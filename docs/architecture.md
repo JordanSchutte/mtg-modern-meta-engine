@@ -1,0 +1,49 @@
+# Architecture and design decisions
+
+## Principles
+
+- **Each source does only the job it's reliable at.** Full-field paper events (every decklist and every Swiss pairing published) build the matchup matrix. MTGO only shows the top 32 lists and the top 8 bracket, so it drives the meta forecast and contributes top 8 matchups at low weight.
+- **Nothing is deleted.** Bronze is append-only and versioned. Rows that can't be used for the matrix (an unknown opponent deck, a bye) stay in silver with flags.
+- **Fail loudly.** Every source parser is covered by contract tests on fixtures captured from the live site. A shape change stops the run and goes to a dead-letter topic; bad rows never reach bronze.
+- **Near-zero cost.** Everything runs locally in Docker Compose; cloud targets (AWS, Snowflake) are Terraform-managed profiles that are created, run and destroyed.
+
+## Event-driven ingestion
+
+Sources publish irregularly: some weekends have six large events, some none, and MTGO posts dozens of times a week. Instead of a fixed schedule:
+
+1. **Watchers** turn publications into events. Melee and MTGO only publish pages, so small pollers detect new completed events and emit `tournament.published` (keyed by source + event ID). TopDeck's webhook posts into the same topic.
+2. An **ingestion consumer** fetches the full event and lands raw responses in bronze. Parse failures go to a dead-letter topic.
+3. Landing in bronze updates an **Airflow asset**, which triggers a debounced rebuild of only the affected marts. A paper event updates the matrix and the forecast; a 5-0 dump only updates the forecast.
+
+Kafka is used for decoupling and replay, not throughput: changing archetype rules means replaying every event from the start of the topic to reclassify history.
+
+## Melee discovery
+
+Melee has no public tournament index, but its *Find Events* search is public. The search is a base64url-encoded JSON query in the URL:
+
+```json
+{"context": 2, "game": "MagicTheGathering", "search": null, "filters": ["Modern", "Past"]}
+```
+
+Results load over SignalR, so the page is rendered with Playwright and the result cards are parsed (tournament ID, date, title, organizer, enrolled players). Results are ordered by when the event was **created**, not when it was played, so paging stops after a long run of consecutive results dated before the cutoff rather than at the first old one.
+
+## Melee event fetch
+
+| Request | Returns |
+| --- | --- |
+| `GET /Tournament/View/{id}` | HTML; round IDs in `round-selector` buttons |
+| `POST /Match/GetRoundMatches/{roundId}` | DataTables JSON: every match, both players, decklist IDs, game wins |
+| `GET /Decklist/View/{guid}` | HTML; the 75 in `<pre id="decklist-text">` |
+
+Results are derived from structured fields (`GameWins`, `GameDraws`, `ByeReason`), not the display string. Some competitors have an empty `Decklists` array; those rows are kept with the deck marked unknown and become candidates for same-75 imputation.
+
+## Matchup matrix
+
+- Mirrors are excluded.
+- Within a format period every match counts equally; a matchup is mostly a property of the two decks. A light decay for list drift is added only if a backtest shows it helps.
+- Each match keeps its round number so late-round effects can be checked.
+- Win rates are shrunk toward 50% (beta-binomial) and reported with intervals.
+
+## Imputation
+
+Melee lets players reuse an exact 75 they've already submitted, so an unpublished list at a side event is most likely the player's most recent Modern submission. Imputed rows use the same player's latest list before the event (ideally within two weeks) and carry an `imputed_same_75` flag so the matrix can down-weight them.

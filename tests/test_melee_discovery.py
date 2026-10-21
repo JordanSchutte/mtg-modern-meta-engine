@@ -30,10 +30,24 @@ def test_comma_player_counts_and_not_ended(melee_fixture):
     assert events[490001].ended is False
 
 
+NOW = datetime(2026, 10, 21, tzinfo=UTC)
+
+
 def test_select_keeps_completed_big_events_since_cutoff(melee_fixture):
     events = parse_search_items(melee_fixture("search_page.html"))
-    picked = select_events(events, since=datetime(2026, 10, 1, tzinfo=UTC), min_players=100)
-    assert [e.tournament_id for e in picked] == [470109]  # weekly too small, RCQ not ended
+    picked = select_events(
+        events, since=datetime(2026, 10, 1, tzinfo=UTC), min_players=100, now=NOW
+    )
+    assert [e.tournament_id for e in picked] == [470109]  # weekly too small, RCQ upcoming
+
+
+def test_past_event_without_ended_badge_is_kept():
+    # Seen live: a 538-player Open from 10 days earlier with no "Ended" badge.
+    open_ = DiscoveredEvent(479653, "Open", None, NOW - timedelta(days=10), 538, False, ())
+    running = DiscoveredEvent(1, "Day 2 today", None, NOW - timedelta(hours=20), 900, False, ())
+    picked = select_events([open_, running], since=NOW - timedelta(days=30), min_players=100,
+                           now=NOW)
+    assert [e.tournament_id for e in picked] == [479653]
 
 
 def test_contract_breaks_loudly_when_card_markup_changes(melee_fixture):

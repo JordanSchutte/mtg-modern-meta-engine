@@ -32,7 +32,7 @@ def main() -> int:
     settings = Settings.from_env()
     since = datetime.fromisoformat(args.since).replace(tzinfo=UTC)
 
-    events = discover(
+    result = discover(
         since=since,
         min_players=args.min_players,
         filters=tuple(args.filters or ("Modern", "Past")),
@@ -40,11 +40,17 @@ def main() -> int:
         page_wait_seconds=settings.melee_request_interval,
         headed=args.headed,
     )
+    events = result.selected
 
     out = settings.data_root / "discovery" / "melee_events.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps([e.to_json() for e in events], indent=2), encoding="utf-8")
+    # Everything the search returned, in page order: the audit trail for the stop rule.
+    scan = settings.data_root / "discovery" / "melee_search_scan.json"
+    scan.write_text(json.dumps([e.to_json() for e in result.scanned], indent=2), encoding="utf-8")
 
+    print(f"\nstopped: {result.stop_reason}")
+    print(f"scanned {len(result.scanned)} results (all saved to {scan})")
     print(f"\n{len(events)} events since {args.since} with >= {args.min_players} players\n")
     print(f"{'date':<12}{'players':>8}  {'id':>7}  title")
     for e in events:

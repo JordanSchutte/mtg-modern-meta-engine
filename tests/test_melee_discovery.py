@@ -5,6 +5,7 @@ import pytest
 from mtgmeta.contracts import ContractError
 from mtgmeta.sources.melee.discovery import (
     DiscoveredEvent,
+    looks_newest_first,
     parse_search_items,
     select_events,
     should_stop,
@@ -56,6 +57,21 @@ def test_contract_breaks_loudly_when_card_markup_changes(melee_fixture):
     )
     with pytest.raises(ContractError, match="subtitle"):
         parse_search_items(broken)
+
+
+def test_ordering_check_catches_location_sorted_results():
+    # IDs in page order from a real location-sorted run, vs. a real global run.
+    location_sorted = [144505, 285576, 332157, 336082, 340603, 444883, 273359, 168976,
+                       476000, 438512, 329680, 441336]
+    global_order = [485382, 482682, 482135, 482105, 480831, 480464, 479653, 476393,
+                    476000, 474904, 473589, 473290]
+    now = datetime(2026, 10, 21, tzinfo=UTC)
+
+    def evs(ids):
+        return [_ev(i, now) for i in ids]
+
+    assert looks_newest_first(evs(global_order))
+    assert not looks_newest_first(evs(location_sorted))
 
 
 def _ev(i: int, start: datetime) -> DiscoveredEvent:

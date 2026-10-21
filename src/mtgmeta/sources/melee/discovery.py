@@ -130,6 +130,32 @@ class DiscoveryResult:
     stop_reason: str
 
 
+def looks_newest_first(events: Sequence[DiscoveredEvent], min_share: float = 0.8) -> bool:
+    """Global results come newest-created first, so tournament IDs mostly descend.
+
+    When Melee knows a location it sorts by distance instead, IDs jump around,
+    and the stop rule would be meaningless.
+    """
+    ids = [e.tournament_id for e in events]
+    pairs = list(zip(ids, ids[1:], strict=False))
+    if len(pairs) < 5:
+        return True
+    return sum(a > b for a, b in pairs) / len(pairs) >= min_share
+
+
+# Runs before Melee's scripts: forget any saved location and deny geolocation,
+# so results are global and newest-first rather than sorted by distance.
+_NO_LOCATION_SCRIPT = """
+try { localStorage.removeItem('flattsware.location'); } catch (e) {}
+Object.defineProperty(navigator, 'geolocation', { value: {
+  getCurrentPosition: (ok, err) => err && err({ code: 1, PERMISSION_DENIED: 1,
+    POSITION_UNAVAILABLE: 2, TIMEOUT: 3, message: 'denied' }),
+  watchPosition: () => 0,
+  clearWatch: () => {},
+}});
+"""
+
+
 def should_stop(events: Sequence[DiscoveredEvent], since: datetime, stop_after_old: int) -> bool:
     """True once the last ``stop_after_old`` results are all dated before ``since``."""
     if len(events) < stop_after_old:
@@ -157,7 +183,9 @@ def discover(
     log.info("searching %s", url)
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=not headed)
-        page = browser.new_page()
+        context = browser.new_context(permissions=[])  # no geolocation grant
+        context.add_init_script(_NO_LOCATION_SCRIPT)
+        page = context.new_page()
         page.goto(url, wait_until="domcontentloaded")
         try:
             page.wait_for_selector(ITEM_SELECTOR, timeout=30_000)
@@ -192,6 +220,10 @@ def discover(
                 break
             page.wait_for_timeout(page_wait_seconds * 1000)  # be gentle between pages
             events = parse_search_items(page.content())
+            if page_no == 2:  # 24 results: enough to judge the ordering
+                require(looks_newest_first(events), SOURCE,
+                        "search results aren't newest-first (location sort applied?)",
+                        f"first ids: {[e.tournament_id for e in events[:10]]}")
         browser.close()
 
     log.info("%s", stop_reason)

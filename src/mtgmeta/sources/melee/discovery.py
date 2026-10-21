@@ -186,11 +186,44 @@ def discover(
         context = browser.new_context(permissions=[])  # no geolocation grant
         context.add_init_script(_NO_LOCATION_SCRIPT)
         page = context.new_page()
+        # Keep the page's own warnings/errors (e.g. "Ignoring outdated response") so a
+        # stalled run explains itself.
+        console: list[str] = []
+        page.on(
+            "console",
+            lambda m: console.append(f"{m.type}: {m.text}"[:300])
+            if m.type in ("warning", "error") else None,
+        )
         page.goto(url, wait_until="domcontentloaded")
         try:
             page.wait_for_selector(ITEM_SELECTOR, timeout=30_000)
         except PlaywrightTimeout:
             require(False, SOURCE, "search page rendered no result cards", url)
+        # Let the page finish its own start-up searches before we add ours; otherwise
+        # Melee can discard our response as outdated.
+        page.wait_for_timeout(max(page_wait_seconds, 3.0) * 1000)
+
+        def load_more(before: int, attempts: int = 3) -> bool:
+            """Click Show more until the result count grows; False if it never does."""
+            for attempt in range(1, attempts + 1):
+                more = page.query_selector(SHOW_MORE_SELECTOR)
+                if more is None:
+                    return False
+                # Trigger the button's own handler from inside the page. A mouse click
+                # is blocked by the cookie-consent modal, and the script shouldn't answer
+                # that modal on anyone's behalf.
+                more.evaluate("el => el.click()")
+                try:
+                    page.wait_for_function(
+                        "([sel, n]) => document.querySelectorAll(sel).length > n",
+                        arg=[ITEM_SELECTOR, before],
+                        timeout=15_000,
+                    )
+                    return True
+                except PlaywrightTimeout:
+                    log.info("show-more attempt %d loaded nothing; retrying", attempt)
+                    page.wait_for_timeout(3_000)
+            return False
 
         events = parse_search_items(page.content())
         stop_reason = f"reached max_pages ({max_pages})"
@@ -203,23 +236,18 @@ def discover(
                     f"dated {lo:%Y-%m-%d}..{hi:%Y-%m-%d}"
                 )
                 break
-            more = page.query_selector(SHOW_MORE_SELECTOR)
-            if more is None or not more.is_visible():
+            if "No more tournaments found" in page.inner_text("body"):
+                stop_reason = f"Melee reported no more tournaments after {page_no} pages"
+                break
+            if page.query_selector(SHOW_MORE_SELECTOR) is None:
                 stop_reason = f"no show-more button after {page_no} pages"
                 break
-            before = len(events)
-            # Trigger the button's own handler from inside the page. A mouse click is
-            # blocked by the cookie-consent modal, and the script shouldn't answer that
-            # modal on anyone's behalf.
-            more.evaluate("el => el.click()")
-            try:
-                page.wait_for_function(
-                    "([sel, n]) => document.querySelectorAll(sel).length > n",
-                    arg=[ITEM_SELECTOR, before],
-                    timeout=20_000,
+            if not load_more(len(events)):
+                recent = "; ".join(console[-5:]) or "no console warnings"
+                stop_reason = (
+                    f"show-more loaded nothing after {page_no} pages and 3 attempts "
+                    f"(page said: {recent})"
                 )
-            except PlaywrightTimeout:
-                stop_reason = f"show-more returned nothing new after {page_no} pages"
                 break
             page.wait_for_timeout(page_wait_seconds * 1000)  # be gentle between pages
             events = parse_search_items(page.content())

@@ -208,7 +208,10 @@ def discover(
                 stop_reason = f"no show-more button after {page_no} pages"
                 break
             before = len(events)
-            more.click()
+            # Trigger the button's own handler from inside the page. A mouse click is
+            # blocked by the cookie-consent modal, and the script shouldn't answer that
+            # modal on anyone's behalf.
+            more.evaluate("el => el.click()")
             try:
                 page.wait_for_function(
                     "([sel, n]) => document.querySelectorAll(sel).length > n",

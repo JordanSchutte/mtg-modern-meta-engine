@@ -43,7 +43,7 @@ Melee doesn't offer API credentials to individuals, so this project reads the sa
 - Only **completed** Modern events with **100+ players** are fetched, each **once**. Raw responses are cached in bronze and never re-requested.
 - One request at a time, **2.5 s apart**, exponential backoff on HTTP 429, and the run **stops** after repeated 429s.
 - Requests carry an identifiable User-Agent with a contact address.
-- Event discovery uses Melee's public *Find Events* search, rendered with Playwright.
+- Event discovery uses Melee's public *Find Events* search: the page is opened once in Playwright and its search hub is queried page by page (about 45 requests for six months of Modern events).
 - Every parser sits behind **contract tests** on fixtures captured from live pages. If Melee changes its page or JSON shape, the run fails loudly instead of writing bad rows.
 
 ## Quick start
@@ -70,7 +70,7 @@ src/mtgmeta/
   contracts.py              ContractError: raised when a source's shape changes
   sources/melee/
     query.py                builds Find Events search URLs
-    discovery.py            Playwright search paging + result-card parsing
+    discovery.py            Find Events search via the page's SignalR hub (Playwright)
     http.py                 throttled, backoff-aware HTTP client
     parse.py                tournament page, round matches, decklist parsers
     fetch.py                fetches one event into bronze (idempotent)

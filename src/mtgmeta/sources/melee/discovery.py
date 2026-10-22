@@ -1,35 +1,38 @@
 """Find completed Melee events through the public *Find Events* search.
 
-Melee has no tournament index, but its search page is public. Results arrive
-over SignalR, so the page is rendered in a headless browser (Playwright) and the
-result cards are parsed from the DOM.
+Melee has no tournament index, but its search page is public. The page talks to
+a SignalR hub (``searchHub.search``) and gets each page of results back as
+JSON. Clicking the page's own "Show more" button proved fragile (start-up
+searches supersede clicks, a cookie modal blocks the mouse), so instead we:
 
-Results are ordered by when the event was *created* on Melee, not when it was
-played, so an old date does not mean we've passed the cutoff: paging stops
-only after ``stop_after_old`` consecutive results dated before ``since``.
+1. open the search page once in a headless browser (Playwright), which sets up
+   the SignalR connection and the anti-forgery token, with geolocation denied
+   so results are global rather than sorted by distance;
+2. call ``searchHub.search`` ourselves for page 1, 2, 3, ... and read the
+   structured JSON (ID, Name, StartDate, Players, StatusDescription, Tags).
+
+Results are ordered newest-*created* first, not by when the event was played,
+so an old date doesn't mean we've passed the cutoff: paging stops only after
+``stop_after_old`` consecutive results dated before ``since``.
 """
 
 from __future__ import annotations
 
+import json
 import logging
-import re
 from collections.abc import Iterable, Sequence
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 
-from bs4 import BeautifulSoup
-
-from mtgmeta.contracts import require
+from mtgmeta.contracts import ContractError, require
 
 from . import SOURCE
 from .query import search_url
 
 log = logging.getLogger(__name__)
 
-ITEM_SELECTOR = ".home-tournament-search-item"
-SHOW_MORE_SELECTOR = ".home-tournament-show-more-tournaments-button"
-_ID_RE = re.compile(r"/Tournament/View/(\d+)")
-_PLAYERS_RE = re.compile(r"([\d,]+)\s+Enrolled Players?", re.I)
+TOURNAMENTS_CONTEXT = 2
+_REQUIRED_KEYS = ("ID", "Name", "StartDate", "Players", "StatusDescription", "Tags")
 
 
 @dataclass(frozen=True)
@@ -49,57 +52,41 @@ class DiscoveredEvent:
         return row
 
 
-def parse_search_items(page_html: str) -> list[DiscoveredEvent]:
-    """Parse every result card on a rendered search page."""
-    soup = BeautifulSoup(page_html, "html.parser")
+def parse_search_results(json_text: str) -> list[DiscoveredEvent]:
+    """Parse one page of ``tournamentSearchResults`` JSON."""
+    try:
+        rows = json.loads(json_text)
+    except json.JSONDecodeError as exc:
+        raise ContractError(SOURCE, "search results are not JSON", str(exc)) from exc
+    require(isinstance(rows, list), SOURCE, "search results are not a JSON list")
     events: list[DiscoveredEvent] = []
-    for item in soup.select(ITEM_SELECTOR):
-        link = item.select_one('a[href*="/Tournament/View/"]')
-        require(link is not None, SOURCE, "search card has no /Tournament/View/ link")
-        match = _ID_RE.search(link["href"])
-        require(match is not None, SOURCE, "search card link has no tournament id", link["href"])
-        tid = int(match.group(1))
-
-        date_el = item.select_one(".home-tournament-search-item-date")
-        require(date_el is not None and date_el.get("data-value"), SOURCE,
-                "search card has no date data-value", str(tid))
-        start = datetime.fromisoformat(date_el["data-value"].replace("Z", "+00:00"))
-
-        title_el = item.select_one(".home-tournament-search-item-title")
-        require(title_el is not None, SOURCE, "search card has no title", str(tid))
-
-        subtitle = item.select_one(".home-tournament-search-item-subtitle")
-        require(subtitle is not None, SOURCE, "search card has no subtitle", str(tid))
-        players = _PLAYERS_RE.search(subtitle.get_text(" ", strip=True))
-        require(players is not None, SOURCE, "search card has no 'N Enrolled Players'",
-                f"{tid}: {subtitle.get_text(' ', strip=True)!r}")
-
-        organizer = item.select_one(".home-tournament-search-item-organizer")
-        badge = item.select_one(".home-tournament-status-label")
-        tags = tuple(
-            a.get_text(strip=True)
-            for a in item.select(".home-tournament-search-item-tag a")
-            if a.get_text(strip=True)
-        )
+    for row in rows:
+        missing = [k for k in _REQUIRED_KEYS if k not in row]
+        require(not missing, SOURCE, "search result missing fields",
+                f"{row.get('ID', '?')}: {missing}")
+        start = datetime.fromisoformat(str(row["StartDate"]).replace("Z", "+00:00"))
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=UTC)
+        tags = row.get("TagDescriptions") or row["Tags"] or []
         events.append(
             DiscoveredEvent(
-                tournament_id=tid,
-                title=title_el.get_text(strip=True),
-                organizer=organizer.get_text(strip=True) if organizer else None,
+                tournament_id=int(row["ID"]),
+                title=str(row["Name"]).strip(),
+                organizer=row.get("OrganizationName"),
                 start=start,
-                enrolled_players=int(players.group(1).replace(",", "")),
-                ended=bool(badge and "ended" in badge.get_text(strip=True).lower()),
-                tags=tags,
+                enrolled_players=int(row["Players"] or 0),
+                ended=row["StatusDescription"] == "Ended",
+                tags=tuple(str(t).strip() for t in tags if str(t).strip()),
             )
         )
     return events
 
 
 def is_finished(ev: DiscoveredEvent, now: datetime, grace: timedelta = timedelta(days=2)) -> bool:
-    """Finished = badge says Ended, or it started more than ``grace`` ago.
+    """Finished = status Ended, or it started more than ``grace`` ago.
 
-    The "Ended" badge isn't reliable: some completed events (e.g. a 538-player
-    Open) never get it. ``grace`` covers multi-day events still in progress.
+    The status isn't always reliable: some completed events (e.g. a 538-player
+    Open) never flip to Ended. ``grace`` covers multi-day events in progress.
     """
     return ev.ended or ev.start <= now - grace
 
@@ -123,13 +110,6 @@ def select_events(
     return sorted(keep.values(), key=lambda e: e.start, reverse=True)
 
 
-@dataclass(frozen=True)
-class DiscoveryResult:
-    selected: list[DiscoveredEvent]
-    scanned: list[DiscoveredEvent]
-    stop_reason: str
-
-
 def looks_newest_first(events: Sequence[DiscoveredEvent], min_share: float = 0.8) -> bool:
     """Global results come newest-created first, so tournament IDs mostly descend.
 
@@ -141,6 +121,20 @@ def looks_newest_first(events: Sequence[DiscoveredEvent], min_share: float = 0.8
     if len(pairs) < 5:
         return True
     return sum(a > b for a, b in pairs) / len(pairs) >= min_share
+
+
+def should_stop(events: Sequence[DiscoveredEvent], since: datetime, stop_after_old: int) -> bool:
+    """True once the last ``stop_after_old`` results are all dated before ``since``."""
+    if len(events) < stop_after_old:
+        return False
+    return all(ev.start < since for ev in events[-stop_after_old:])
+
+
+@dataclass(frozen=True)
+class DiscoveryResult:
+    selected: list[DiscoveredEvent]
+    scanned: list[DiscoveredEvent]
+    stop_reason: str
 
 
 # Runs before Melee's scripts: forget any saved location and deny geolocation,
@@ -155,18 +149,46 @@ Object.defineProperty(navigator, 'geolocation', { value: {
 }});
 """
 
-
-def should_stop(events: Sequence[DiscoveredEvent], since: datetime, stop_after_old: int) -> bool:
-    """True once the last ``stop_after_old`` results are all dated before ``since``."""
-    if len(events) < stop_after_old:
-        return False
-    return all(ev.start < since for ev in events[-stop_after_old:])
+# Calls searchHub.search for one page and waits for that request's results.
+# Arguments mirror the page's own call: (token, requestId, context, page, game,
+# search, location, filters, timeZone, followedOrganizersOnly).
+_FETCH_PAGE_JS = """
+async ([pageNo, context, game, filters]) => {
+  const hub = $.connection.searchHub;
+  if (!window.__mme) {
+    window.__mme = [];
+    $.connection.hub.proxies.searchhub.on('receiveResponse', n => window.__mme.push(n));
+  }
+  if ($.connection.hub.state !== $.signalR.connectionState.connected) {
+    await new Promise((res, rej) => $.connection.hub.start().done(res).fail(e => rej(String(e))));
+  }
+  const id = Date.now();
+  const token = $('input[name="__RequestVerificationToken"]').val();
+  hub.server.search(token, id, context, pageNo, game, null, null, filters,
+                    Intl.DateTimeFormat().resolvedOptions().timeZone, false);
+  const deadline = Date.now() + 20000;
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, 250));
+    const mine = window.__mme.filter(n => String(n.RequestId) === String(id));
+    const res = mine.find(n => n.MessageType === 'tournamentSearchResults');
+    if (res) {
+      return { code: res.Data.Code, json: res.Data.Json,
+               error: res.Data.Error ? String(res.Data.Message) : null };
+    }
+    const err = mine.find(n => n.Type === 1);
+    if (err) return { error: String(err.Data) };
+    if (mine.some(n => n.MessageType === 'searchCompleted')) return { code: 404, json: null };
+  }
+  return { timeout: true };
+}
+"""
 
 
 def discover(
     since: datetime,
     min_players: int = 100,
     filters: Sequence[str] = ("Modern", "Past"),
+    game: str = "MagicTheGathering",
     max_pages: int = 300,
     stop_after_old: int = 40,
     page_wait_seconds: float = 2.5,
@@ -179,55 +201,52 @@ def discover(
     if since.tzinfo is None:
         since = since.replace(tzinfo=UTC)
 
-    url = search_url(filters)
-    log.info("searching %s", url)
+    url = search_url(filters, game=game)
+    log.info("opening %s", url)
+    events: list[DiscoveredEvent] = []
+    stop_reason = f"reached max_pages ({max_pages})"
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=not headed)
         context = browser.new_context(permissions=[])  # no geolocation grant
         context.add_init_script(_NO_LOCATION_SCRIPT)
         page = context.new_page()
-        # Keep the page's own warnings/errors (e.g. "Ignoring outdated response") so a
-        # stalled run explains itself.
-        console: list[str] = []
-        page.on(
-            "console",
-            lambda m: console.append(f"{m.type}: {m.text}"[:300])
-            if m.type in ("warning", "error") else None,
-        )
         page.goto(url, wait_until="domcontentloaded")
         try:
-            page.wait_for_selector(ITEM_SELECTOR, timeout=30_000)
+            page.wait_for_function(
+                "() => window.$ && $.connection && $.connection.searchHub"
+                " && $.connection.hub.proxies && $.connection.hub.proxies.searchhub",
+                timeout=30_000,
+            )
         except PlaywrightTimeout:
-            require(False, SOURCE, "search page rendered no result cards", url)
-        # Let the page finish its own start-up searches before we add ours; otherwise
-        # Melee can discard our response as outdated.
+            require(False, SOURCE, "search page never set up its SignalR searchHub", url)
+        # Let the page's own start-up search finish; it restarts the hub connection.
         page.wait_for_timeout(max(page_wait_seconds, 3.0) * 1000)
 
-        def load_more(before: int, attempts: int = 3) -> bool:
-            """Click Show more until the result count grows; False if it never does."""
-            for attempt in range(1, attempts + 1):
-                more = page.query_selector(SHOW_MORE_SELECTOR)
-                if more is None:
-                    return False
-                # Trigger the button's own handler from inside the page. A mouse click
-                # is blocked by the cookie-consent modal, and the script shouldn't answer
-                # that modal on anyone's behalf.
-                more.evaluate("el => el.click()")
-                try:
-                    page.wait_for_function(
-                        "([sel, n]) => document.querySelectorAll(sel).length > n",
-                        arg=[ITEM_SELECTOR, before],
-                        timeout=15_000,
-                    )
-                    return True
-                except PlaywrightTimeout:
-                    log.info("show-more attempt %d loaded nothing; retrying", attempt)
-                    page.wait_for_timeout(3_000)
-            return False
-
-        events = parse_search_items(page.content())
-        stop_reason = f"reached max_pages ({max_pages})"
         for page_no in range(1, max_pages + 1):
+            result = None
+            for attempt in range(1, 4):
+                result = page.evaluate(_FETCH_PAGE_JS, [page_no, TOURNAMENTS_CONTEXT, game,
+                                                        list(filters)])
+                if not result.get("timeout") and not result.get("error"):
+                    break
+                log.info("page %d attempt %d: %s; retrying", page_no, attempt, result)
+                page.wait_for_timeout(3_000)
+            if result.get("timeout") or result.get("error"):
+                raise ContractError(SOURCE, "search hub gave no results",
+                                    f"page {page_no}: {result}")
+            if result.get("code") == 404 or not result.get("json"):
+                stop_reason = f"no more results after {page_no - 1} pages"
+                break
+
+            batch = parse_search_results(result["json"])
+            if not batch:
+                stop_reason = f"empty page {page_no}"
+                break
+            events.extend(batch)
+            if page_no == 3:  # 24 results: enough to judge the ordering
+                require(looks_newest_first(events), SOURCE,
+                        "search results aren't newest-first (location sort applied?)",
+                        f"first ids: {[e.tournament_id for e in events[:10]]}")
             if should_stop(events, since, stop_after_old):
                 tail = events[-stop_after_old:]
                 lo, hi = min(e.start for e in tail), max(e.start for e in tail)
@@ -236,25 +255,7 @@ def discover(
                     f"dated {lo:%Y-%m-%d}..{hi:%Y-%m-%d}"
                 )
                 break
-            if "No more tournaments found" in page.inner_text("body"):
-                stop_reason = f"Melee reported no more tournaments after {page_no} pages"
-                break
-            if page.query_selector(SHOW_MORE_SELECTOR) is None:
-                stop_reason = f"no show-more button after {page_no} pages"
-                break
-            if not load_more(len(events)):
-                recent = "; ".join(console[-5:]) or "no console warnings"
-                stop_reason = (
-                    f"show-more loaded nothing after {page_no} pages and 3 attempts "
-                    f"(page said: {recent})"
-                )
-                break
             page.wait_for_timeout(page_wait_seconds * 1000)  # be gentle between pages
-            events = parse_search_items(page.content())
-            if page_no == 2:  # 24 results: enough to judge the ordering
-                require(looks_newest_first(events), SOURCE,
-                        "search results aren't newest-first (location sort applied?)",
-                        f"first ids: {[e.tournament_id for e in events[:10]]}")
         browser.close()
 
     log.info("%s", stop_reason)

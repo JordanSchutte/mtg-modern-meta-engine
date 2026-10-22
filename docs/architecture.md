@@ -25,7 +25,12 @@ Melee has no public tournament index, but its *Find Events* search is public. Th
 {"context": 2, "game": "MagicTheGathering", "search": null, "filters": ["Modern", "Past"]}
 ```
 
-Results load over SignalR, so the page is rendered with Playwright and the result cards are parsed (tournament ID, date, title, organizer, enrolled players). Results are ordered by when the event was **created**, not when it was played, so paging stops after a long run of consecutive results dated before the cutoff rather than at the first old one.
+Results load over SignalR (`searchHub.search(token, requestId, context, page, game, search, location, filters, timeZone, followedOnly)`, answered through `receiveResponse`). Discovery opens the page once in Playwright to get the hub connection and anti-forgery token, then calls `search` itself page by page and reads the structured JSON (ID, Name, StartDate, Players, StatusDescription, Tags). Clicking the page's own "Show more" button was abandoned: the page's start-up searches superseded the clicks and a cookie modal blocked the mouse.
+
+Two traps found on live runs:
+
+- **Location sorting.** If Melee knows a location (browser geolocation or a saved `flattsware.location`), results are sorted by distance across all dates. Discovery denies geolocation and clears the saved value, and fails loudly if IDs aren't mostly descending.
+- **Creation order.** Results are ordered by when the event was **created**, not when it was played, so paging stops after a long run of consecutive results dated before the cutoff rather than at the first old one.
 
 ## Melee event fetch
 

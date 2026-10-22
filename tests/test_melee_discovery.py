@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -6,44 +7,36 @@ from mtgmeta.contracts import ContractError
 from mtgmeta.sources.melee.discovery import (
     DiscoveredEvent,
     looks_newest_first,
-    parse_search_items,
+    parse_search_results,
     select_events,
     should_stop,
 )
 
-
-def test_parses_live_cards(melee_fixture):
-    events = parse_search_items(melee_fixture("search_page.html"))
-    assert [e.tournament_id for e in events] == [485382, 470109, 490001]
-
-    weekly = events[0]
-    assert weekly.title == "Fortnightly Modern"
-    assert weekly.organizer == "Bristol Community Competitive MTG"
-    assert weekly.enrolled_players == 7
-    assert weekly.ended is True
-    assert weekly.start == datetime(2026, 10, 20, 17, 30, tzinfo=UTC)
-    assert "Modern" in weekly.tags
+NOW = datetime(2026, 10, 22, 18, tzinfo=UTC)
 
 
-def test_comma_player_counts_and_not_ended(melee_fixture):
-    events = {e.tournament_id: e for e in parse_search_items(melee_fixture("search_page.html"))}
-    assert events[470109].enrolled_players == 1193
-    assert events[490001].ended is False
+def test_parses_live_search_json(melee_fixture):
+    events = parse_search_results(melee_fixture("search_results.json"))
+    assert len(events) == 8
+    rc = events[0]
+    assert rc.tournament_id == 470109
+    assert rc.enrolled_players == 1193
+    assert rc.ended is True
+    assert rc.start == datetime(2026, 10, 10, 7, tzinfo=UTC)
+    assert rc.organizer == "Fanfinity"
+    assert rc.tags == ("Modern", "Magic: The Gathering", "Tabletop")
+    assert events[6].ended is False  # status "Registration"
 
 
-NOW = datetime(2026, 10, 21, tzinfo=UTC)
+def test_select_keeps_finished_big_events_since_cutoff(melee_fixture):
+    events = parse_search_results(melee_fixture("search_results.json"))
+    picked = select_events(events, since=datetime(2026, 9, 1, tzinfo=UTC), min_players=100,
+                           now=NOW)
+    assert [e.tournament_id for e in picked] == [470109]
 
 
-def test_select_keeps_completed_big_events_since_cutoff(melee_fixture):
-    events = parse_search_items(melee_fixture("search_page.html"))
-    picked = select_events(
-        events, since=datetime(2026, 10, 1, tzinfo=UTC), min_players=100, now=NOW
-    )
-    assert [e.tournament_id for e in picked] == [470109]  # weekly too small, RCQ upcoming
-
-
-def test_past_event_without_ended_badge_is_kept():
-    # Seen live: a 538-player Open from 10 days earlier with no "Ended" badge.
+def test_past_event_without_ended_status_is_kept():
+    # Seen live: a 538-player Open from 10 days earlier never flipped to Ended.
     open_ = DiscoveredEvent(479653, "Open", None, NOW - timedelta(days=10), 538, False, ())
     running = DiscoveredEvent(1, "Day 2 today", None, NOW - timedelta(hours=20), 900, False, ())
     picked = select_events([open_, running], since=NOW - timedelta(days=30), min_players=100,
@@ -51,12 +44,20 @@ def test_past_event_without_ended_badge_is_kept():
     assert [e.tournament_id for e in picked] == [479653]
 
 
-def test_contract_breaks_loudly_when_card_markup_changes(melee_fixture):
-    broken = melee_fixture("search_page.html").replace(
-        "home-tournament-search-item-subtitle", "renamed-subtitle"
-    )
-    with pytest.raises(ContractError, match="subtitle"):
-        parse_search_items(broken)
+def test_missing_field_fails_loudly(melee_fixture):
+    rows = json.loads(melee_fixture("search_results.json"))
+    del rows[2]["Players"]
+    with pytest.raises(ContractError, match="Players"):
+        parse_search_results(json.dumps(rows))
+
+
+def test_non_json_fails_loudly():
+    with pytest.raises(ContractError, match="not JSON"):
+        parse_search_results("<html>maintenance</html>")
+
+
+def _ev(i: int, start: datetime) -> DiscoveredEvent:
+    return DiscoveredEvent(i, f"e{i}", None, start, 150, True, ("Modern",))
 
 
 def test_ordering_check_catches_location_sorted_results():
@@ -65,17 +66,8 @@ def test_ordering_check_catches_location_sorted_results():
                        476000, 438512, 329680, 441336]
     global_order = [485382, 482682, 482135, 482105, 480831, 480464, 479653, 476393,
                     476000, 474904, 473589, 473290]
-    now = datetime(2026, 10, 21, tzinfo=UTC)
-
-    def evs(ids):
-        return [_ev(i, now) for i in ids]
-
-    assert looks_newest_first(evs(global_order))
-    assert not looks_newest_first(evs(location_sorted))
-
-
-def _ev(i: int, start: datetime) -> DiscoveredEvent:
-    return DiscoveredEvent(i, f"e{i}", None, start, 150, True, ("Modern",))
+    assert looks_newest_first([_ev(i, NOW) for i in global_order])
+    assert not looks_newest_first([_ev(i, NOW) for i in location_sorted])
 
 
 def test_stop_rule_needs_a_run_of_old_results():

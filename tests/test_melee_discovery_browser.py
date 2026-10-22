@@ -103,7 +103,7 @@ def fake_melee(monkeypatch):
 
 def _run(**kw):
     try:
-        return discovery.discover(page_wait_seconds=0.0, **kw)
+        return discovery.discover(page_wait_seconds=0.0, headed=False, **kw)
     except Exception as exc:  # no browser installed on this machine
         if "Executable doesn't exist" in str(exc):
             pytest.skip("Chromium not installed")

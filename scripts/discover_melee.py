@@ -2,7 +2,9 @@
 """Find completed Melee Modern events with enough players.
 
     python scripts/discover_melee.py --since 2026-04-20 --min-players 100
-    python scripts/discover_melee.py --since 2026-09-01 --headed      # watch the browser
+
+A Chromium window opens while it runs: Melee's firewall appears to block
+headless Chrome. --headless is available but may fail with a contract error.
 
 Writes data/discovery/melee_events.json and prints a table.
 """
@@ -25,7 +27,9 @@ def main() -> int:
     ap.add_argument("--filter", action="append", dest="filters",
                     help="search filter (repeatable); default: Modern + Past")
     ap.add_argument("--max-pages", type=int, default=300)
-    ap.add_argument("--headed", action="store_true", help="show the browser window")
+    ap.add_argument("--headless", action="store_true",
+                    help="no browser window (Melee's firewall may block headless Chrome)")
+    ap.add_argument("--headed", action="store_true", help=argparse.SUPPRESS)  # old flag, default
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -38,7 +42,7 @@ def main() -> int:
         filters=tuple(args.filters or ("Modern", "Past")),
         max_pages=args.max_pages,
         page_wait_seconds=settings.melee_request_interval,
-        headed=args.headed,
+        headed=not args.headless,
     )
     events = result.selected
 

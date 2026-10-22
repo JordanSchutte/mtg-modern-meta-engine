@@ -192,7 +192,7 @@ def discover(
     max_pages: int = 300,
     stop_after_old: int = 40,
     page_wait_seconds: float = 2.5,
-    headed: bool = False,
+    headed: bool = True,
 ) -> DiscoveryResult:
     """Page through Melee's search until past ``since``; return qualifying events."""
     from playwright.sync_api import TimeoutError as PlaywrightTimeout
@@ -218,7 +218,12 @@ def discover(
                 timeout=30_000,
             )
         except PlaywrightTimeout:
-            require(False, SOURCE, "search page never set up its SignalR searchHub", url)
+            # Say what we actually got: a firewall/challenge page looks very different.
+            title = page.title()
+            body = page.evaluate("() => (document.body && document.body.innerText) || ''")
+            require(False, SOURCE, "search page never set up its SignalR searchHub",
+                    f"{'headless' if not headed else 'headed'} browser got title={title!r}, "
+                    f"body starts {body[:200]!r}")
         # Let the page's own start-up search finish; it restarts the hub connection.
         page.wait_for_timeout(max(page_wait_seconds, 3.0) * 1000)
 

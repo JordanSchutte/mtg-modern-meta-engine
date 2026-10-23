@@ -27,6 +27,15 @@ _ROUND_RE = re.compile(
 _ISO_RE = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
 
 
+class NoRoundsError(Exception):
+    """A real Melee tournament page with no rounds (e.g. a registration-only shell).
+
+    Not a contract break: the page parsed fine, there's just nothing to fetch.
+    Callers skip the event, and the fetch script fails loudly if most events
+    in a run end up here (which would point to a page change instead).
+    """
+
+
 @dataclass(frozen=True)
 class RoundRef:
     id: int
@@ -62,8 +71,9 @@ def parse_tournament_page(page: str, tournament_id: int) -> TournamentMeta:
                 name=html.unescape(name),
                 is_completed=None if completed == "" else completed == "True",
             )
-    require(bool(seen), SOURCE, "tournament page has no round-selector buttons",
-            f"tournament {tournament_id} may be private, unstarted, or the page changed")
+    if not seen:
+        raise NoRoundsError(f"tournament {tournament_id} ({html.unescape(title.group(1)).strip()}) "
+                            "has no rounds")
 
     start = _ISO_RE.search(page)
     return TournamentMeta(

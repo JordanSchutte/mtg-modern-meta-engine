@@ -4,6 +4,7 @@ import pytest
 
 from mtgmeta.contracts import ContractError
 from mtgmeta.sources.melee.parse import (
+    NoRoundsError,
     datatables_form,
     parse_decklist_page,
     parse_round_matches,
@@ -21,10 +22,16 @@ def test_tournament_page_rounds_deduped_in_order(melee_fixture):
     assert meta.start == "2026-10-11T17:00:00"
 
 
-def test_tournament_page_without_rounds_fails_loudly(melee_fixture):
+def test_tournament_page_without_rounds_is_skippable(melee_fixture):
+    # e.g. "Registration///Champions Cup Final" – a real page, nothing to fetch
     page = melee_fixture("tournament_view.html").replace("round-selector", "round-picker")
-    with pytest.raises(ContractError, match="round-selector"):
-        parse_tournament_page(page, 453138)
+    with pytest.raises(NoRoundsError, match="no rounds"):
+        parse_tournament_page(page, 410899)
+
+
+def test_non_tournament_page_fails_loudly():
+    with pytest.raises(ContractError, match="title"):
+        parse_tournament_page("<html><title>Just a moment...</title></html>", 1)
 
 
 # -- round matches ------------------------------------------------------------

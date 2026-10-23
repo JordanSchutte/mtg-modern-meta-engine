@@ -1,0 +1,44 @@
+name: Melee probe
+
+# Manual only. Answers one question: can a GitHub-hosted runner (datacenter IP)
+# fetch a Melee event at all? Run it once before building a schedule on it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tournament_id:
+        description: "Completed Melee tournament id (small event preferred)"
+        required: true
+        type: string
+      decklists:
+        description: "Also fetch decklists (slow; ~2.5 s per list)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      MELEE_CONTACT_EMAIL: ${{ secrets.MELEE_CONTACT_EMAIL }}
+      MELEE_REQUEST_INTERVAL: "2.5"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install (no browser needed for fetch)
+        run: pip install -e .
+      - name: Fetch one event
+        run: |
+          ARGS="${{ inputs.tournament_id }}"
+          if [ "${{ inputs.decklists }}" != "true" ]; then ARGS="$ARGS --no-decklists"; fi
+          python scripts/fetch_melee_event.py $ARGS
+      - name: Keep what came back
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bronze-${{ inputs.tournament_id }}
+          path: data/bronze/melee/events/${{ inputs.tournament_id }}
+          if-no-files-found: warn

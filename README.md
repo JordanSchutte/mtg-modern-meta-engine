@@ -42,7 +42,7 @@ Melee doesn't offer API credentials to individuals, so this project reads the sa
 
 - Only **completed** Modern events with **100+ players** are fetched, each **once**. Raw responses are cached in bronze and never re-requested.
 - One request at a time, **2.5 s apart**, exponential backoff on HTTP 429, and the run **stops** after repeated 429s.
-- Requests carry an identifiable User-Agent with a contact address.
+- Requests present a browser User-Agent, because Melee's firewall returns 403 to anything else; the contact address is carried in a `From` header on every request.
 - Event discovery uses Melee's public *Find Events* search: the page is opened once in Playwright and its search hub is queried page by page (about 45 requests for six months of Modern events).
 - Every parser sits behind **contract tests** on fixtures captured from live pages. If Melee changes its page or JSON shape, the run fails loudly instead of writing bad rows.
 

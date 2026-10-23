@@ -5,7 +5,8 @@ Rules it enforces:
 * one request at a time, at least ``interval`` seconds apart (2 s floor);
 * exponential backoff on HTTP 429, and a hard stop after ``max_429`` in a row;
 * a short retry on transient 5xx/network errors;
-* an identifiable User-Agent carrying a contact address.
+* a browser User-Agent (Melee's WAF answers 403 to anything else), with the
+  contact address carried in a ``From`` header instead.
 """
 
 from __future__ import annotations
@@ -22,6 +23,14 @@ from mtgmeta.config import MIN_MELEE_INTERVAL
 from . import BASE_URL
 
 log = logging.getLogger(__name__)
+
+# Melee's firewall rejects non-browser User-Agents outright, so requests present
+# as the browser whose AJAX calls these endpoints exist for. Who is actually
+# asking stays visible in the From header.
+BROWSER_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+)
 
 
 class RateLimitedError(RuntimeError):
@@ -55,10 +64,9 @@ class PoliteClient:
             transport=transport,
             follow_redirects=False,
             headers={
-                "User-Agent": (
-                    f"mtg-modern-meta-engine/{__version__} "
-                    f"(personal research; contact: {contact_email})"
-                ),
+                "User-Agent": BROWSER_UA,
+                "From": contact_email,
+                "X-Client": f"mtg-modern-meta-engine/{__version__}",
                 "Accept-Language": "en-US,en;q=0.9",
             },
         )

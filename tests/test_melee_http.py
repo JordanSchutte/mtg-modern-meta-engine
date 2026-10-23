@@ -51,7 +51,8 @@ def test_identifies_itself_and_sends_referer():
 
     client, _ = make(handler)
     client.post_form_json("/x", [("a", "1")], referer="https://melee.gg/Tournament/View/1")
-    assert "me@example.com" in seen["user-agent"]
+    assert seen["user-agent"].startswith("Mozilla/5.0")  # WAF rejects anything else
+    assert seen["from"] == "me@example.com"
     assert seen["referer"] == "https://melee.gg/Tournament/View/1"
     assert seen["x-requested-with"] == "XMLHttpRequest"
 

@@ -27,6 +27,7 @@ from datetime import UTC, datetime, timedelta
 from mtgmeta.contracts import ContractError, require
 
 from . import SOURCE
+from .http import BROWSER_UA
 from .query import search_url
 
 log = logging.getLogger(__name__)
@@ -207,7 +208,10 @@ def discover(
     stop_reason = f"reached max_pages ({max_pages})"
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=not headed)
-        context = browser.new_context(permissions=[])  # no geolocation grant
+        # Headless Chromium announces itself as "HeadlessChrome/..." and Melee's
+        # firewall rejects that UA (same filter PoliteClient works around), so
+        # present the same browser UA in both modes.
+        context = browser.new_context(permissions=[], user_agent=BROWSER_UA)
         context.add_init_script(_NO_LOCATION_SCRIPT)
         page = context.new_page()
         page.goto(url, wait_until="domcontentloaded")

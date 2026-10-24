@@ -3,8 +3,9 @@
 
     python scripts/discover_melee.py --since 2026-04-20 --min-players 100
 
-A Chromium window opens while it runs: Melee's firewall appears to block
-headless Chrome. --headless is available but may fail with a contract error.
+By default a Chromium window opens while it runs. --headless runs without one
+(the browser presents a normal Chrome User-Agent either way, which is what
+Melee's firewall checks); use it on servers and in CI.
 
 Writes data/discovery/melee_events.json and prints a table.
 """

@@ -16,6 +16,7 @@ import argparse
 import json
 import logging
 import sys
+from datetime import UTC, datetime, timedelta
 
 from mtgmeta.config import Settings
 from mtgmeta.contracts import ContractError
@@ -31,6 +32,10 @@ def main() -> int:
                     help="fetch every event in data/discovery/melee_events.json")
     ap.add_argument("--force", action="store_true", help="write a new version even if present")
     ap.add_argument("--no-decklists", action="store_true")
+    ap.add_argument("--min-age-days", type=float, default=0.0,
+                    help="with --from-discovery: skip events that started less than this many "
+                         "days ago, so late decklist uploads and result corrections land before "
+                         "the event's single fetch (default 0)")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -39,7 +44,14 @@ def main() -> int:
     ids = list(args.tournament_ids)
     if args.from_discovery:
         path = settings.data_root / "discovery" / "melee_events.json"
-        ids += [row["tournament_id"] for row in json.loads(path.read_text())]
+        cutoff = datetime.now(UTC) - timedelta(days=args.min_age_days)
+        for row in json.loads(path.read_text()):
+            start = datetime.fromisoformat(row["start"])
+            if start > cutoff:
+                logging.info("event %s started %s; waiting until it is %.0f days old",
+                             row["tournament_id"], start.date(), args.min_age_days)
+                continue
+            ids.append(row["tournament_id"])
     if not ids:
         ap.error("give tournament ids or --from-discovery")
 

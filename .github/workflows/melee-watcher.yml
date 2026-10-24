@@ -1,0 +1,95 @@
+name: Melee watcher
+
+# The "Melee watcher" from docs/architecture.md, as a scheduled job:
+#   bronze (R2) -> runner, discover recent Modern events, fetch the new ones,
+#   runner -> bronze (R2).
+#
+# Runs twice a day around noon and midnight US Eastern: EU/Asia events publish
+# in the US morning, NA events late at night. Minutes are off the hour because
+# GitHub's cron queue is busiest at :00.
+#
+# Bronze never loses anything here: the download is a sync (the runner is
+# disposable), the upload is a copy (never deletes in R2), and fetch itself is
+# append-only and idempotent per event.
+
+on:
+  schedule:
+    - cron: "17 4,16 * * *"   # 00:17 / 12:17 EDT; 23:17 / 11:17 EST
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "Earliest event date to consider (YYYY-MM-DD). Default: 14 days ago."
+        required: false
+        type: string
+      min_age_days:
+        description: "Only fetch events that started at least this many days ago"
+        required: false
+        type: string
+        default: "2"
+      min_players:
+        description: "Minimum enrolled players"
+        required: false
+        type: string
+        default: "100"
+
+concurrency:
+  group: melee-bronze
+  cancel-in-progress: false   # never interrupt a run mid-fetch
+
+env:
+  MELEE_CONTACT_EMAIL: ${{ secrets.MELEE_CONTACT_EMAIL }}
+  MELEE_REQUEST_INTERVAL: "2.5"
+  # rclone reads its remote config from the environment: remote name "r2".
+  RCLONE_CONFIG_R2_TYPE: s3
+  RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  RCLONE_CONFIG_R2_ACL: private
+  BUCKET: mtgmeta-bronze
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350   # a 1,500-player RC is ~65 min; backfills may need more
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install -e .
+          playwright install --with-deps chromium
+          sudo apt-get install -y -qq rclone
+
+      - name: Pull bronze from R2
+        run: |
+          mkdir -p data/bronze
+          rclone sync "r2:$BUCKET/bronze" data/bronze --fast-list
+          echo "events in bronze: $(ls data/bronze/melee/events 2>/dev/null | wc -l)"
+
+      - name: Discover recent events
+        run: |
+          SINCE="${{ inputs.since }}"
+          if [ -z "$SINCE" ]; then SINCE=$(date -u -d '14 days ago' +%F); fi
+          echo "discovering Modern events since $SINCE"
+          python scripts/discover_melee.py --headless --since "$SINCE" \
+            --min-players "${{ inputs.min_players || '100' }}"
+
+      - name: Fetch new events
+        run: |
+          python scripts/fetch_melee_event.py --from-discovery \
+            --min-age-days "${{ inputs.min_age_days || '2' }}"
+
+      - name: Push bronze to R2
+        if: always()   # keep whatever completed, even if a later event failed
+        run: rclone copy data/bronze "r2:$BUCKET/bronze" --fast-list
+
+      - name: Keep this run's discovery output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: discovery-${{ github.run_id }}
+          path: data/discovery/
+          if-no-files-found: ignore

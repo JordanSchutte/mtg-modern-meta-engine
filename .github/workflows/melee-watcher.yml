@@ -46,6 +46,8 @@ env:
   RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
   # No ACL: R2 answers 501 NotImplemented to any S3 feature it lacks, ACLs included.
+  # The token is scoped to one bucket, so rclone must not try to CreateBucket first.
+  RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
   BUCKET: mtgmeta-bronze
 
 jobs:

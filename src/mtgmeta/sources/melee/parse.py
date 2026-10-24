@@ -27,6 +27,21 @@ _ROUND_RE = re.compile(
 _ISO_RE = re.compile(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})")
 
 
+class UnusableDecklistError(Exception):
+    """A decklist page that parsed fine but holds no usable list (0 or < 40 main cards).
+
+    Melee keeps a decklist record for players who never submitted cards, or
+    whose list is hidden. Not a contract break: fetch keeps the raw page so it
+    is never re-requested, notes the id in the manifest, and the deck counts as
+    unknown downstream.
+    """
+
+    def __init__(self, decklist_id: str, main_count: int) -> None:
+        self.decklist_id = decklist_id
+        self.main_count = main_count
+        super().__init__(f"decklist {decklist_id} has {main_count} main-deck cards")
+
+
 class NoRoundsError(Exception):
     """A real Melee tournament page with no rounds (e.g. a registration-only shell).
 
@@ -272,6 +287,6 @@ def parse_decklist_page(page: str, decklist_id: str) -> Decklist:
         sections[current].append((int(card.group(1)), card.group(2).strip()))
 
     deck = Decklist(decklist_id, sections["main"], sections["side"], sections["companion"])
-    require(deck.main_count >= 40, SOURCE, "decklist main deck has fewer than 40 cards",
-            f"{decklist_id}: {deck.main_count}")
+    if deck.main_count < 40:
+        raise UnusableDecklistError(decklist_id, deck.main_count)
     return deck

@@ -14,7 +14,7 @@ from mtgmeta.sources.melee.http import PoliteClient
 
 @pytest.fixture
 def fake_melee(melee_fixture):
-    state = {"break_decklists": False}
+    state = {"break_decklists": False, "empty_decklists": False}
 
     def handler(request: httpx.Request) -> httpx.Response:
         path = request.url.path
@@ -25,6 +25,10 @@ def fake_melee(melee_fixture):
         if path.startswith("/Decklist/View/"):
             if state["break_decklists"]:
                 return httpx.Response(200, text="<html>redesigned</html>")
+            if state["empty_decklists"]:
+                return httpx.Response(
+                    200, text='<html><pre class="d-none" id="decklist-text"></pre></html>'
+                )
             return httpx.Response(200, text=melee_fixture("decklist_view.html"))
         return httpx.Response(404)
 
@@ -88,3 +92,14 @@ def test_contract_break_writes_nothing(tmp_path, fake_melee):
         fetch_event(453138, client_for(handler), tmp_path)
     assert not (bronze_root(tmp_path) / "events" / "453138").exists()
     assert not list((bronze_root(tmp_path)).rglob("*.html"))
+
+
+def test_empty_decklist_is_kept_and_flagged(tmp_path, fake_melee):
+    handler, state = fake_melee
+    state["empty_decklists"] = True
+    manifest = fetch_event(453138, client_for(handler), tmp_path)
+    # the event still lands, the empty pages are kept so they're never re-requested
+    assert latest_version(bronze_root(tmp_path) / "events" / "453138") is not None
+    assert len(list((bronze_root(tmp_path) / "decklists").glob("*.html"))) == 3
+    assert set(manifest["unusable_decklists"]) == set(manifest["decklist_ids"])
+    assert all(n == 0 for n in manifest["unusable_decklists"].values())

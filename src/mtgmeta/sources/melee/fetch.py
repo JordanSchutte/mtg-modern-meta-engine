@@ -37,6 +37,7 @@ from . import BASE_URL
 from .http import PoliteClient
 from .parse import (
     MATCH_COLUMNS,
+    UnusableDecklistError,
     check_datatables_page,
     datatables_form,
     parse_decklist_page,
@@ -121,12 +122,18 @@ def fetch_event(
 
         # Decklists are shared across events (players reuse an exact 75).
         new_decks: dict[str, str] = {}
+        unusable: dict[str, int] = {}
         if fetch_decklists:
             for did in sorted(decklist_ids):
                 if (deck_dir / f"{did}.html").exists():
                     continue
                 deck_page = client.get_text(f"/Decklist/View/{did}", referer=referer)
-                parse_decklist_page(deck_page, did)  # contract check before keeping it
+                try:
+                    parse_decklist_page(deck_page, did)  # contract check before keeping it
+                except UnusableDecklistError as exc:
+                    # Real page, no list: keep the raw HTML so it's never re-requested.
+                    log.warning("%s; keeping page, deck counts as unknown", exc)
+                    unusable[did] = exc.main_count
                 new_decks[did] = deck_page
 
         manifest = {
@@ -140,6 +147,7 @@ def fetch_event(
             "requests": client.requests_made - requests_before,
             "rounds": rounds_summary,
             "decklist_ids": sorted(decklist_ids),
+            "unusable_decklists": unusable,
             "tournament_html_sha256": _sha256(page),
         }
         (stage / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")

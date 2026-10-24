@@ -16,6 +16,7 @@ import argparse
 import json
 import logging
 import sys
+import time
 from datetime import UTC, datetime, timedelta
 
 from mtgmeta.config import Settings
@@ -32,6 +33,9 @@ def main() -> int:
                     help="fetch every event in data/discovery/melee_events.json")
     ap.add_argument("--force", action="store_true", help="write a new version even if present")
     ap.add_argument("--no-decklists", action="store_true")
+    ap.add_argument("--budget-minutes", type=float, default=0.0,
+                    help="stop starting new events after this many minutes so a job with a "
+                         "time limit ends on an event boundary (0 = no budget)")
     ap.add_argument("--min-age-days", type=float, default=0.0,
                     help="with --from-discovery: skip events that started less than this many "
                          "days ago, so late decklist uploads and result corrections land before "
@@ -57,8 +61,14 @@ def main() -> int:
 
     ids = list(dict.fromkeys(ids))
     skipped: list[str] = []
+    deferred: list[int] = []
+    t0 = time.monotonic()
     with PoliteClient(settings.melee_contact_email, settings.melee_request_interval) as client:
         for tid in ids:
+            elapsed_min = (time.monotonic() - t0) / 60
+            if args.budget_minutes and elapsed_min >= args.budget_minutes:
+                deferred.append(tid)
+                continue
             try:
                 manifest = fetch_event(tid, client, settings.data_root, force=args.force,
                                        fetch_decklists=not args.no_decklists)
@@ -82,6 +92,9 @@ def main() -> int:
             total = sum(r["matches"] for r in swiss)
             print(f"{tid}: {manifest['name'][:60]} | swiss matches {total}, "
                   f"both decks known {known}")
+    if deferred:
+        print(f"\nbudget of {args.budget_minutes:.0f} min reached; {len(deferred)} event(s) "
+              f"left for the next run: {deferred}")
     if skipped:
         print(f"\nskipped {len(skipped)} event(s) with no rounds:")
         for line in skipped:

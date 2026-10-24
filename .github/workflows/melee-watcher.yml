@@ -45,7 +45,7 @@ env:
   RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
   RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-  RCLONE_CONFIG_R2_ACL: private
+  # No ACL: R2 answers 501 NotImplemented to any S3 feature it lacks, ACLs included.
   BUCKET: mtgmeta-bronze
 
 jobs:
@@ -61,13 +61,21 @@ jobs:
         run: |
           pip install -e .
           playwright install --with-deps chromium
-          sudo apt-get install -y -qq rclone
+          # Ubuntu's packaged rclone is years old; R2 needs a current build.
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
 
       - name: Pull bronze from R2
         run: |
           mkdir -p data/bronze
           rclone sync "r2:$BUCKET/bronze" data/bronze --fast-list
           echo "events in bronze: $(ls data/bronze/melee/events 2>/dev/null | wc -l)"
+
+      - name: Check R2 is writable
+        # Fail here, in the first minute, rather than after hours of fetching.
+        run: |
+          date -u +%FT%TZ | rclone rcat "r2:$BUCKET/_last_run_started"
+          rclone cat "r2:$BUCKET/_last_run_started"
 
       - name: Discover recent events
         run: |
@@ -78,13 +86,18 @@ jobs:
             --min-players "${{ inputs.min_players || '100' }}"
 
       - name: Fetch new events
+        # Stop starting events at 300 min so the job (limit 350) always ends on a
+        # clean event boundary with time to push; leftovers go to the next run.
         run: |
           python scripts/fetch_melee_event.py --from-discovery \
-            --min-age-days "${{ inputs.min_age_days || '2' }}"
+            --min-age-days "${{ inputs.min_age_days || '2' }}" \
+            --budget-minutes 300
 
       - name: Push bronze to R2
         if: always()   # keep whatever completed, even if a later event failed
-        run: rclone copy data/bronze "r2:$BUCKET/bronze" --fast-list
+        run: |
+          rclone copy data/bronze "r2:$BUCKET/bronze" --fast-list --stats-one-line -v
+          echo "objects in R2: $(rclone size "r2:$BUCKET/bronze" --json)"
 
       - name: Keep this run's discovery output
         if: always()

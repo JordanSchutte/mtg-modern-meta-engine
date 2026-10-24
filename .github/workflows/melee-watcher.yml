@@ -31,6 +31,11 @@ on:
         required: false
         type: string
         default: "100"
+      max_events:
+        description: "Fetch at most this many new events this run (0 = all)"
+        required: false
+        type: string
+        default: "0"
 
 concurrency:
   group: melee-bronze
@@ -93,6 +98,7 @@ jobs:
         run: |
           python scripts/fetch_melee_event.py --from-discovery \
             --min-age-days "${{ inputs.min_age_days || '2' }}" \
+            --max-events "${{ inputs.max_events || '0' }}" \
             --budget-minutes 300
 
       - name: Push bronze to R2

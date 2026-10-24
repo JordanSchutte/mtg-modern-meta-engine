@@ -33,6 +33,8 @@ def main() -> int:
                     help="fetch every event in data/discovery/melee_events.json")
     ap.add_argument("--force", action="store_true", help="write a new version even if present")
     ap.add_argument("--no-decklists", action="store_true")
+    ap.add_argument("--max-events", type=int, default=0,
+                    help="fetch at most this many events not yet in bronze this run (0 = all)")
     ap.add_argument("--budget-minutes", type=float, default=0.0,
                     help="stop starting new events after this many minutes so a job with a "
                          "time limit ends on an event boundary (0 = no budget)")
@@ -62,6 +64,7 @@ def main() -> int:
     ids = list(dict.fromkeys(ids))
     skipped: list[str] = []
     deferred: list[int] = []
+    fetched = 0
     t0 = time.monotonic()
     with PoliteClient(settings.melee_contact_email, settings.melee_request_interval) as client:
         for tid in ids:
@@ -69,9 +72,15 @@ def main() -> int:
             if args.budget_minutes and elapsed_min >= args.budget_minutes:
                 deferred.append(tid)
                 continue
+            if args.max_events and fetched >= args.max_events:
+                deferred.append(tid)
+                continue
             try:
+                before = client.requests_made
                 manifest = fetch_event(tid, client, settings.data_root, force=args.force,
                                        fetch_decklists=not args.no_decklists)
+                if client.requests_made > before:
+                    fetched += 1
             except NoRoundsError as exc:
                 logging.warning("skipping: %s", exc)
                 skipped.append(str(exc))
@@ -93,8 +102,8 @@ def main() -> int:
             print(f"{tid}: {manifest['name'][:60]} | swiss matches {total}, "
                   f"both decks known {known}")
     if deferred:
-        print(f"\nbudget of {args.budget_minutes:.0f} min reached; {len(deferred)} event(s) "
-              f"left for the next run: {deferred}")
+        print(f"\n{len(deferred)} event(s) left for the next run (budget or max-events): "
+              f"{deferred}")
     if skipped:
         print(f"\nskipped {len(skipped)} event(s) with no rounds:")
         for line in skipped:

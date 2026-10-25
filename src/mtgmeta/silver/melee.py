@@ -117,6 +117,13 @@ def _read_event(event_root: Path, version_dir: Path) -> tuple[dict, list[dict], 
                     }
 
     swiss = [r for r in match_rows if r["is_swiss"]]
+    # What the matrix can use: Modern Swiss rounds, byes excluded (a bye isn't a
+    # match). A Pro Tour's draft rounds are Swiss too but carry no lists.
+    usable = [r for r in swiss if r["format"] == "Modern" and r["result"] != "bye"]
+    # Players, from round 1's rows when the manifest predates players_estimate.
+    round1 = [r for r in match_rows if r["round_number"] == 1]
+    players_from_rows = sum(1 for r in round1 for side in ("a", "b")
+                            if r[f"player_{side}_id"] is not None) or None
     refresh_log = event_root / "refreshes.json"
     refreshes = json.loads(refresh_log.read_text(encoding="utf-8")) if refresh_log.exists() else []
     event_row = {
@@ -126,13 +133,16 @@ def _read_event(event_root: Path, version_dir: Path) -> tuple[dict, list[dict], 
         "version": version,
         "fetched_at": manifest["fetched_at"],
         "fetcher_version": manifest.get("fetcher_version"),
-        "players_estimate": manifest.get("players_estimate"),
+        "players_estimate": manifest.get("players_estimate") or players_from_rows,
         "rounds": len(manifest["rounds"]),
         "swiss_rounds": sum(1 for r in manifest["rounds"] if r["is_swiss"]),
         "matches": len(match_rows),
         "swiss_matches": len(swiss),
         "swiss_both_known": sum(1 for r in swiss if r["both_decks_known"]),
         "swiss_byes": sum(1 for r in swiss if r["result"] == "bye"),
+        "modern_swiss_matches": len(usable),
+        "modern_swiss_known": sum(1 for r in usable if r["both_decks_known"]),
+        "formats": ",".join(sorted({r["format"] for r in match_rows if r["format"]})),
         "decklist_ids": len(manifest.get("decklist_ids") or []),
         "unusable_decklists": len(manifest.get("unusable_decklists") or {}),
         "versions": sum(1 for p in event_root.iterdir()
@@ -244,20 +254,22 @@ def _frame(rows: list[dict]):
 
 
 def coverage_report(build_: SilverBuild) -> str:
-    lines = [f"{'start':<11}{'id':>7}{'players':>8}{'swiss':>7}{'known':>7}{'share':>7}"
-             f"{'lists':>7}{'empty':>7}  name"]
+    lines = [f"{'start':<11}{'id':>7}{'players':>8}{'modern':>7}{'known':>7}{'share':>7}"
+             f"{'lists':>7}{'empty':>7}  name",
+             "  (modern = Modern Swiss matches excluding byes; known = both decks published)"]
     for e in sorted(build_.events, key=lambda e: e["start"] or ""):
-        share = e["swiss_both_known"] / e["swiss_matches"] if e["swiss_matches"] else 0.0
+        n, k = e["modern_swiss_matches"], e["modern_swiss_known"]
+        share = k / n if n else 0.0
         lines.append(
             f"{(e['start'] or '')[:10]:<11}{e['tournament_id']:>7}"
-            f"{e['players_estimate'] or 0:>8}{e['swiss_matches']:>7}{e['swiss_both_known']:>7}"
+            f"{e['players_estimate'] or 0:>8}{n:>7}{k:>7}"
             f"{share:>7.0%}{e['decklist_ids']:>7}{e['unusable_decklists']:>7}  {e['name'][:48]}"
         )
-    total_swiss = sum(e["swiss_matches"] for e in build_.events)
-    total_known = sum(e["swiss_both_known"] for e in build_.events)
-    lines.append(f"\n{len(build_.events)} events, {total_swiss} swiss matches, "
-                 f"{total_known} with both decks known "
-                 f"({total_known / total_swiss:.0%})" if total_swiss else "\nno events")
+    total_n = sum(e["modern_swiss_matches"] for e in build_.events)
+    total_k = sum(e["modern_swiss_known"] for e in build_.events)
+    lines.append(f"\n{len(build_.events)} events, {total_n} Modern Swiss matches, "
+                 f"{total_k} with both decks known "
+                 f"({total_k / total_n:.0%})" if total_n else "\nno events")
     usable = sum(1 for d in build_.decklists if d["usable"])
     lines.append(f"{len(build_.decklists)} decklists referenced, {usable} usable, "
                  f"{len(build_.decklist_cards)} card lines, {len(build_.players)} players")

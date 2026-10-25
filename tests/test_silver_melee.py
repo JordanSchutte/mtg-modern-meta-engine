@@ -38,6 +38,9 @@ def test_build_tables_from_bronze(tmp_path, melee_fixture):
     assert ev["tournament_id"] == 453138
     assert ev["rounds"] == 6 and ev["matches"] == 6 * 3
     assert ev["decklist_ids"] == 3 and ev["unusable_decklists"] == 0
+    # 3 rows per round: one bye, one draw with both lists, one win without lists
+    assert ev["modern_swiss_matches"] == 6 * 2 and ev["modern_swiss_known"] == 6 * 1
+    assert ev["players_estimate"] == 5 and ev["formats"] == "Modern"
 
     # Competitors flattened; the bye has no b side and is not "both known".
     bye = next(m for m in build.matches if m["result"] == "bye")

@@ -21,8 +21,8 @@ from mtgmeta.silver.melee import TABLES, silver_root
 
 DEFAULT = """
 select substr(start, 1, 10) as start, tournament_id, players_estimate as players,
-       swiss_matches as swiss, swiss_both_known as known,
-       round(100.0 * swiss_both_known / nullif(swiss_matches, 0)) as pct,
+       modern_swiss_matches as modern, modern_swiss_known as known,
+       round(100.0 * modern_swiss_known / nullif(modern_swiss_matches, 0)) as pct,
        decklist_ids as lists, unusable_decklists as empty, substr(name, 1, 48) as name
 from events order by start
 """

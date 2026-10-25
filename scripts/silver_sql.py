@@ -32,11 +32,13 @@ def main() -> int:
     sql = " ".join(sys.argv[1:]) or DEFAULT
     root = silver_root(Settings.from_env().data_root)
     con = duckdb.connect()
+    found = 0
     for table in TABLES:
         path = root / f"{table}.parquet"
         if path.exists():
-            con.execute(f"create view {table} as select * from '{path.as_posix()}'")
-    if not con.execute("select count(*) from duckdb_views() where internal = false").fetchone()[0]:
+            con.execute(f"create view {table} as select * from '{path.as_posix()}'").fetchall()
+            found += 1
+    if not found:
         print(f"no silver tables under {root}; run build_silver.py or pull them from R2")
         return 1
     rel = con.sql(sql)

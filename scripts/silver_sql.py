@@ -39,8 +39,11 @@ def main() -> int:
     if not con.execute("select count(*) from duckdb_views() where internal = false").fetchone()[0]:
         print(f"no silver tables under {root}; run build_silver.py or pull them from R2")
         return 1
-    con.execute("set max_rows = 500")
-    print(con.sql(sql))
+    rel = con.sql(sql)
+    try:
+        rel.show(max_rows=500, max_width=200)
+    except TypeError:  # older duckdb without those keywords
+        print(rel)
     return 0
 
 

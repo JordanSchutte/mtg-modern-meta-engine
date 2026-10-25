@@ -28,7 +28,7 @@ import json
 import logging
 import shutil
 import tempfile
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from mtgmeta import __version__
@@ -80,6 +80,66 @@ def latest_version(event_root: Path) -> Path | None:
     return versions[-1] if versions else None
 
 
+def matches_signature(matches) -> str:
+    """Order-independent fingerprint of what the matrix cares about: who played
+    whom, with which lists, and the result. Timestamps and display fields are
+    left out so a refresh only sees real changes."""
+    rows = sorted(
+        (m.match_guid, m.round_id, m.result, m.winner_player_id, m.game_draws,
+         tuple(sorted((c.player_id, c.decklist_id, c.game_wins) for c in m.competitors)))
+        for m in matches
+    )
+    return _sha256(json.dumps(rows, default=str))
+
+
+def stored_signature(version_dir: Path) -> str:
+    """Signature of a stored version, from its round pages."""
+    matches = []
+    for f in sorted((version_dir / "rounds").glob("*.json")):
+        matches.extend(parse_round_matches(json.loads(f.read_text(encoding="utf-8"))))
+    return matches_signature(matches)
+
+
+def last_refresh_at(event_root: Path) -> datetime | None:
+    path = event_root / "refreshes.json"
+    if not path.exists():
+        return None
+    history = json.loads(path.read_text(encoding="utf-8"))
+    return datetime.fromisoformat(history[-1]["checked_at"]) if history else None
+
+
+def events_to_refresh(data_root: Path, days: float, now: datetime | None = None,
+                      min_gap: timedelta = timedelta(hours=20)) -> list[int]:
+    """Events in bronze that started within ``days`` and weren't checked in the last ``min_gap``."""
+    now = now or datetime.now(UTC)
+    out = []
+    events_dir = bronze_root(data_root) / "events"
+    if not events_dir.exists():
+        return out
+    for event_root in sorted(events_dir.iterdir()):
+        version = latest_version(event_root)
+        if version is None:
+            continue
+        manifest = json.loads((version / "manifest.json").read_text(encoding="utf-8"))
+        start_text = manifest.get("start") or manifest["fetched_at"]
+        start = datetime.fromisoformat(str(start_text)[:19]).replace(tzinfo=UTC)
+        if start < now - timedelta(days=days):
+            continue
+        last = last_refresh_at(event_root)
+        if last is not None and last > now - min_gap:
+            continue
+        out.append(int(event_root.name))
+    return out
+
+
+def log_refresh(event_root: Path, record: dict) -> None:
+    """Append one refresh check to events/<id>/refreshes.json (never rewritten)."""
+    path = event_root / "refreshes.json"
+    history = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    history.append(record)
+    path.write_text(json.dumps(history, indent=2), encoding="utf-8")
+
+
 def fetch_event(
     tournament_id: int,
     client: PoliteClient,
@@ -87,18 +147,31 @@ def fetch_event(
     force: bool = False,
     fetch_decklists: bool = True,
     min_players: int = 0,
+    refresh: bool = False,
 ) -> dict:
+    """Fetch an event into bronze (see module docstring).
+
+    ``refresh``: for an event already in bronze, re-pull the tournament page
+    and round JSON (cheap: no decklists) and compare with the latest stored
+    version. Unchanged -> nothing written except a line in refreshes.json.
+    Changed -> a new version beside the old one, plus any newly published
+    decklists; lists that were empty last time are requested again.
+    """
     root = bronze_root(data_root)
     event_root = root / "events" / str(tournament_id)
     deck_dir = root / "decklists"
     existing = latest_version(event_root)
-    if existing is not None and not force:
+    if existing is not None and not force and not refresh:
         log.info("event %s already in bronze (%s); skipping", tournament_id, existing.name)
         return json.loads((existing / "manifest.json").read_text())
+    refreshing = refresh and existing is not None
+    previous = json.loads((existing / "manifest.json").read_text()) if existing else {}
 
     referer = f"{BASE_URL}/Tournament/View/{tournament_id}"
     started = datetime.now(UTC)
     version = started.strftime("%Y%m%dT%H%M%SZ")
+    while (event_root / version).exists():  # two writes in one second (tests, retries)
+        version += "x"
     requests_before = client.requests_made
 
     with tempfile.TemporaryDirectory(prefix=f"melee-{tournament_id}-") as tmp:
@@ -111,6 +184,7 @@ def fetch_event(
 
         decklist_ids: set[str] = set()
         rounds_summary = []
+        matches_by_round = []
         players_estimate: int | None = None
         for rnd in meta.rounds:
             pages: list[dict] = []
@@ -128,6 +202,7 @@ def fetch_event(
                 if not data or start >= total:
                     break
             matches = parse_round_matches(pages)
+            matches_by_round.append(matches)
             (stage / "rounds" / f"{rnd.id}.json").write_text(json.dumps(pages), encoding="utf-8")
             for m in matches:
                 decklist_ids.update(c.decklist_id for c in m.competitors if c.decklist_id)
@@ -140,21 +215,50 @@ def fetch_event(
                 "formats": sorted({m.format for m in matches if m.format}),
             })
 
+        all_matches = [m for group in matches_by_round for m in group]
+        signature = matches_signature(all_matches)
+        if refreshing:
+            before_sig = previous.get("matches_sha256") or stored_signature(existing)
+            retry_decks = set(previous.get("unusable_decklists") or {})
+            changed = signature != before_sig
+            log_refresh(event_root, {
+                "checked_at": started.isoformat(),
+                "against_version": existing.name,
+                "changed": changed,
+                "requests": client.requests_made - requests_before,
+                "decklists_then": len(previous.get("decklist_ids") or []),
+                "decklists_now": len(decklist_ids),
+            })
+            if not changed and not retry_decks:
+                log.info("event %s unchanged since %s; nothing written",
+                         tournament_id, existing.name)
+                return previous
+        else:
+            retry_decks = set()
+            changed = True
+
         # Decklists are shared across events (players reuse an exact 75).
         new_decks: dict[str, str] = {}
         unusable: dict[str, int] = {}
         if fetch_decklists:
             for did in sorted(decklist_ids):
-                if (deck_dir / f"{did}.html").exists():
+                if (deck_dir / f"{did}.html").exists() and did not in retry_decks:
                     continue
                 deck_page = client.get_text(f"/Decklist/View/{did}", referer=referer)
                 try:
                     parse_decklist_page(deck_page, did)  # contract check before keeping it
                 except UnusableDecklistError as exc:
+                    unusable[did] = exc.main_count
+                    if did in retry_decks:
+                        continue  # still empty: the stored copy already says so
                     # Real page, no list: keep the raw HTML so it's never re-requested.
                     log.warning("%s; keeping page, deck counts as unknown", exc)
-                    unusable[did] = exc.main_count
                 new_decks[did] = deck_page
+
+        if refreshing and not changed and not new_decks:
+            log.info("event %s unchanged since %s (empty lists still empty); nothing written",
+                     tournament_id, existing.name)
+            return previous
 
         manifest = {
             "source": "melee",
@@ -167,6 +271,8 @@ def fetch_event(
             "requests": client.requests_made - requests_before,
             "rounds": rounds_summary,
             "players_estimate": players_estimate,
+            "matches_sha256": signature,
+            "refreshed_from": existing.name if refreshing else None,
             "decklist_ids": sorted(decklist_ids),
             "unusable_decklists": unusable,
             "tournament_html_sha256": _sha256(page),
@@ -176,7 +282,10 @@ def fetch_event(
         # Everything validated: publish to bronze.
         deck_dir.mkdir(parents=True, exist_ok=True)
         for did, text in new_decks.items():
-            (deck_dir / f"{did}.html").write_text(text, encoding="utf-8")
+            target = deck_dir / f"{did}.html"
+            if target.exists():  # an empty list that has since been published: keep both
+                target.rename(deck_dir / f"{did}.superseded-{version}.html")
+            target.write_text(text, encoding="utf-8")
         event_root.mkdir(parents=True, exist_ok=True)
         shutil.move(str(stage), str(event_root / version))
 

@@ -98,11 +98,14 @@ jobs:
         run: python scripts/update_watchlist.py --headless
 
       - name: Fetch new events
-        # Discovered past events plus watchlist events that have finished.
+        # Discovered past events plus watchlist events that have finished, then
+        # a cheap re-check of events from the last 14 days (once a day each) for
+        # late decklists and corrections; a new version is written only on change.
         # Stop starting events at 300 min so the job (limit 350) always ends on a
         # clean event boundary with time to push; leftovers go to the next run.
         run: |
           python scripts/fetch_melee_event.py --from-discovery --from-watchlist \
+            --refresh-days 14 \
             --min-players "${{ inputs.min_players || '100' }}" \
             --min-age-days "${{ inputs.min_age_days || '2' }}" \
             --max-events "${{ inputs.max_events || '0' }}" \

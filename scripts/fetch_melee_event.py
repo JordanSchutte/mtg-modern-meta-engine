@@ -24,7 +24,7 @@ from pathlib import Path
 from mtgmeta.config import Settings
 from mtgmeta.contracts import ContractError
 from mtgmeta.sources.melee import watchlist
-from mtgmeta.sources.melee.fetch import TooSmallError, fetch_event
+from mtgmeta.sources.melee.fetch import TooSmallError, events_to_refresh, fetch_event
 from mtgmeta.sources.melee.http import PoliteClient, RateLimitedError
 from mtgmeta.sources.melee.parse import NoRoundsError
 
@@ -42,6 +42,10 @@ def main() -> int:
     ap.add_argument("--min-players", type=int, default=100,
                     help="with --from-watchlist: minimum players, judged from round 1 "
                          "(default 100)")
+    ap.add_argument("--refresh-days", type=float, default=0.0,
+                    help="re-check events in bronze that started within this many days (at most "
+                         "once per ~20h each): tournament page + rounds only; a new version is "
+                         "written only if results or published decklists changed")
     ap.add_argument("--force", action="store_true", help="write a new version even if present")
     ap.add_argument("--no-decklists", action="store_true")
     ap.add_argument("--max-events", type=int, default=0,
@@ -82,13 +86,19 @@ def main() -> int:
         wl_ids = {e["tournament_id"] for e in due}
         logging.info("watchlist: %d pending event(s) due for settling", len(due))
         ids += [e["tournament_id"] for e in due]
-    if not ids:
-        if args.from_watchlist or args.from_discovery:
+    refresh_ids: list[int] = []
+    if args.refresh_days:
+        refresh_ids = events_to_refresh(settings.data_root, args.refresh_days)
+        logging.info("refresh: %d recent event(s) to re-check", len(refresh_ids))
+    if not ids and not refresh_ids:
+        if args.from_watchlist or args.from_discovery or args.refresh_days:
             print("nothing to fetch")
             return 0
-        ap.error("give tournament ids, --from-discovery or --from-watchlist")
+        ap.error("give tournament ids, --from-discovery, --from-watchlist or --refresh-days")
 
     ids = list(dict.fromkeys(ids))
+    refresh_ids = [t for t in refresh_ids if t not in ids]
+    ids += refresh_ids
 
     def settle(tid: int, status: str, **facts) -> None:
         if tid in wl:
@@ -112,7 +122,8 @@ def main() -> int:
                 before = client.requests_made
                 manifest = fetch_event(tid, client, settings.data_root, force=args.force,
                                        fetch_decklists=not args.no_decklists,
-                                       min_players=args.min_players if tid in wl_ids else 0)
+                                       min_players=args.min_players if tid in wl_ids else 0,
+                                       refresh=tid in refresh_ids)
                 if client.requests_made > before:
                     fetched += 1
                 settle(tid, watchlist.FETCHED, players_estimate=manifest.get("players_estimate"))

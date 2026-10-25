@@ -121,9 +121,10 @@ def _read_event(event_root: Path, version_dir: Path) -> tuple[dict, list[dict], 
     # match). A Pro Tour's draft rounds are Swiss too but carry no lists.
     usable = [r for r in swiss if r["format"] == "Modern" and r["result"] != "bye"]
     # Players, from round 1's rows when the manifest predates players_estimate.
-    round1 = [r for r in match_rows if r["round_number"] == 1]
-    players_from_rows = sum(1 for r in round1 for side in ("a", "b")
-                            if r[f"player_{side}_id"] is not None) or None
+    first_round = manifest["rounds"][0]["round_id"] if manifest["rounds"] else None
+    players_from_rows = len({r[f"player_{side}_id"] for r in match_rows for side in ("a", "b")
+                             if r["round_id"] == first_round
+                             and r[f"player_{side}_id"] is not None}) or None
     refresh_log = event_root / "refreshes.json"
     refreshes = json.loads(refresh_log.read_text(encoding="utf-8")) if refresh_log.exists() else []
     event_row = {

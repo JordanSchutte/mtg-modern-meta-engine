@@ -17,8 +17,8 @@ import json
 import logging
 import sys
 import time
-from pathlib import Path
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from mtgmeta.config import Settings
 from mtgmeta.contracts import ContractError

@@ -254,16 +254,18 @@ def discover(
             for attempt in range(1, 4):
                 result = page.evaluate(_FETCH_PAGE_JS, [page_no, TOURNAMENTS_CONTEXT, game,
                                                         list(filters)])
+                if result.get("code") == 404:
+                    break  # past the last page: "No tournaments found." (not an error)
                 if not result.get("timeout") and not result.get("error"):
                     break
                 log.info("page %d attempt %d: %s; retrying", page_no, attempt, result)
                 page.wait_for_timeout(3_000)
-            if result.get("timeout") or result.get("error"):
-                raise ContractError(SOURCE, "search hub gave no results",
-                                    f"page {page_no}: {result}")
             if result.get("code") == 404 or not result.get("json"):
                 stop_reason = f"no more results after {page_no - 1} pages"
                 break
+            if result.get("timeout") or result.get("error"):
+                raise ContractError(SOURCE, "search hub gave no results",
+                                    f"page {page_no}: {result}")
 
             batch = parse_search_results(result["json"])
             if not batch:

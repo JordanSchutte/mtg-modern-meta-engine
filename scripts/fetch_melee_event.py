@@ -96,9 +96,10 @@ def main() -> int:
             return 0
         ap.error("give tournament ids, --from-discovery, --from-watchlist or --refresh-days")
 
-    ids = list(dict.fromkeys(ids))
-    refresh_ids = [t for t in refresh_ids if t not in ids]
-    ids += refresh_ids
+    # An event can be both discovered (still in the window) and due a refresh;
+    # refresh wins for anything already in bronze, a plain fetch otherwise.
+    refresh_set = set(refresh_ids)
+    ids = list(dict.fromkeys(ids + refresh_ids))
 
     def settle(tid: int, status: str, **facts) -> None:
         if tid in wl:
@@ -123,7 +124,7 @@ def main() -> int:
                 manifest = fetch_event(tid, client, settings.data_root, force=args.force,
                                        fetch_decklists=not args.no_decklists,
                                        min_players=args.min_players if tid in wl_ids else 0,
-                                       refresh=tid in refresh_ids)
+                                       refresh=tid in refresh_set)
                 if client.requests_made > before:
                     fetched += 1
                 settle(tid, watchlist.FETCHED, players_estimate=manifest.get("players_estimate"))

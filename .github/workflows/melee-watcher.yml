@@ -117,6 +117,18 @@ jobs:
           rclone copy data/bronze "r2:$BUCKET/bronze" --fast-list --stats-one-line -v
           echo "objects in R2: $(rclone size "r2:$BUCKET/bronze" --json)"
 
+      - name: Build silver from bronze
+        # Derived tables, rebuilt from scratch each run; the coverage report goes
+        # to the run summary so it can be read without opening the log.
+        if: always()
+        run: |
+          python scripts/build_silver.py | tee silver-report.txt
+          { echo '## Melee coverage'; echo '```'; cat silver-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push silver to R2
+        if: always()
+        run: rclone copy data/silver "r2:$BUCKET/silver" --fast-list --stats-one-line -v
+
       - name: Keep this run's discovery output
         if: always()
         uses: actions/upload-artifact@v4

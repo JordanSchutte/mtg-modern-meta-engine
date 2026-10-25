@@ -2,7 +2,7 @@
 
 Predicts the Modern field for an upcoming tournament and recommends the best-positioned deck and flex slots for it, built as an event-driven data platform.
 
-> **Status:** Phase 0 — ingestion foundations. Melee event discovery and event fetching work end to end; everything downstream is planned (see [Roadmap](#roadmap)).
+> **Status:** Phase 0 — ingestion foundations. Melee discovery, fetching and the unattended watcher run end to end into an R2 bronze layer, and silver tables are rebuilt from it on every run; everything downstream is planned (see [Roadmap](#roadmap)).
 
 ## What it does
 
@@ -60,6 +60,9 @@ python scripts/discover_melee.py --since 2026-04-20 --min-players 100
 # Fetch one event into data/bronze/melee/
 python scripts/fetch_melee_event.py 453138
 
+# Parse bronze into silver Parquet tables and print per-event coverage
+python scripts/build_silver.py
+
 pytest
 ```
 
@@ -81,6 +84,7 @@ src/mtgmeta/
     http.py                 throttled, backoff-aware HTTP client
     parse.py                tournament page, round matches, decklist parsers
     fetch.py                fetches one event into bronze (idempotent)
+  silver/melee.py           bronze -> Parquet tables (events, matches, decklists, cards, players)
 scripts/                    CLI entry points
 tests/fixtures/melee/       responses captured from live Melee pages
 docs/                       architecture and design notes
@@ -90,7 +94,7 @@ docs/                       architecture and design notes
 
 | Phase | Builds | Done when |
 | --- | --- | --- |
-| 0 Foundations | Melee discovery + fetch, contract tests, CI, Docker Compose stack, Scryfall cards | One command loads cards and an event to silver; CI green |
+| 0 Foundations | Melee discovery + fetch, contract tests, CI, unattended watcher with R2 bronze, silver tables (DuckDB/Parquet), Scryfall cards | One command loads cards and an event to silver; CI green |
 | 1 Batch MVP | MTGO scraper, archetype rules, naive matrix and meta share, first ranking (dbt on DuckDB) | Produces a ranking for a real upcoming Modern event |
 | 2 Orchestration, Spark, quality | Airflow DAGs, Spark bronze→silver, history backfill, data contracts | Full history rebuilds from bronze in one run |
 | 3 Event-driven ingestion | Watchers, Kafka topic, dead-letter topic, debounced asset triggers | A new event rebuilds only the affected marts |

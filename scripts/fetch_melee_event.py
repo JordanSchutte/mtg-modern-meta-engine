@@ -4,6 +4,7 @@
     python scripts/fetch_melee_event.py 453138
     python scripts/fetch_melee_event.py --from-discovery          # everything discovered
     python scripts/fetch_melee_event.py 453138 --force            # new version (corrections)
+    python scripts/fetch_melee_event.py --from-watchlist          # settle finished upcoming events
 
 A 270-player event is roughly 290 requests (~12 minutes at 2.5 s apart);
 a 1,500-player RC is roughly 1,550 requests (~65 minutes). Decklists already in
@@ -22,7 +23,8 @@ from pathlib import Path
 
 from mtgmeta.config import Settings
 from mtgmeta.contracts import ContractError
-from mtgmeta.sources.melee.fetch import fetch_event
+from mtgmeta.sources.melee import watchlist
+from mtgmeta.sources.melee.fetch import TooSmallError, fetch_event
 from mtgmeta.sources.melee.http import PoliteClient, RateLimitedError
 from mtgmeta.sources.melee.parse import NoRoundsError
 
@@ -33,6 +35,13 @@ def main() -> int:
     ap.add_argument("--from-discovery", action="store_true",
                     help="fetch every event in data/discovery/melee_events.json plus "
                          "config/extra_melee_events.json")
+    ap.add_argument("--from-watchlist", action="store_true",
+                    help="settle watchlist events (bronze/melee/watchlist.json) whose start is "
+                         "at least --min-age-days ago: fetch if they meet --min-players, "
+                         "otherwise mark too_small")
+    ap.add_argument("--min-players", type=int, default=100,
+                    help="with --from-watchlist: minimum players, judged from round 1 "
+                         "(default 100)")
     ap.add_argument("--force", action="store_true", help="write a new version even if present")
     ap.add_argument("--no-decklists", action="store_true")
     ap.add_argument("--max-events", type=int, default=0,
@@ -65,10 +74,27 @@ def main() -> int:
             extra_ids = [e["tournament_id"] for e in json.loads(extra.read_text())["events"]]
             logging.info("adding %d event(s) from %s", len(extra_ids), extra)
             ids += extra_ids
+    wl_path = watchlist.watchlist_path(settings.data_root)
+    wl = watchlist.load(wl_path) if args.from_watchlist else {}
+    wl_ids: set[int] = set()
+    if args.from_watchlist:
+        due = watchlist.due(wl, min_age=timedelta(days=args.min_age_days))
+        wl_ids = {e["tournament_id"] for e in due}
+        logging.info("watchlist: %d pending event(s) due for settling", len(due))
+        ids += [e["tournament_id"] for e in due]
     if not ids:
-        ap.error("give tournament ids or --from-discovery")
+        if args.from_watchlist or args.from_discovery:
+            print("nothing to fetch")
+            return 0
+        ap.error("give tournament ids, --from-discovery or --from-watchlist")
 
     ids = list(dict.fromkeys(ids))
+
+    def settle(tid: int, status: str, **facts) -> None:
+        if tid in wl:
+            watchlist.settle(wl[tid], status, **facts)
+            watchlist.save(wl_path, wl)  # after every event: a budget stop keeps progress
+
     skipped: list[str] = []
     deferred: list[int] = []
     fetched = 0
@@ -85,12 +111,19 @@ def main() -> int:
             try:
                 before = client.requests_made
                 manifest = fetch_event(tid, client, settings.data_root, force=args.force,
-                                       fetch_decklists=not args.no_decklists)
+                                       fetch_decklists=not args.no_decklists,
+                                       min_players=args.min_players if tid in wl_ids else 0)
                 if client.requests_made > before:
                     fetched += 1
+                settle(tid, watchlist.FETCHED, players_estimate=manifest.get("players_estimate"))
+            except TooSmallError as exc:
+                logging.info("%s", exc)
+                settle(tid, watchlist.TOO_SMALL, players_estimate=exc.players_estimate)
+                continue
             except NoRoundsError as exc:
                 logging.warning("skipping: %s", exc)
                 skipped.append(str(exc))
+                settle(tid, watchlist.NO_ROUNDS)
                 # Many "no rounds" in one run looks like a page change, not shell events.
                 if len(skipped) >= 3 and len(skipped) > len(ids) / 2:
                     logging.error("most events have no rounds; Melee's page probably changed")

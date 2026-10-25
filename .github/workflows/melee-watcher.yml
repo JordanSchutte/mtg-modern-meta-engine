@@ -1,8 +1,8 @@
 name: Melee watcher
 
 # The "Melee watcher" from docs/architecture.md, as a scheduled job:
-#   bronze (R2) -> runner, discover recent Modern events, fetch the new ones,
-#   runner -> bronze (R2).
+#   bronze (R2) -> runner, discover recently created Modern events, add upcoming
+#   events to the watchlist, fetch new/finished ones, runner -> bronze (R2).
 #
 # Runs twice a day around noon and midnight US Eastern: EU/Asia events publish
 # in the US morning, NA events late at night. Minutes are off the hour because
@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       since:
-        description: "Earliest event date to consider (YYYY-MM-DD). Default: format period start."
+        description: "Earliest event date for the past-events scan (YYYY-MM-DD). Default: 14 days ago."
         required: false
         type: string
       min_age_days:
@@ -86,21 +86,24 @@ jobs:
 
       - name: Discover recent events
         run: |
-          # Melee's search is creation-ordered and big events are created months
-          # ahead, so a short lookback stops paging before it reaches them. Scan
-          # from the format period start every run (~15-20 min) until the
-          # upcoming-events watchlist replaces this.
+          # Covers events created and played within the window. Events created
+          # months ahead (RCs) are caught by the watchlist step instead.
           SINCE="${{ inputs.since }}"
-          if [ -z "$SINCE" ]; then SINCE="2026-05-18"; fi
+          if [ -z "$SINCE" ]; then SINCE=$(date -u -d '14 days ago' +%F); fi
           echo "discovering Modern events since $SINCE"
           python scripts/discover_melee.py --headless --since "$SINCE" \
             --min-players "${{ inputs.min_players || '100' }}"
 
+      - name: Update watchlist of upcoming events
+        run: python scripts/update_watchlist.py --headless
+
       - name: Fetch new events
+        # Discovered past events plus watchlist events that have finished.
         # Stop starting events at 300 min so the job (limit 350) always ends on a
         # clean event boundary with time to push; leftovers go to the next run.
         run: |
-          python scripts/fetch_melee_event.py --from-discovery \
+          python scripts/fetch_melee_event.py --from-discovery --from-watchlist \
+            --min-players "${{ inputs.min_players || '100' }}" \
             --min-age-days "${{ inputs.min_age_days || '2' }}" \
             --max-events "${{ inputs.max_events || '0' }}" \
             --budget-minutes 300

@@ -124,6 +124,19 @@ def looks_newest_first(events: Sequence[DiscoveredEvent], min_share: float = 0.8
     return sum(a > b for a, b in pairs) / len(pairs) >= min_share
 
 
+def first_known(events: Iterable[DiscoveredEvent], known_ids: frozenset[int]) -> int | None:
+    """The first event id that is already known, if any.
+
+    Results are newest-created first, so once a page holds an id we have seen
+    before, everything after it was created earlier and is already known too.
+    This is the stop rule for incremental scans (the upcoming-events watchlist).
+    """
+    for ev in events:
+        if ev.tournament_id in known_ids:
+            return ev.tournament_id
+    return None
+
+
 def should_stop(events: Sequence[DiscoveredEvent], since: datetime, stop_after_old: int) -> bool:
     """True once the last ``stop_after_old`` results are all dated before ``since``."""
     if len(events) < stop_after_old:
@@ -194,8 +207,13 @@ def discover(
     stop_after_old: int = 40,
     page_wait_seconds: float = 2.5,
     headed: bool = True,
+    known_ids: frozenset[int] = frozenset(),
 ) -> DiscoveryResult:
-    """Page through Melee's search until past ``since``; return qualifying events."""
+    """Page through Melee's search until past ``since``; return qualifying events.
+
+    ``known_ids``: stop as soon as a page holds one of these ids (incremental
+    scans; see ``first_known``). The date rule still applies as well.
+    """
     from playwright.sync_api import TimeoutError as PlaywrightTimeout
     from playwright.sync_api import sync_playwright
 
@@ -252,6 +270,10 @@ def discover(
                 stop_reason = f"empty page {page_no}"
                 break
             events.extend(batch)
+            seen_before = first_known(batch, known_ids)
+            if seen_before is not None:
+                stop_reason = f"reached already-known event {seen_before} after {page_no} pages"
+                break
             if page_no == 3:  # 24 results: enough to judge the ordering
                 require(looks_newest_first(events), SOURCE,
                         "search results aren't newest-first (location sort applied?)",

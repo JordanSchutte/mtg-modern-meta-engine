@@ -31,6 +31,8 @@ Two traps found on live runs:
 
 - **Location sorting.** If Melee knows a location (browser geolocation or a saved `flattsware.location`), results are sorted by distance across all dates. Discovery denies geolocation and clears the saved value, and fails loudly if IDs aren't mostly descending.
 - **Creation order.** Results are ordered by when the event was **created**, not when it was played, so paging stops after a long run of consecutive results dated before the cutoff rather than at the first old one.
+- **Events created months ahead.** Regional Championships and Spotlights are created long before they run (the September Baltimore RC has a March-era id), so a past-events scan with a short lookback stops before reaching them, and enrollment isn't visible until close to the event. The watcher therefore also scans `Modern + Upcoming` each run, stopping at the first id already seen, and keeps every upcoming event on a watchlist in bronze. Once an event's start is two days past it is settled: round 1's match count gives a player estimate after two requests; too small is recorded and never revisited, otherwise the event is fetched in full.
+- **Unlisted events.** Some organizer events (the Pro Tour and its PTQs) don't appear in Find Events at all; `config/extra_melee_events.json` lists their ids by hand.
 
 ## Melee event fetch
 

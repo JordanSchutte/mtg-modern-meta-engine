@@ -65,7 +65,7 @@ pytest
 
 ## Unattended runs
 
-`.github/workflows/melee-watcher.yml` is the Melee watcher from the architecture doc as a scheduled GitHub Actions job: it pulls bronze down from a Cloudflare R2 bucket, discovers Modern events from the last 14 days (headless), fetches the ones that are at least two days old (so late decklist uploads and corrections have landed), and copies bronze back. It runs twice a day, around noon and midnight US Eastern. The upload is a copy, never a sync, so nothing in R2 is ever deleted by a run.
+`.github/workflows/melee-watcher.yml` is the Melee watcher from the architecture doc as a scheduled GitHub Actions job: it pulls bronze down from a Cloudflare R2 bucket, discovers Modern events created in the last 14 days (headless), adds upcoming Modern events to a watchlist, fetches events that are at least two days old (so late decklist uploads and corrections have landed), and copies bronze back. The watchlist exists because Melee's search is ordered by creation date and large events are created months ahead; see [docs/architecture.md](docs/architecture.md#melee-discovery). It runs twice a day, around noon and midnight US Eastern. The upload is a copy, never a sync, so nothing in R2 is ever deleted by a run.
 
 Secrets it needs: `MELEE_CONTACT_EMAIL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`. Run it by hand with a `since` date to backfill.
 
@@ -77,6 +77,7 @@ src/mtgmeta/
   sources/melee/
     query.py                builds Find Events search URLs
     discovery.py            Find Events search via the page's SignalR hub (Playwright)
+    watchlist.py            upcoming events, settled (fetched or marked too small) once over
     http.py                 throttled, backoff-aware HTTP client
     parse.py                tournament page, round matches, decklist parsers
     fetch.py                fetches one event into bronze (idempotent)

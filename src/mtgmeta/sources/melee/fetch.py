@@ -50,6 +50,20 @@ log = logging.getLogger(__name__)
 PAGE_SIZE = 100
 
 
+class TooSmallError(Exception):
+    """The event has fewer players than asked for; nothing was written.
+
+    Decided from round 1's match count (players ~ 2 x matches, byes aside)
+    after two requests, so settling a small watchlist event is cheap.
+    """
+
+    def __init__(self, tournament_id: int, players_estimate: int, min_players: int) -> None:
+        self.tournament_id = tournament_id
+        self.players_estimate = players_estimate
+        super().__init__(f"event {tournament_id}: about {players_estimate} players, "
+                         f"below the {min_players} minimum")
+
+
 def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
 
@@ -72,6 +86,7 @@ def fetch_event(
     data_root: Path,
     force: bool = False,
     fetch_decklists: bool = True,
+    min_players: int = 0,
 ) -> dict:
     root = bronze_root(data_root)
     event_root = root / "events" / str(tournament_id)
@@ -96,6 +111,7 @@ def fetch_event(
 
         decklist_ids: set[str] = set()
         rounds_summary = []
+        players_estimate: int | None = None
         for rnd in meta.rounds:
             pages: list[dict] = []
             start = 0
@@ -103,6 +119,10 @@ def fetch_event(
                 form = datatables_form(MATCH_COLUMNS, start, PAGE_SIZE)
                 payload = client.post_form_json(f"/Match/GetRoundMatches/{rnd.id}", form, referer)
                 total, data = check_datatables_page(payload)
+                if players_estimate is None:
+                    players_estimate = 2 * total  # round 1: every player is in one match row
+                    if min_players and players_estimate < min_players:
+                        raise TooSmallError(tournament_id, players_estimate, min_players)
                 pages.append(payload)
                 start += PAGE_SIZE
                 if not data or start >= total:
@@ -146,6 +166,7 @@ def fetch_event(
             "fetcher_version": __version__,
             "requests": client.requests_made - requests_before,
             "rounds": rounds_summary,
+            "players_estimate": players_estimate,
             "decklist_ids": sorted(decklist_ids),
             "unusable_decklists": unusable,
             "tournament_html_sha256": _sha256(page),

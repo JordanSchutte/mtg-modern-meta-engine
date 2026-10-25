@@ -1,0 +1,7 @@
+{
+  "_comment": "Melee tournament ids that Find Events does not list (e.g. Wizards-run events) or that discovery missed. Fetched by fetch_melee_event.py --from-discovery alongside discovered events; already-fetched ids are skipped.",
+  "events": [
+    {"tournament_id": 434455, "note": "Pro Tour Magic: The Gathering Marvel Super Heroes, Amsterdam, 2026-07-17 (Modern + draft; 362 players); not listed in Find Events"},
+    {"tournament_id": 443260, "note": "2nd Chance PTQ, PT MSH weekend, 2026-07-19 (Modern; 194 players); not listed in Find Events"}
+  ]
+}

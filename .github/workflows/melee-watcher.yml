@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
     inputs:
       since:
-        description: "Earliest event date to consider (YYYY-MM-DD). Default: 14 days ago."
+        description: "Earliest event date to consider (YYYY-MM-DD). Default: format period start."
         required: false
         type: string
       min_age_days:
@@ -86,8 +86,12 @@ jobs:
 
       - name: Discover recent events
         run: |
+          # Melee's search is creation-ordered and big events are created months
+          # ahead, so a short lookback stops paging before it reaches them. Scan
+          # from the format period start every run (~15-20 min) until the
+          # upcoming-events watchlist replaces this.
           SINCE="${{ inputs.since }}"
-          if [ -z "$SINCE" ]; then SINCE=$(date -u -d '14 days ago' +%F); fi
+          if [ -z "$SINCE" ]; then SINCE="2026-05-18"; fi
           echo "discovering Modern events since $SINCE"
           python scripts/discover_melee.py --headless --since "$SINCE" \
             --min-players "${{ inputs.min_players || '100' }}"

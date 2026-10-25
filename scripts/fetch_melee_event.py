@@ -17,6 +17,7 @@ import json
 import logging
 import sys
 import time
+from pathlib import Path
 from datetime import UTC, datetime, timedelta
 
 from mtgmeta.config import Settings
@@ -30,7 +31,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("tournament_ids", nargs="*", type=int)
     ap.add_argument("--from-discovery", action="store_true",
-                    help="fetch every event in data/discovery/melee_events.json")
+                    help="fetch every event in data/discovery/melee_events.json plus "
+                         "config/extra_melee_events.json")
     ap.add_argument("--force", action="store_true", help="write a new version even if present")
     ap.add_argument("--no-decklists", action="store_true")
     ap.add_argument("--max-events", type=int, default=0,
@@ -58,6 +60,11 @@ def main() -> int:
                              row["tournament_id"], start.date(), args.min_age_days)
                 continue
             ids.append(row["tournament_id"])
+        extra = Path("config") / "extra_melee_events.json"
+        if extra.exists():
+            extra_ids = [e["tournament_id"] for e in json.loads(extra.read_text())["events"]]
+            logging.info("adding %d event(s) from %s", len(extra_ids), extra)
+            ids += extra_ids
     if not ids:
         ap.error("give tournament ids or --from-discovery")
 

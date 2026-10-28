@@ -1,0 +1,1438 @@
+# DRAFT mined from 7557 lists. Rename archetype/variant, merge or split
+# clusters, trim signatures to the cards that define the deck, then save as
+# config/archetypes/modern-2026-05-18.yml (drop the .draft).
+# Keys starting with _ are notes for you and are ignored by the classifier.
+# 58 clusters of >= min size; 210 small clusters listed at the end.
+format: Modern
+period_start: '2026-05-18'
+rules:
+- archetype: Basking Broodscale + Blade of the Bloodchief
+  variant: Basking Broodscale + Blade of the Bloodchief
+  signature:
+  - Basking Broodscale
+  - Blade of the Bloodchief
+  - Ancient Stirrings
+  - Springleaf Drum
+  - Soul-Guide Lantern
+  - Haywire Mite
+  min_signature: 3
+  _mined:
+    cluster: 8
+    lists: 901
+    signature_presence:
+      Basking Broodscale: 100%
+      Blade of the Bloodchief: 100%
+      Ancient Stirrings: 100%
+      Springleaf Drum: 99%
+      Soul-Guide Lantern: 94%
+      Haywire Mite: 99%
+    sample_decklists:
+    - 006c315b-96bf-425b-8b72-b48c004d90e5
+    - 00afd566-e53d-4d05-92be-b4e0010b3ac5
+    - 00cbf583-a58d-430d-8b4f-b4c20152adbc
+- archetype: Cori-Steel Cutter + Lava Dart
+  variant: Cori-Steel Cutter + Lava Dart
+  signature:
+  - Cori-Steel Cutter
+  - Lava Dart
+  - Dragon's Rage Channeler
+  - Monastery Swiftspear
+  - Mutagenic Growth
+  - Expressive Iteration
+  min_signature: 3
+  _mined:
+    cluster: 50
+    lists: 774
+    signature_presence:
+      Cori-Steel Cutter: 100%
+      Lava Dart: 100%
+      Dragon's Rage Channeler: 100%
+      Monastery Swiftspear: 98%
+      Mutagenic Growth: 94%
+      Expressive Iteration: 94%
+    sample_decklists:
+    - 000b6f55-54ed-47b2-b6b6-b4c200443263
+    - 008bad81-069b-46f9-8759-b4de0136ede1
+    - 0097497c-df07-4476-89e9-b4c2011f5594
+- archetype: Goryo's Vengeance + Faithful Mending
+  variant: Goryo's Vengeance + Faithful Mending
+  signature:
+  - Goryo's Vengeance
+  - Faithful Mending
+  - Atraxa, Grand Unifier
+  - Griselbrand
+  - Psychic Frog
+  - Ephemerate
+  min_signature: 3
+  _mined:
+    cluster: 60
+    lists: 498
+    signature_presence:
+      Goryo's Vengeance: 100%
+      Faithful Mending: 99%
+      Atraxa, Grand Unifier: 100%
+      Griselbrand: 97%
+      Psychic Frog: 100%
+      Ephemerate: 99%
+    sample_decklists:
+    - 008d101b-8ffe-4f08-bad6-b4c400e3c563
+    - 008f7443-3a22-4b50-b654-b4b6015a0d83
+    - 0095af93-e389-4b71-990f-b4de017027d5
+- archetype: Ajani, Nacatl Pariah + Guide of Souls
+  variant: Ajani, Nacatl Pariah + Guide of Souls
+  signature:
+  - Ajani, Nacatl Pariah
+  - Guide of Souls
+  - Goblin Bombardment
+  - Ocelot Pride
+  - Voice of Victory
+  - Thraben Charm
+  min_signature: 3
+  _mined:
+    cluster: 30
+    lists: 495
+    signature_presence:
+      Ajani, Nacatl Pariah: 100%
+      Guide of Souls: 100%
+      Goblin Bombardment: 100%
+      Ocelot Pride: 100%
+      Voice of Victory: 96%
+      Thraben Charm: 93%
+    sample_decklists:
+    - 0062fc6b-2227-4dbf-b05f-b48b0171ea32
+    - 00e422b0-b22c-4870-a1db-b4e000979f9b
+    - 01408b7a-0628-4d9c-9d94-b4c3000a9a5c
+- archetype: Pinnacle Emissary + Kappa Cannoneer
+  variant: Pinnacle Emissary + Kappa Cannoneer
+  signature:
+  - Pinnacle Emissary
+  - Kappa Cannoneer
+  - Engineered Explosives
+  - Skateboard
+  - Claws of Gix
+  - Weapons Manufacturing
+  min_signature: 3
+  _mined:
+    cluster: 25
+    lists: 442
+    signature_presence:
+      Pinnacle Emissary: 100%
+      Kappa Cannoneer: 100%
+      Engineered Explosives: 100%
+      Skateboard: 99%
+      Claws of Gix: 98%
+      Weapons Manufacturing: 98%
+    sample_decklists:
+    - 001c6d74-5a32-453a-b494-b46800474412
+    - 0165c9b3-f790-44ec-957e-b45a00fdeca1
+    - 01f03de0-5f7b-4b13-9f62-b4bb004cc131
+- archetype: Overlord of the Balemurk + Flickerwisp
+  variant: Overlord of the Balemurk + Flickerwisp
+  signature:
+  - Overlord of the Balemurk
+  - Flickerwisp
+  - Boggart Trawler
+  - Witch Enchanter
+  - Emperor of Bones
+  - Phelia, Exuberant Shepherd
+  min_signature: 3
+  _mined:
+    cluster: 17
+    lists: 411
+    signature_presence:
+      Overlord of the Balemurk: 100%
+      Flickerwisp: 97%
+      Boggart Trawler: 97%
+      Witch Enchanter: 99%
+      Emperor of Bones: 94%
+      Phelia, Exuberant Shepherd: 100%
+    sample_decklists:
+    - 00a5eddd-e3f5-4536-9b4b-b4b400f0fbc5
+    - 00de1ea7-6c1a-472f-a895-b4c200042aeb
+    - 01066d31-991d-4c9a-bd46-b4de012ba15e
+- archetype: Karn, the Great Creator + Expedition Map
+  variant: Karn, the Great Creator + Expedition Map
+  signature:
+  - Karn, the Great Creator
+  - Expedition Map
+  - Ugin, Eye of the Storms
+  - Devourer of Destiny
+  - Dismember
+  - Kozilek's Command
+  min_signature: 3
+  _mined:
+    cluster: 63
+    lists: 299
+    signature_presence:
+      Karn, the Great Creator: 100%
+      Expedition Map: 100%
+      Ugin, Eye of the Storms: 100%
+      Devourer of Destiny: 100%
+      Dismember: 95%
+      Kozilek's Command: 100%
+    sample_decklists:
+    - 00dd1472-d2b9-4879-87a7-b46700d57ac8
+    - 019d30f3-af05-44e9-b534-b4870184a21c
+    - 02764d6d-9f2f-45b7-a6ce-b4c2016571e7
+- archetype: Orim's Chant + Consult the Star Charts
+  variant: Orim's Chant + Consult the Star Charts
+  signature:
+  - Orim's Chant
+  - Consult the Star Charts
+  - Narset, Parter of Veils
+  - Isochron Scepter
+  - Day's Undoing
+  - Supreme Verdict
+  min_signature: 3
+  _mined:
+    cluster: 62
+    lists: 288
+    signature_presence:
+      Orim's Chant: 100%
+      Consult the Star Charts: 98%
+      Narset, Parter of Veils: 95%
+      Isochron Scepter: 95%
+      Day's Undoing: 94%
+      Supreme Verdict: 85%
+    sample_decklists:
+    - 004910c1-d241-43c2-8c48-b4e4011fe91d
+    - 018e4cf7-54d5-4e73-bc93-b4de01025bc0
+    - 01fd1e4a-d9da-4a37-9229-b4dd0152a000
+- archetype: Scion of Draco + Leyline Binding
+  variant: Scion of Draco + Leyline Binding
+  signature:
+  - Scion of Draco
+  - Leyline Binding
+  - Leyline of the Guildpact
+  - Territorial Kavu
+  - Stubborn Denial
+  - Ragavan, Nimble Pilferer
+  min_signature: 3
+  _mined:
+    cluster: 16
+    lists: 273
+    signature_presence:
+      Scion of Draco: 100%
+      Leyline Binding: 100%
+      Leyline of the Guildpact: 100%
+      Territorial Kavu: 97%
+      Stubborn Denial: 93%
+      Ragavan, Nimble Pilferer: 99%
+    sample_decklists:
+    - 0005d651-9ca9-4995-8056-b45b00d6f829
+    - 00858cb9-422a-4a02-85c0-b4db0148286e
+    - 011a49ed-1057-4155-b1b9-b4de007812f2
+- archetype: Badgermole Cub + Nature's Rhythm
+  variant: Badgermole Cub + Nature's Rhythm
+  signature:
+  - Badgermole Cub
+  - Nature's Rhythm
+  - Devoted Druid
+  - Vizier of Remedies
+  - Leyline of Abundance
+  - Birds of Paradise
+  min_signature: 3
+  _mined:
+    cluster: 41
+    lists: 256
+    signature_presence:
+      Badgermole Cub: 100%
+      Nature's Rhythm: 100%
+      Devoted Druid: 100%
+      Vizier of Remedies: 100%
+      Leyline of Abundance: 99%
+      Birds of Paradise: 99%
+    sample_decklists:
+    - 00d49d63-1612-42dc-87a8-b4df0151e1e5
+    - 022ad25b-ac17-4ecc-9ce9-b4de011ee4d8
+    - 028bea18-36ba-47ed-896e-b4c201649ecd
+- archetype: Amulet of Vigor + Primeval Titan
+  variant: Amulet of Vigor + Primeval Titan
+  signature:
+  - Amulet of Vigor
+  - Primeval Titan
+  - Arboreal Grazer
+  - Spelunking
+  - Cultivator Colossus
+  - Scapeshift
+  min_signature: 3
+  _mined:
+    cluster: 103
+    lists: 231
+    signature_presence:
+      Amulet of Vigor: 100%
+      Primeval Titan: 100%
+      Arboreal Grazer: 100%
+      Spelunking: 99%
+      Cultivator Colossus: 99%
+      Scapeshift: 97%
+    sample_decklists:
+    - 00494180-5e4f-48c2-8cbb-b4bb0035778f
+    - 014db76d-c4cc-40bb-ac8e-b4d3000a4c75
+    - 016d4408-6952-45dd-8890-b4dd00c4cd9f
+- archetype: Ruby Medallion + Manamorphose
+  variant: Ruby Medallion + Manamorphose
+  signature:
+  - Ruby Medallion
+  - Manamorphose
+  - Wish
+  - Ral, Monsoon Mage
+  - Reckless Impulse
+  - Pyretic Ritual
+  min_signature: 3
+  _mined:
+    cluster: 38
+    lists: 223
+    signature_presence:
+      Ruby Medallion: 100%
+      Manamorphose: 100%
+      Wish: 100%
+      Ral, Monsoon Mage: 100%
+      Reckless Impulse: 100%
+      Pyretic Ritual: 100%
+    sample_decklists:
+    - 017e3d54-1d7f-4e9d-a381-b4de00f0b148
+    - 01af6c9b-a665-45c2-bd2c-b4de0053b54e
+    - 052bc157-283e-45f6-88ed-b4c200c0c5ed
+- archetype: Sheoldred's Edict + Kaito, Bane of Nightmares
+  variant: Sheoldred's Edict + Kaito, Bane of Nightmares
+  signature:
+  - Sheoldred's Edict
+  - Kaito, Bane of Nightmares
+  - Murktide Regent
+  - Tamiyo, Inquisitive Student
+  - Orcish Bowmasters
+  - Counterspell
+  min_signature: 3
+  _mined:
+    cluster: 129
+    lists: 181
+    signature_presence:
+      Sheoldred's Edict: 96%
+      Kaito, Bane of Nightmares: 87%
+      Murktide Regent: 81%
+      Tamiyo, Inquisitive Student: 92%
+      Orcish Bowmasters: 96%
+      Counterspell: 100%
+    sample_decklists:
+    - 00d427bd-711e-4e87-976c-b4de0001728e
+    - 00f11682-030c-4fd0-abd4-b4de0067cc22
+    - 04740c73-24a1-46a1-a0f0-b4de012e7a8a
+- archetype: Fight Rigging + Fanatic of Rhonas
+  variant: Fight Rigging + Fanatic of Rhonas
+  signature:
+  - Fight Rigging
+  - Fanatic of Rhonas
+  - Slumbering Trudge
+  - Ulamog, the Ceaseless Hunger
+  - Drowner of Truth
+  - Disciple of Freyalise
+  min_signature: 3
+  _mined:
+    cluster: 44
+    lists: 179
+    signature_presence:
+      Fight Rigging: 100%
+      Fanatic of Rhonas: 100%
+      Slumbering Trudge: 100%
+      Ulamog, the Ceaseless Hunger: 91%
+      Drowner of Truth: 77%
+      Disciple of Freyalise: 100%
+    sample_decklists:
+    - 00bece07-ec0e-4519-ad64-b4bb01174c86
+    - 01039c99-6767-4a9d-bf64-b4dc01012105
+    - 016eabb7-4641-45ef-b0f3-b48700eed035
+- archetype: Living End + Generous Ent
+  variant: Living End + Generous Ent
+  signature:
+  - Living End
+  - Generous Ent
+  - Shardless Agent
+  - Wistfulness
+  - Violent Outburst
+  - Oliphaunt
+  min_signature: 3
+  _mined:
+    cluster: 4
+    lists: 167
+    signature_presence:
+      Living End: 100%
+      Generous Ent: 100%
+      Shardless Agent: 100%
+      Wistfulness: 99%
+      Violent Outburst: 86%
+      Oliphaunt: 83%
+    sample_decklists:
+    - 01de37c8-d199-4606-8a9e-b4c400d1fae3
+    - 01ec0735-0337-4034-8e0e-b4b400e94621
+    - 01fb859e-45e1-4e8c-a2de-b4c20133f722
+- archetype: Price of Freedom + Cleansing Wildfire
+  variant: Price of Freedom + Cleansing Wildfire
+  signature:
+  - Price of Freedom
+  - Cleansing Wildfire
+  - Path to Exile
+  - Erode
+  - Avengers Disassembled
+  - Wrath of the Skies
+  min_signature: 3
+  _mined:
+    cluster: 23
+    lists: 161
+    signature_presence:
+      Price of Freedom: 100%
+      Cleansing Wildfire: 100%
+      Path to Exile: 100%
+      Erode: 99%
+      Avengers Disassembled: 94%
+      Wrath of the Skies: 100%
+    sample_decklists:
+    - 01ccef5c-3b33-4704-83ef-b4de004296ef
+    - 031c8fb3-e722-4bb9-bea3-b4d60056b3d8
+    - 0405f6b6-3a88-4f2d-97b5-b48800376bad
+- archetype: Xenagos, God of Revels + Ghalta, Stampede Tyrant
+  variant: Xenagos, God of Revels + Ghalta, Stampede Tyrant
+  signature:
+  - Xenagos, God of Revels
+  - Ghalta, Stampede Tyrant
+  - Eldritch Evolution
+  - Allosaurus Rider
+  - Neoform
+  - Pact of Negation
+  min_signature: 3
+  _mined:
+    cluster: 105
+    lists: 146
+    signature_presence:
+      Xenagos, God of Revels: 100%
+      Ghalta, Stampede Tyrant: 100%
+      Eldritch Evolution: 100%
+      Allosaurus Rider: 100%
+      Neoform: 100%
+      Pact of Negation: 100%
+    sample_decklists:
+    - 007f6280-4c46-48c4-b5f0-b4c001477a40
+    - 0109e288-0a69-473d-af52-b4c2012fa2d3
+    - 01220e5c-9d4e-46c4-9034-b4b40172ce75
+- archetype: Unearth + Archon of Cruelty
+  variant: Unearth + Archon of Cruelty
+  signature:
+  - Unearth
+  - Archon of Cruelty
+  - Abhorrent Oculus
+  - Persist
+  - Faithless Looting
+  - Thought Scour
+  min_signature: 3
+  _mined:
+    cluster: 21
+    lists: 88
+    signature_presence:
+      Unearth: 100%
+      Archon of Cruelty: 100%
+      Abhorrent Oculus: 100%
+      Persist: 100%
+      Faithless Looting: 97%
+      Thought Scour: 86%
+    sample_decklists:
+    - 01b3d3a6-92a7-43be-8249-b4c400dea925
+    - 050f2a85-79b5-441b-b00d-b4c00165201a
+    - 09ad3442-7d6c-41eb-9222-b4b4017d7e79
+- archetype: Fable of the Mirror-Breaker + Phelia, Exuberant Shepherd
+  variant: Fable of the Mirror-Breaker + Phelia, Exuberant Shepherd
+  signature:
+  - Fable of the Mirror-Breaker
+  - Phelia, Exuberant Shepherd
+  - Wrath of the Skies
+  - Galvanic Discharge
+  - March of Otherworldly Light
+  - Ragavan, Nimble Pilferer
+  min_signature: 3
+  _mined:
+    cluster: 102
+    lists: 71
+    signature_presence:
+      Fable of the Mirror-Breaker: 90%
+      Phelia, Exuberant Shepherd: 100%
+      Wrath of the Skies: 99%
+      Galvanic Discharge: 100%
+      March of Otherworldly Light: 89%
+      Ragavan, Nimble Pilferer: 97%
+    sample_decklists:
+    - 00831267-b7be-4952-9d51-b4de01231d06
+    - 02a748ac-b81e-49bd-bb5a-b4e000661303
+    - 044eaa6b-3108-4a01-9bfb-b4de01628e86
+- archetype: Moonshadow + Detective's Phoenix
+  variant: Moonshadow + Detective's Phoenix
+  signature:
+  - Moonshadow
+  - Detective's Phoenix
+  - Nethergoyf
+  - Fear of Missing Out
+  - Dark Matter Manipulator
+  - Troll of Khazad-dûm
+  min_signature: 3
+  _mined:
+    cluster: 18
+    lists: 71
+    signature_presence:
+      Moonshadow: 100%
+      Detective's Phoenix: 100%
+      Nethergoyf: 100%
+      Fear of Missing Out: 94%
+      Dark Matter Manipulator: 94%
+      Troll of Khazad-dûm: 77%
+    sample_decklists:
+    - 00aaed1c-d6b9-4cbf-b10b-b4da008a725e
+    - 04fa952e-40e9-4b5b-9504-b4e0006a8fdc
+    - 06130863-8556-4667-913e-b4df00ff9e3e
+- archetype: Yawgmoth, Thran Physician + Young Wolf
+  variant: Yawgmoth, Thran Physician + Young Wolf
+  signature:
+  - Yawgmoth, Thran Physician
+  - Young Wolf
+  - Grist, the Hunger Tide
+  - Dredger's Insight
+  - Agatha's Soul Cauldron
+  - Strangleroot Geist
+  min_signature: 3
+  _mined:
+    cluster: 52
+    lists: 69
+    signature_presence:
+      Yawgmoth, Thran Physician: 100%
+      Young Wolf: 100%
+      Grist, the Hunger Tide: 100%
+      Dredger's Insight: 99%
+      Agatha's Soul Cauldron: 100%
+      Strangleroot Geist: 83%
+    sample_decklists:
+    - 00c1f1a7-c5bc-4409-98e7-b4c2013ae0f7
+    - 0a536668-e9d4-4c6a-899d-b45b00d7f3d7
+    - 0d4a9adc-39a7-4ba4-8098-b4bb016c98e7
+- archetype: Tameshi, Reality Architect + Suppression Ray
+  variant: Tameshi, Reality Architect + Suppression Ray
+  signature:
+  - Tameshi, Reality Architect
+  - Suppression Ray
+  - Sea Gate Restoration
+  - Whir of Invention
+  - Goblin Charbelcher
+  - Jwari Disruption
+  min_signature: 3
+  _mined:
+    cluster: 93
+    lists: 69
+    signature_presence:
+      Tameshi, Reality Architect: 100%
+      Suppression Ray: 100%
+      Sea Gate Restoration: 100%
+      Whir of Invention: 100%
+      Goblin Charbelcher: 100%
+      Jwari Disruption: 100%
+    sample_decklists:
+    - 048aca21-cbf8-4e40-81d5-b4bd00f463a4
+    - 06328815-e90d-4245-95e3-b4d4014582a5
+    - 0641f678-8b32-416c-9649-b4880115af87
+- archetype: Burning Inquiry + Faithless Looting
+  variant: Burning Inquiry + Faithless Looting
+  signature:
+  - Burning Inquiry
+  - Faithless Looting
+  - Hollow One
+  - Detective's Phoenix
+  - Marauding Mako
+  - Street Wraith
+  min_signature: 3
+  _mined:
+    cluster: 47
+    lists: 58
+    signature_presence:
+      Burning Inquiry: 100%
+      Faithless Looting: 100%
+      Hollow One: 100%
+      Detective's Phoenix: 98%
+      Marauding Mako: 97%
+      Street Wraith: 100%
+    sample_decklists:
+    - 095410bb-bb33-41cc-8a7d-b4bc004a0e5e
+    - 09f62df5-6807-453b-97d4-b4b40167bbaf
+    - 0d244766-2dac-460f-8fe7-b4e0005cbee0
+- archetype: Utopia Sprawl + World Breaker
+  variant: Utopia Sprawl + World Breaker
+  signature:
+  - Utopia Sprawl
+  - World Breaker
+  - Icetill Explorer
+  - Talisman of Impulse
+  - Ugin, Eye of the Storms
+  - Sire of Seven Deaths
+  min_signature: 3
+  _mined:
+    cluster: 14
+    lists: 57
+    signature_presence:
+      Utopia Sprawl: 100%
+      World Breaker: 82%
+      Icetill Explorer: 79%
+      Talisman of Impulse: 77%
+      Ugin, Eye of the Storms: 93%
+      Sire of Seven Deaths: 95%
+    sample_decklists:
+    - 0388622b-46b7-484d-8e8e-b4de000383ac
+    - 04958361-e7a3-4804-b11e-b4bc005229b0
+    - 0739e3af-b62e-452b-ad80-b4db014817b8
+- archetype: Birthing Ritual + Ice-Fang Coatl
+  variant: Birthing Ritual + Ice-Fang Coatl
+  signature:
+  - Birthing Ritual
+  - Ice-Fang Coatl
+  - Flare of Denial
+  - Abhorrent Oculus
+  - Harbinger of the Seas
+  - Coiling Oracle
+  min_signature: 3
+  _mined:
+    cluster: 33
+    lists: 48
+    signature_presence:
+      Birthing Ritual: 100%
+      Ice-Fang Coatl: 100%
+      Flare of Denial: 100%
+      Abhorrent Oculus: 100%
+      Harbinger of the Seas: 94%
+      Coiling Oracle: 92%
+    sample_decklists:
+    - 01cc8f21-fd97-42a6-8300-b4c2011989b7
+    - 05b70cfd-1709-41e9-ac6a-b4df00603f3b
+    - 08b2bdb5-7a2d-47eb-b4d0-b4c2013391d2
+- archetype: Ketramose, the New Dawn + Relic of Progenitus
+  variant: Ketramose, the New Dawn + Relic of Progenitus
+  signature:
+  - Ketramose, the New Dawn
+  - Relic of Progenitus
+  - Psychic Frog
+  - Spell Snare
+  - Prismatic Ending
+  - Ephemerate
+  min_signature: 3
+  _mined:
+    cluster: 11
+    lists: 46
+    signature_presence:
+      Ketramose, the New Dawn: 93%
+      Relic of Progenitus: 87%
+      Psychic Frog: 98%
+      Spell Snare: 91%
+      Prismatic Ending: 100%
+      Ephemerate: 91%
+    sample_decklists:
+    - 034e3bbf-4349-477d-a110-b4b400d30eb7
+    - 0476b377-10a0-4755-b75f-b4bc0039b6f1
+    - 04b9ae33-5a0a-475d-b72b-b4e0006bd1c6
+- archetype: Necrodominance + Soul Spike
+  variant: Necrodominance + Soul Spike
+  signature:
+  - Necrodominance
+  - Soul Spike
+  - Sheoldred, the Apocalypse
+  - Fell the Profane
+  - March of Wretched Sorrow
+  - Force of Despair
+  min_signature: 3
+  _mined:
+    cluster: 205
+    lists: 46
+    signature_presence:
+      Necrodominance: 100%
+      Soul Spike: 100%
+      Sheoldred, the Apocalypse: 100%
+      Fell the Profane: 98%
+      March of Wretched Sorrow: 98%
+      Force of Despair: 96%
+    sample_decklists:
+    - 0a6b2ab6-5deb-422e-b866-b4de0156954e
+    - 1238ce4d-2394-48a4-b760-b4de004764f8
+    - 12fbbb51-00ea-444e-8ed2-b4ba0069222a
+- archetype: Birthing Ritual + Chord of Calling
+  variant: Birthing Ritual + Chord of Calling
+  signature:
+  - Birthing Ritual
+  - Chord of Calling
+  - Samwise Gamgee
+  - Gilded Goose
+  - Cauldron Familiar
+  - Young Wolf
+  min_signature: 3
+  _mined:
+    cluster: 24
+    lists: 44
+    signature_presence:
+      Birthing Ritual: 100%
+      Chord of Calling: 100%
+      Samwise Gamgee: 100%
+      Gilded Goose: 100%
+      Cauldron Familiar: 100%
+      Young Wolf: 98%
+    sample_decklists:
+    - 0d761825-a5e5-497e-acc1-b4b300ada31f
+    - 0f6e71fb-c22f-453f-b2e4-b48c0057ae90
+    - 1258459c-f35c-4d20-8e62-b4c1010022b1
+- archetype: Cling to Dust + Snapcaster Mage
+  variant: Cling to Dust + Snapcaster Mage
+  signature:
+  - Cling to Dust
+  - Snapcaster Mage
+  - Wan Shi Tong, Librarian
+  - Sheoldred's Edict
+  - Consult the Star Charts
+  - Counterspell
+  min_signature: 3
+  _mined:
+    cluster: 128
+    lists: 43
+    signature_presence:
+      Cling to Dust: 100%
+      Snapcaster Mage: 95%
+      Wan Shi Tong, Librarian: 86%
+      Sheoldred's Edict: 100%
+      Consult the Star Charts: 93%
+      Counterspell: 100%
+    sample_decklists:
+    - 0b5712ce-35f3-4d2c-af1e-b4dd016b3854
+    - 11fca44e-dd9b-4d5b-955e-b4de0173609e
+    - 13a7429f-8572-4e77-b754-b4de00b1e815
+- archetype: Mox Amber + Aether Spellbomb
+  variant: Mox Amber + Aether Spellbomb
+  signature:
+  - Mox Amber
+  - Aether Spellbomb
+  - Tamiyo, Inquisitive Student
+  - Emry, Lurker of the Loch
+  - Metallic Rebuke
+  - Mox Opal
+  min_signature: 3
+  _mined:
+    cluster: 2
+    lists: 43
+    signature_presence:
+      Mox Amber: 100%
+      Aether Spellbomb: 93%
+      Tamiyo, Inquisitive Student: 98%
+      Emry, Lurker of the Loch: 100%
+      Metallic Rebuke: 91%
+      Mox Opal: 100%
+    sample_decklists:
+    - 0c444f50-32d0-4255-a7a9-b4c20155f4e0
+    - 10329047-5ed3-4e46-898c-b4c200bee351
+    - 125072cc-23ea-4f88-96e8-b4bc0032ec49
+- archetype: Archive Trap + Hedron Crab
+  variant: Archive Trap + Hedron Crab
+  signature:
+  - Archive Trap
+  - Hedron Crab
+  - Ruin Crab
+  - Surgical Extraction
+  - Fractured Sanity
+  - Visions of Beyond
+  min_signature: 3
+  _mined:
+    cluster: 29
+    lists: 42
+    signature_presence:
+      Archive Trap: 100%
+      Hedron Crab: 100%
+      Ruin Crab: 100%
+      Surgical Extraction: 100%
+      Fractured Sanity: 98%
+      Visions of Beyond: 95%
+    sample_decklists:
+    - 064a9024-6127-4f3b-affd-b4de016e5a82
+    - 06baa6cb-3732-418f-8cb1-b493018a6868
+    - 073751a3-cb17-4d46-8c79-b4c2008b2a06
+- archetype: Lava Spike + Skewer the Critics
+  variant: Lava Spike + Skewer the Critics
+  signature:
+  - Lava Spike
+  - Skewer the Critics
+  - Boltwave
+  - Goblin Guide
+  - Searing Blaze
+  - Eidolon of the Great Revel
+  min_signature: 3
+  _mined:
+    cluster: 39
+    lists: 40
+    signature_presence:
+      Lava Spike: 100%
+      Skewer the Critics: 98%
+      Boltwave: 95%
+      Goblin Guide: 90%
+      Searing Blaze: 88%
+      Eidolon of the Great Revel: 78%
+    sample_decklists:
+    - 025af82c-9b17-4650-8368-b4cf00f26ab2
+    - 031d91e4-3ec4-4543-92cc-b4de00f40a98
+    - 0d1e4077-1c3d-4259-a9a2-b4b400515fd1
+- archetype: Sewer-veillance Cam + Grinding Station
+  variant: Sewer-veillance Cam + Grinding Station
+  signature:
+  - Sewer-veillance Cam
+  - Grinding Station
+  - Mox Amber
+  - Loki, God of Mischief
+  - Aether Spellbomb
+  - Oswald Fiddlebender
+  min_signature: 3
+  _mined:
+    cluster: 19
+    lists: 40
+    signature_presence:
+      Sewer-veillance Cam: 100%
+      Grinding Station: 100%
+      Mox Amber: 98%
+      Loki, God of Mischief: 92%
+      Aether Spellbomb: 90%
+      Oswald Fiddlebender: 78%
+    sample_decklists:
+    - 04770650-2129-4c16-8839-b4ba0024db84
+    - 0d9de2ea-fc2c-42a9-b5a1-b4c200398cad
+    - 104442ec-7f0d-4f3f-98b9-b4b4004ab189
+- archetype: Starfield Shepherd + White Orchid Phantom
+  variant: Starfield Shepherd + White Orchid Phantom
+  signature:
+  - Starfield Shepherd
+  - White Orchid Phantom
+  - Ocelot Pride
+  - Guide of Souls
+  - Witch Enchanter
+  - Phelia, Exuberant Shepherd
+  min_signature: 3
+  _mined:
+    cluster: 0
+    lists: 34
+    signature_presence:
+      Starfield Shepherd: 85%
+      White Orchid Phantom: 76%
+      Ocelot Pride: 100%
+      Guide of Souls: 100%
+      Witch Enchanter: 91%
+      Phelia, Exuberant Shepherd: 94%
+    sample_decklists:
+    - 01a73ec3-b188-4a3e-9f64-b45b002b2cc0
+    - 08437ce6-960d-45f2-83f5-b4c3015a6610
+    - 0c21b246-5c68-486a-aedd-b4bc0060ff6e
+- archetype: Birthing Ritual + Omnath, Locus of Creation
+  variant: Birthing Ritual + Omnath, Locus of Creation
+  signature:
+  - Birthing Ritual
+  - Omnath, Locus of Creation
+  - Elesh Norn, Mother of Machines
+  - Shardless Agent
+  - Leyline Binding
+  - Subtlety
+  min_signature: 3
+  _mined:
+    cluster: 36
+    lists: 32
+    signature_presence:
+      Birthing Ritual: 100%
+      Omnath, Locus of Creation: 100%
+      Elesh Norn, Mother of Machines: 84%
+      Shardless Agent: 100%
+      Leyline Binding: 100%
+      Subtlety: 94%
+    sample_decklists:
+    - 053c28c2-dc09-4954-861b-b4de00038315
+    - 05938a5f-f766-498d-bdc8-b4c3001fc3e0
+    - 0a6065e3-fd50-4672-9822-b4c200475d80
+- archetype: Cosmogoyf + Spoils of the Vault
+  variant: Cosmogoyf + Spoils of the Vault
+  signature:
+  - Cosmogoyf
+  - Spoils of the Vault
+  - Serum Powder
+  - Plunge into Darkness
+  - Thud
+  - Chancellor of the Dross
+  min_signature: 3
+  _mined:
+    cluster: 120
+    lists: 31
+    signature_presence:
+      Cosmogoyf: 100%
+      Spoils of the Vault: 100%
+      Serum Powder: 100%
+      Plunge into Darkness: 100%
+      Thud: 100%
+      Chancellor of the Dross: 81%
+    sample_decklists:
+    - 05d41e30-6c1c-454d-9470-b48700bf469b
+    - 0e2a8932-984d-41d2-b507-b4e0007353f8
+    - 11fb3145-7aaf-42ac-acb2-b4c400db569c
+- archetype: Murktide Regent + Unholy Heat
+  variant: Murktide Regent + Unholy Heat
+  signature:
+  - Murktide Regent
+  - Unholy Heat
+  - Counterspell
+  - Expressive Iteration
+  - Spell Snare
+  - Dragon's Rage Channeler
+  min_signature: 3
+  _mined:
+    cluster: 54
+    lists: 26
+    signature_presence:
+      Murktide Regent: 100%
+      Unholy Heat: 100%
+      Counterspell: 92%
+      Expressive Iteration: 85%
+      Spell Snare: 96%
+      Dragon's Rage Channeler: 85%
+    sample_decklists:
+    - 0095049b-4695-4482-be69-b4e0006861c9
+    - 00d0508b-d7df-413b-b6aa-b4dc003936d1
+    - 02e20aa4-9a8f-46cc-b47f-b4df014d6b9e
+- archetype: Lord of Atlantis + Tide Shaper
+  variant: Lord of Atlantis + Tide Shaper
+  signature:
+  - Lord of Atlantis
+  - Tide Shaper
+  - Vodalian Hexcatcher
+  - Master of the Pearl Trident
+  - Harbinger of the Seas
+  - Flare of Denial
+  min_signature: 3
+  _mined:
+    cluster: 69
+    lists: 24
+    signature_presence:
+      Lord of Atlantis: 100%
+      Tide Shaper: 100%
+      Vodalian Hexcatcher: 96%
+      Master of the Pearl Trident: 96%
+      Harbinger of the Seas: 92%
+      Flare of Denial: 83%
+    sample_decklists:
+    - 08eb932a-16d8-4a43-a5c7-b4de00ce811b
+    - 11a33bd4-b7d8-4e0c-8f84-b4bc0033bf16
+    - 20b33242-69bd-4160-9352-b4db00e22aff
+- archetype: Death's Shadow + Moonshadow
+  variant: Death's Shadow + Moonshadow
+  signature:
+  - Death's Shadow
+  - Moonshadow
+  - Street Wraith
+  - Mishra's Bauble
+  - Thoughtseize
+  min_signature: 3
+  _mined:
+    cluster: 22
+    lists: 18
+    signature_presence:
+      Death's Shadow: 100%
+      Moonshadow: 89%
+      Street Wraith: 100%
+      Mishra's Bauble: 100%
+      Thoughtseize: 100%
+    sample_decklists:
+    - 03269907-769a-4e4d-a4bd-b4e00106eafe
+    - 08558d3c-a44f-4498-a043-b4bd017a333a
+    - 0bae9302-5410-447b-ab36-b4bb01237268
+- archetype: Indomitable Creativity + Archon of Cruelty
+  variant: Indomitable Creativity + Archon of Cruelty
+  signature:
+  - Indomitable Creativity
+  - Archon of Cruelty
+  - Pawpatch Formation
+  - Wrenn and Six
+  - Fable of the Mirror-Breaker
+  - Teferi, Time Raveler
+  min_signature: 3
+  _mined:
+    cluster: 98
+    lists: 18
+    signature_presence:
+      Indomitable Creativity: 100%
+      Archon of Cruelty: 100%
+      Pawpatch Formation: 100%
+      Wrenn and Six: 100%
+      Fable of the Mirror-Breaker: 94%
+      Teferi, Time Raveler: 94%
+    sample_decklists:
+    - 08dc94d0-bf10-4406-bc15-b4de012c695d
+    - 0cc796a2-51cd-4f17-a8f4-b4de0183e475
+    - 1b4d0ded-a728-4208-87e2-b4bc0020d033
+- archetype: Colossus Hammer + Puresteel Paladin
+  variant: Colossus Hammer + Puresteel Paladin
+  signature:
+  - Colossus Hammer
+  - Puresteel Paladin
+  - Ornithopter
+  - Stoneforge Mystic
+  - Leyline Axe
+  - Shadowspear
+  min_signature: 3
+  _mined:
+    cluster: 112
+    lists: 17
+    signature_presence:
+      Colossus Hammer: 100%
+      Puresteel Paladin: 100%
+      Ornithopter: 100%
+      Stoneforge Mystic: 94%
+      Leyline Axe: 88%
+      Shadowspear: 100%
+    sample_decklists:
+    - 0582403e-0086-46c3-a144-b4bb0151a2e8
+    - 101a8c60-120a-4af0-9d4a-b4de00c184ee
+    - 11739808-a832-4603-9430-b4de012fea33
+- archetype: Eldrazi Linebreaker + It That Heralds the End
+  variant: Eldrazi Linebreaker + It That Heralds the End
+  signature:
+  - Eldrazi Linebreaker
+  - It That Heralds the End
+  - Wastescape Battlemage
+  - Thought-Knot Seer
+  - Glaring Fleshraker
+  - Sire of Seven Deaths
+  min_signature: 3
+  _mined:
+    cluster: 59
+    lists: 17
+    signature_presence:
+      Eldrazi Linebreaker: 100%
+      It That Heralds the End: 94%
+      Wastescape Battlemage: 82%
+      Thought-Knot Seer: 88%
+      Glaring Fleshraker: 100%
+      Sire of Seven Deaths: 100%
+    sample_decklists:
+    - 117ff829-1849-4319-818d-b4de016906ea
+    - 1423edd9-04ef-4c45-a3e6-b4be00e01d15
+    - 1af009fd-c171-4a60-87ff-b45b00cbbed1
+- archetype: Fire + Crashing Footfalls
+  variant: Fire + Crashing Footfalls
+  signature:
+  - Fire
+  - Crashing Footfalls
+  - Violent Outburst
+  - Dead
+  - Shardless Agent
+  - Subtlety
+  min_signature: 3
+  _mined:
+    cluster: 37
+    lists: 16
+    signature_presence:
+      Fire: 100%
+      Crashing Footfalls: 100%
+      Violent Outburst: 100%
+      Dead: 81%
+      Shardless Agent: 100%
+      Subtlety: 100%
+    sample_decklists:
+    - 060f52a8-3aa0-4000-923c-b4b400c18919
+    - 07adc93d-84f8-42ea-9b63-b4bb0044a32a
+    - 0fb032b8-ca18-432d-a75e-b4de0108f053
+- archetype: Portent of Calamity + Emrakul, the Aeons Torn
+  variant: Portent of Calamity + Emrakul, the Aeons Torn
+  signature:
+  - Portent of Calamity
+  - Emrakul, the Aeons Torn
+  - Stock Up
+  - Expedition Map
+  - Ugin, Eye of the Storms
+  - Kozilek's Command
+  min_signature: 3
+  _mined:
+    cluster: 46
+    lists: 16
+    signature_presence:
+      Portent of Calamity: 100%
+      Emrakul, the Aeons Torn: 100%
+      Stock Up: 81%
+      Expedition Map: 100%
+      Ugin, Eye of the Storms: 100%
+      Kozilek's Command: 100%
+    sample_decklists:
+    - 0a48f36f-3d79-4a23-8afc-b4de00d3e796
+    - 1c7413e2-4697-4376-baf7-b4c200463e71
+    - 29bf7a42-2978-4d68-8fc0-b4dd00d755b2
+- archetype: Sundering Eruption + Irencrag Feat
+  variant: Sundering Eruption + Irencrag Feat
+  signature:
+  - Sundering Eruption
+  - Irencrag Feat
+  - Strike It Rich
+  - Goblin Charbelcher
+  - Shatterskull Smashing
+  - Pinnacle Monk
+  min_signature: 3
+  _mined:
+    cluster: 5
+    lists: 15
+    signature_presence:
+      Sundering Eruption: 100%
+      Irencrag Feat: 100%
+      Strike It Rich: 100%
+      Goblin Charbelcher: 100%
+      Shatterskull Smashing: 100%
+      Pinnacle Monk: 100%
+    sample_decklists:
+    - 1013885c-4374-4368-8f21-b4de01168134
+    - 1767d149-c0e6-4baa-b518-b4d600b023c8
+    - 3a2b7514-5049-4777-a554-b48f010c4097
+- archetype: Flame of Anor + Snapcaster Mage
+  variant: Flame of Anor + Snapcaster Mage
+  signature:
+  - Flame of Anor
+  - Snapcaster Mage
+  - Tamiyo, Inquisitive Student
+  - Counterspell
+  - Subtlety
+  - Spell Snare
+  min_signature: 3
+  _mined:
+    cluster: 9
+    lists: 12
+    signature_presence:
+      Flame of Anor: 100%
+      Snapcaster Mage: 92%
+      Tamiyo, Inquisitive Student: 100%
+      Counterspell: 100%
+      Subtlety: 75%
+      Spell Snare: 100%
+    sample_decklists:
+    - 1a03c997-8064-4093-a933-b4df000d66ec
+    - 28840439-185d-4e8e-b4eb-b45b00dfc86d
+    - 2921d79a-0759-4c05-bd0f-b4c400e2f075
+- archetype: Darklight Phoenix + Flare of Malice
+  variant: Darklight Phoenix + Flare of Malice
+  signature:
+  - Darklight Phoenix
+  - Flare of Malice
+  - Stitcher's Supplier
+  - Dark Matter Manipulator
+  - Bloodghast
+  - Carrion Feeder
+  min_signature: 3
+  _mined:
+    cluster: 64
+    lists: 11
+    signature_presence:
+      Darklight Phoenix: 100%
+      Flare of Malice: 100%
+      Stitcher's Supplier: 100%
+      Dark Matter Manipulator: 100%
+      Bloodghast: 91%
+      Carrion Feeder: 91%
+    sample_decklists:
+    - 011ff317-20d6-4e3a-892a-b4e0007fae19
+    - 2f50b8c4-9cf0-4fb0-aaef-b4dc0034a504
+    - 40e437e3-4036-4392-a38c-b4de0087fac6
+- archetype: Creeping Chill + Arclight Phoenix
+  variant: Creeping Chill + Arclight Phoenix
+  signature:
+  - Creeping Chill
+  - Arclight Phoenix
+  - Life from the Loam
+  - Otherworldly Gaze
+  - Burning Inquiry
+  - Stinkweed Imp
+  min_signature: 3
+  _mined:
+    cluster: 187
+    lists: 11
+    signature_presence:
+      Creeping Chill: 100%
+      Arclight Phoenix: 100%
+      Life from the Loam: 100%
+      Otherworldly Gaze: 100%
+      Burning Inquiry: 100%
+      Stinkweed Imp: 100%
+    sample_decklists:
+    - 0f89a877-2cd9-44bf-b26c-b45b00e22926
+    - 2ca5c5c0-5a9a-4b35-97a4-b4c30036e547
+    - 2ec542b0-498f-4257-8b7c-b45b00d896ae
+- archetype: Flare of Malice + Eyetwitch
+  variant: Flare of Malice + Eyetwitch
+  signature:
+  - Flare of Malice
+  - Eyetwitch
+  - Archon of Cruelty
+  - Stitcher's Supplier
+  - Persist
+  - Troll of Khazad-dûm
+  min_signature: 3
+  _mined:
+    cluster: 15
+    lists: 11
+    signature_presence:
+      Flare of Malice: 100%
+      Eyetwitch: 100%
+      Archon of Cruelty: 100%
+      Stitcher's Supplier: 100%
+      Persist: 100%
+      Troll of Khazad-dûm: 91%
+    sample_decklists:
+    - 124ad9eb-ab09-44ed-9ff1-b4c400e6ad4c
+    - 1afc5a51-83c1-413c-9f62-b4c001090dff
+    - 3427f297-1141-4af7-ad62-b4c200e90c49
+- archetype: Jace, Wielder of Mysteries + Mox Amber
+  variant: Jace, Wielder of Mysteries + Mox Amber
+  signature:
+  - Jace, Wielder of Mysteries
+  - Mox Amber
+  - Six
+  - Song of Creation
+  - Tamiyo, Inquisitive Student
+  - Engineered Explosives
+  min_signature: 3
+  _mined:
+    cluster: 68
+    lists: 10
+    signature_presence:
+      Jace, Wielder of Mysteries: 100%
+      Mox Amber: 100%
+      Six: 100%
+      Song of Creation: 100%
+      Tamiyo, Inquisitive Student: 100%
+      Engineered Explosives: 100%
+    sample_decklists:
+    - 042cd08a-fcab-4854-831f-b4bb00f8f66c
+    - 22241327-7d8d-478c-8317-b4bc0044b327
+    - 222f8477-219a-4001-9cc1-b46800dce71b
+- archetype: Rite of Consumption + Cosmogoyf
+  variant: Rite of Consumption + Cosmogoyf
+  signature:
+  - Rite of Consumption
+  - Cosmogoyf
+  - Soul Spike
+  - Necrodominance
+  - Witherbloom Charm
+  - Plunge into Darkness
+  min_signature: 3
+  _mined:
+    cluster: 48
+    lists: 10
+    signature_presence:
+      Rite of Consumption: 100%
+      Cosmogoyf: 100%
+      Soul Spike: 100%
+      Necrodominance: 100%
+      Witherbloom Charm: 90%
+      Plunge into Darkness: 90%
+    sample_decklists:
+    - 0a6b114f-015d-40b7-9302-b4b4016f81e8
+    - 50304e2d-9d66-4709-97d1-b4e000528849
+    - 5c093bb8-d28a-4dad-be56-b4b4003e465b
+- archetype: Brainsurge + Terminus
+  variant: Brainsurge + Terminus
+  signature:
+  - Brainsurge
+  - Terminus
+  - Jace, the Mind Sculptor
+  - Isochron Scepter
+  - Orim's Chant
+  - Counterspell
+  min_signature: 3
+  _mined:
+    cluster: 95
+    lists: 9
+    signature_presence:
+      Brainsurge: 100%
+      Terminus: 100%
+      Jace, the Mind Sculptor: 89%
+      Isochron Scepter: 100%
+      Orim's Chant: 100%
+      Counterspell: 100%
+    sample_decklists:
+    - 19556d1d-1539-4b28-be3c-b4c8004b225e
+    - 1ca6527f-ca3a-4245-94d0-b4b400cfc716
+    - 30feb985-6d6e-4372-92e6-b4e4011ea932
+- archetype: Through the Breach + Ulamog, the Defiler
+  variant: Through the Breach + Ulamog, the Defiler
+  signature:
+  - Through the Breach
+  - Ulamog, the Defiler
+  - Emrakul, the Aeons Torn
+  - Yggdrasil, Rebirth Engine
+  - Devourer of Destiny
+  - Kozilek's Command
+  min_signature: 3
+  _mined:
+    cluster: 56
+    lists: 9
+    signature_presence:
+      Through the Breach: 100%
+      Ulamog, the Defiler: 100%
+      Emrakul, the Aeons Torn: 100%
+      Yggdrasil, Rebirth Engine: 78%
+      Devourer of Destiny: 100%
+      Kozilek's Command: 100%
+    sample_decklists:
+    - 257e4e0b-91b3-460c-8631-b4c40004e23e
+    - 37f19389-9974-4f91-ab85-b4e0006b8e17
+    - 3b5eba38-bcf0-4409-8822-b4d500a2dfb9
+- archetype: Archon of Cruelty + Persist
+  variant: Archon of Cruelty + Persist
+  signature:
+  - Archon of Cruelty
+  - Persist
+  - Faithful Mending
+  - Emperor of Bones
+  - Psychic Frog
+  - Ephemerate
+  min_signature: 3
+  _mined:
+    cluster: 58
+    lists: 8
+    signature_presence:
+      Archon of Cruelty: 100%
+      Persist: 100%
+      Faithful Mending: 88%
+      Emperor of Bones: 75%
+      Psychic Frog: 100%
+      Ephemerate: 100%
+    sample_decklists:
+    - 0111ba14-5bcb-4eac-a01a-b4b300014b5c
+    - 02481309-d8c7-44b7-806e-b49300683ff7
+    - 035b3a80-a1eb-4c78-b081-b4c201493b61
+- archetype: Ornithopter + Memnite
+  variant: Ornithopter + Memnite
+  signature:
+  - Ornithopter
+  - Memnite
+  - Cranial Plating
+  - Basim Ibn Ishaq
+  - Pinnacle Emissary
+  - Kappa Cannoneer
+  min_signature: 3
+  _mined:
+    cluster: 254
+    lists: 8
+    signature_presence:
+      Ornithopter: 100%
+      Memnite: 88%
+      Cranial Plating: 88%
+      Basim Ibn Ishaq: 75%
+      Pinnacle Emissary: 100%
+      Kappa Cannoneer: 100%
+    sample_decklists:
+    - 03d25816-2f8f-48c3-8387-b4d0005df6c3
+    - 48c5c953-2b7d-4bdb-af67-b4c200e8f930
+    - 56a81153-b29e-4338-a1f2-b4c20085f13f
+- archetype: Teferi, Hero of Dominaria + Wan Shi Tong, Librarian
+  variant: Teferi, Hero of Dominaria + Wan Shi Tong, Librarian
+  signature:
+  - Teferi, Hero of Dominaria
+  - Wan Shi Tong, Librarian
+  - Supreme Verdict
+  - Consult the Star Charts
+  - Counterspell
+  - Wrath of the Skies
+  min_signature: 3
+  _mined:
+    cluster: 26
+    lists: 8
+    signature_presence:
+      Teferi, Hero of Dominaria: 75%
+      Wan Shi Tong, Librarian: 75%
+      Supreme Verdict: 88%
+      Consult the Star Charts: 100%
+      Counterspell: 100%
+      Wrath of the Skies: 100%
+    sample_decklists:
+    - 08ad6ffb-f506-4797-b139-b48700e9db10
+    - 2378cc97-db74-488a-9367-b4930072ef60
+    - 378cda2b-42da-4e4a-ab7d-b4bc00358e5d
+- archetype: Might of Old Krosa + Noble Hierarch
+  variant: Might of Old Krosa + Noble Hierarch
+  signature:
+  - Might of Old Krosa
+  - Noble Hierarch
+  - Blighted Agent
+  - Scale Up
+  - Vines of Vastwood
+  min_signature: 3
+  _mined:
+    cluster: 27
+    lists: 8
+    signature_presence:
+      Might of Old Krosa: 100%
+      Noble Hierarch: 100%
+      Blighted Agent: 100%
+      Scale Up: 88%
+      Vines of Vastwood: 75%
+    sample_decklists:
+    - 14063ab9-f921-4d9c-ae3a-b4de011f4b54
+    - 180686cc-afe8-4ef9-9e62-b4b400d115e8
+    - 410afbed-72e9-42f5-b49f-b4c10135eb0a
+- archetype: Springheart Nantuko + Quirion Ranger
+  variant: Springheart Nantuko + Quirion Ranger
+  signature:
+  - Springheart Nantuko
+  - Quirion Ranger
+  - Ouroboroid
+  - Ashaya, Soul of the Wild
+  - Nissa, Resurgent Animist
+  - Enduring Vitality
+  min_signature: 3
+  _mined:
+    cluster: 88
+    lists: 8
+    signature_presence:
+      Springheart Nantuko: 100%
+      Quirion Ranger: 100%
+      Ouroboroid: 100%
+      Ashaya, Soul of the Wild: 100%
+      Nissa, Resurgent Animist: 100%
+      Enduring Vitality: 88%
+    sample_decklists:
+    - 1b608be3-be26-452b-92cc-b4c2002c567d
+    - 2c65071d-4932-4308-930e-b4bc00c72a64
+    - 32c9602b-8ef4-4c9e-bfe8-b4bb00f8d4ae
+
+# Small clusters (not drafted; usually variants of a rule above):
+#      7 lists  Dress Down, Tamiyo, Inquisitive Student, Unholy Heat, Subtlety
+#      6 lists  Splinter Twin, Flame of Anor, Snapcaster Mage, Counterspell
+#      6 lists  Omnath, Locus of Creation, Wrenn and Six, Stock Up, Emeritus of Abundance
+#      6 lists  Thundertrap Trainer, Flame of Anor, Flare of Denial, Snapcaster Mage
+#      6 lists  Champion of the Parish, Thalia's Lieutenant, Reflector Mage, Jirina, Dauntless General
+#      6 lists  Boltwave, Light Up the Stage, Lava Spike, Lava Dart
+#      6 lists  Nihil Spellbomb, Nethergoyf, Orcish Bowmasters, Shadowspear
+#      5 lists  Asmoranomardicadaistinaculdacar, The Underworld Cookbook, Archon of Cruelty, Ovalchase Daredevil
+#      5 lists  Hexhaven Invigorator, Dryad of the Ilysian Grove, Mine Collapse, Icetill Explorer
+#      5 lists  Bitter Triumph, Unearth, Abhorrent Oculus, Moonshadow
+#      5 lists  Warren Soultrader, Marionette Apprentice, Gravecrawler, Sephiroth, Fabled SOLDIER
+#      5 lists  Gladecover Scout, Cartouche of Solidarity, Spirit Mantle, Daybreak Coronet
+#      5 lists  Nettle Sentinel, Heritage Druid, Elvish Mystic, Quirion Ranger
+#      5 lists  Ox of Agonas, Creeping Chill, Timeline Culler, Otherworldly Gaze
+#      5 lists  Hardened Scales, Zabaz, the Glimmerwasp, The Ozolith, Hangarback Walker
+#      4 lists  Get Lost, Lórien Revealed, Path to Exile, Ashiok, Dream Render
+#      4 lists  Eternal Witness, Orim's Chant, Phelia, Exuberant Shepherd, Ephemerate
+#      4 lists  Giant's Boulder, Talisman of Curiosity, Expedition Map, Ugin, Eye of the Storms
+#      4 lists  Nihil Spellbomb, Tarmogoyf, Nethergoyf, Wrenn and Six
+#      4 lists  Divergent Equation, Planar Genesis, Wilderness Reclamation, Waterlogged Teachings
+#      4 lists  Unearth, Abhorrent Oculus, Thought Scour, Sheoldred's Edict
+#      4 lists  Monstrous Rage, Turn Inside Out, Cacophony Scamp, Heartfire Hero
+#      3 lists  Omnath, Locus of Creation, Wrenn and Six, Wrath of the Skies, Galvanic Discharge
+#      3 lists  Pyxis of Pandemonium, Torpor Orb, Lantern of Insight, Codex Shredder
+#      3 lists  Mox Amber, Nihil Spellbomb, Basim Ibn Ishaq, Tamiyo, Inquisitive Student
+#      3 lists  Shadow of Mortality, Calibrated Blast, Emrakul, the Aeons Torn, Throes of Chaos
+#      3 lists  Bloodghast, Darklight Phoenix, Flare of Malice, Eyetwitch
+#      3 lists  Stock Up, Lórien Revealed, Fallaji Archaeologist, Thundertrap Trainer
+#      3 lists  Kolaghan's Command, Snapcaster Mage, Flame of Anor, Drown in the Loch
+#      3 lists  Invoke Despair, Damnation, March of Wretched Sorrow, Sheoldred, the Apocalypse
+#      3 lists  Magus of the Moon, Recruiter of the Guard, Flickerwisp, Orcish Bowmasters
+#      3 lists  Baral, Chief of Compliance, Flame of Anor, Grapeshot, Ral, Monsoon Mage
+#      3 lists  Flare of Malice, Eyetwitch, Stitcher's Supplier, Chthonian Nightmare
+#      3 lists  Cragganwick Cremator, The Underworld Cookbook, Yargle and Multani, Emrakul, the Aeons Torn
+#      3 lists  Jace, the Perfected Mind, Mox Amber, Sewer-veillance Cam, Kethis, the Hidden Hand
+#      3 lists  Moonshadow, Bilbo, Thief in the Night, Nihil Spellbomb, Unearth
+#      3 lists  Stoneforge Mystic, Cryptic Coat, Meteor Sword, Phelia, Exuberant Shepherd
+#      3 lists  Icetill Explorer, Dryad of the Ilysian Grove, Vibrance, Wrenn and Six
+#      3 lists  Chromatic Star, Chromatic Sphere, Sylvan Scrying, Oblivion Stone
+#      3 lists  Sythis, Harvest's Hand, Sanctum Weaver, Enchantress's Presence, Solitary Confinement

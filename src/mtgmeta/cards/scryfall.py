@@ -11,6 +11,7 @@ Scryfall asks bulk users to download at most once a day; we keep the file for
 
 from __future__ import annotations
 
+import gzip
 import json
 import logging
 import re
@@ -75,12 +76,18 @@ def download(client: httpx.Client | None = None) -> list[dict]:
     index = client.get(BULK_INDEX).raise_for_status().json()
     if isinstance(index, dict) and isinstance(index.get("data"), list):  # list wrapper
         index = next((i for i in index["data"] if i.get("type") == "oracle_cards"), {})
-    log.info("bulk-data index: %s", json.dumps(index)[:800])
-    uri = index.get("download_uri") or index.get("download_url")
-    if not uri:
-        raise RuntimeError(f"unexpected Scryfall bulk-data response: keys={sorted(index)}")
-    log.info("downloading %s (%s MB)", uri, round((index.get("size") or 0) / 1e6))
-    return client.get(uri, follow_redirects=True).raise_for_status().json()
+    jsonl = index.get("jsonl_download_uri")
+    plain = index.get("download_uri")
+    if jsonl:
+        log.info("downloading %s (%s MB compressed)", jsonl,
+                 round((index.get("compressed_size") or 0) / 1e6))
+        raw = client.get(jsonl, follow_redirects=True).raise_for_status().content
+        text = gzip.decompress(raw).decode("utf-8") if jsonl.endswith(".gz") else raw.decode()
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+    if plain:
+        log.info("downloading %s", plain)
+        return client.get(plain, follow_redirects=True).raise_for_status().json()
+    raise RuntimeError(f"unexpected Scryfall bulk-data response: keys={sorted(index)}")
 
 
 def is_fresh(path: Path, now: datetime | None = None) -> bool:

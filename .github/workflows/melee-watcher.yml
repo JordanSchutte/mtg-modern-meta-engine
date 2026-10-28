@@ -37,6 +37,10 @@ on:
         type: string
         default: "0"
 
+defaults:
+  run:
+    shell: bash -eo pipefail {0}   # a failing command inside a pipe fails the step
+
 concurrency:
   group: melee-bronze
   cancel-in-progress: false   # never interrupt a run mid-fetch

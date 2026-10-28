@@ -31,6 +31,10 @@ env:
   RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
   BUCKET: mtgmeta-bronze
 
+defaults:
+  run:
+    shell: bash -eo pipefail {0}   # a failing command inside a pipe fails the step
+
 jobs:
   mine:
     runs-on: ubuntu-latest

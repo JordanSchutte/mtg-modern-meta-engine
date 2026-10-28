@@ -11,6 +11,7 @@ Scryfall asks bulk users to download at most once a day; we keep the file for
 
 from __future__ import annotations
 
+import json
 import logging
 import re
 from datetime import UTC, datetime, timedelta
@@ -74,7 +75,8 @@ def download(client: httpx.Client | None = None) -> list[dict]:
     index = client.get(BULK_INDEX).raise_for_status().json()
     if isinstance(index, dict) and isinstance(index.get("data"), list):  # list wrapper
         index = next((i for i in index["data"] if i.get("type") == "oracle_cards"), {})
-    uri = index.get("download_uri") or index.get("download_url") or index.get("uri")
+    log.info("bulk-data index: %s", json.dumps(index)[:800])
+    uri = index.get("download_uri") or index.get("download_url")
     if not uri:
         raise RuntimeError(f"unexpected Scryfall bulk-data response: keys={sorted(index)}")
     log.info("downloading %s (%s MB)", uri, round((index.get("size") or 0) / 1e6))

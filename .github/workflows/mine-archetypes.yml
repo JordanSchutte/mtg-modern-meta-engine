@@ -49,20 +49,32 @@ jobs:
           mkdir -p data/silver
           rclone sync "r2:$BUCKET/silver" data/silver --fast-list
       - name: Card table (Scryfall)
+        id: cards
+        continue-on-error: true
         run: |
-          python scripts/update_cards.py
-          rclone copy data/silver/cards.parquet "r2:$BUCKET/silver/"
+          python scripts/update_cards.py 2>&1 | tee -a mine-log.txt
+          rclone copy data/silver/cards.parquet "r2:$BUCKET/silver/" 2>&1 | tee -a mine-log.txt
       - name: Mine
+        id: mine
+        if: steps.cards.outcome == 'success'
+        continue-on-error: true
         run: |
           python scripts/mine_archetypes.py --period-start "${{ inputs.period_start }}" \
             --threshold "${{ inputs.threshold }}" --min-cluster "${{ inputs.min_cluster }}" \
-            | tee mine-report.txt
+            2>&1 | tee mine-report.txt | tee -a mine-log.txt
           { echo '## Mined clusters'; echo '```'; cat mine-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-      - name: Push draft to branch archetype-draft
+      - name: Push draft and log to branch archetype-draft
+        # Always: the log is how a failure gets read from outside the runner.
+        if: always()
         run: |
           git config user.name "melee-watcher[bot]"
           git config user.email "noreply@github.com"
           git checkout -B archetype-draft
-          git add config/archetypes/*.draft.yml
-          git commit -m "Archetype draft: period ${{ inputs.period_start }}, threshold ${{ inputs.threshold }}, min cluster ${{ inputs.min_cluster }}" || echo "nothing new"
+          mkdir -p config/archetypes
+          cp mine-log.txt config/archetypes/mine-log.txt 2>/dev/null || true
+          git add -f config/archetypes/
+          git commit -m "Archetype draft run: period ${{ inputs.period_start }}, threshold ${{ inputs.threshold }}, min cluster ${{ inputs.min_cluster }} (cards=${{ steps.cards.outcome }}, mine=${{ steps.mine.outcome }})" || echo "nothing new"
           git push -f origin archetype-draft
+      - name: Fail the run if a step failed
+        if: steps.cards.outcome != 'success' || steps.mine.outcome != 'success'
+        run: exit 1

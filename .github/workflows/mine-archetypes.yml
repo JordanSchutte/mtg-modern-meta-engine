@@ -1,0 +1,68 @@
+name: Mine archetypes
+
+# Manual. Drafts an archetype rules file from the decklists in silver and
+# pushes it to a branch (archetype-draft) for review. Nothing in main changes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      period_start:
+        description: "Format period start (YYYY-MM-DD); names the rules file"
+        required: true
+        default: "2026-05-18"
+      threshold:
+        description: "Cluster merge distance (lower = more clusters)"
+        required: false
+        default: "0.55"
+      min_cluster:
+        description: "Smallest cluster that gets a rule"
+        required: false
+        default: "8"
+
+permissions:
+  contents: write
+
+env:
+  RCLONE_CONFIG_R2_TYPE: s3
+  RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+  BUCKET: mtgmeta-bronze
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install -e .
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Pull silver from R2
+        run: |
+          mkdir -p data/silver
+          rclone sync "r2:$BUCKET/silver" data/silver --fast-list
+      - name: Card table (Scryfall)
+        run: |
+          python scripts/update_cards.py
+          rclone copy data/silver/cards.parquet "r2:$BUCKET/silver/"
+      - name: Mine
+        run: |
+          python scripts/mine_archetypes.py --period-start "${{ inputs.period_start }}" \
+            --threshold "${{ inputs.threshold }}" --min-cluster "${{ inputs.min_cluster }}" \
+            | tee mine-report.txt
+          { echo '## Mined clusters'; echo '```'; cat mine-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Push draft to branch archetype-draft
+        run: |
+          git config user.name "melee-watcher[bot]"
+          git config user.email "noreply@github.com"
+          git checkout -B archetype-draft
+          git add config/archetypes/*.draft.yml
+          git commit -m "Archetype draft: period ${{ inputs.period_start }}, threshold ${{ inputs.threshold }}, min cluster ${{ inputs.min_cluster }}" || echo "nothing new"
+          git push -f origin archetype-draft

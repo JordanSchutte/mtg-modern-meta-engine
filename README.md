@@ -63,6 +63,11 @@ python scripts/fetch_melee_event.py 453138
 # Parse bronze into silver Parquet tables and print per-event coverage
 python scripts/build_silver.py
 
+# Archetypes: card table, mined draft rules, then classify with the rules you keep
+python scripts/update_cards.py
+python scripts/mine_archetypes.py --period-start 2026-05-18     # -> config/archetypes/*.draft.yml
+python scripts/classify_decklists.py                            # newest non-draft rules file
+
 pytest
 ```
 
@@ -85,6 +90,10 @@ src/mtgmeta/
     parse.py                tournament page, round matches, decklist parsers
     fetch.py                fetches one event into bronze (idempotent)
   silver/melee.py           bronze -> Parquet tables (events, matches, decklists, cards, players)
+  cards/scryfall.py         Scryfall bulk data -> silver/cards.parquet (colors, types, lands)
+  archetypes/rules.py       rules file format and the signature-based classifier
+  archetypes/mine.py        drafts rules by clustering the period's decklists
+config/archetypes/          archetype rules per format period (yours to edit; drafts are mined)
 scripts/                    CLI entry points
 tests/fixtures/melee/       responses captured from live Melee pages
 docs/                       architecture and design notes

@@ -125,6 +125,17 @@ jobs:
           python scripts/build_silver.py | tee silver-report.txt
           { echo '## Melee coverage'; echo '```'; cat silver-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Card table (Scryfall, refreshed weekly)
+        if: always()
+        run: python scripts/update_cards.py
+
+      - name: Classify decklists
+        # Uses the newest non-draft rules file in config/archetypes, if any.
+        if: always()
+        run: |
+          python scripts/classify_decklists.py | tee archetype-report.txt
+          { echo '## Archetypes'; echo '```'; cat archetype-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Push silver to R2
         if: always()
         run: rclone copy data/silver "r2:$BUCKET/silver" --fast-list --stats-one-line -v

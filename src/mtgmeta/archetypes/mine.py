@@ -19,6 +19,7 @@ signature cards; the person renames, merges and splits from there.
 
 from __future__ import annotations
 
+import logging
 import math
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -27,6 +28,8 @@ import numpy as np
 import yaml
 
 from mtgmeta.cards.scryfall import normalize
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -63,6 +66,12 @@ def mine(decklists: dict[str, list[tuple[int, str]]], cards: dict[str, dict] | N
 
     ids = list(decklists)
     sets = [_present_cards(decklists[d], cards) for d in ids]
+    # A list with no non-land cards (it happens) has nothing to cluster on.
+    keep = [i for i, s in enumerate(sets) if s]
+    if len(keep) < len(ids):
+        log.info("skipping %d list(s) with no non-land cards", len(ids) - len(keep))
+        ids = [ids[i] for i in keep]
+        sets = [sets[i] for i in keep]
     df: Counter[str] = Counter()
     for s in sets:
         df.update(s)

@@ -1,0 +1,38 @@
+start           id players modern  known  share  lists  empty  name
+  (modern = Modern Swiss matches excluding byes; known = both decks published)
+2026-05-30  421364     101     97     90    93%     95      1  ReCQ - Modern - SCG CON Washington DC - Saturday
+2026-05-31  421360     200    422    417    99%    199      0  $uper $unday RCQ - Modern - SCG CON Washington D
+2026-06-13  423709     155    465    445    96%    143      0  Mont Destination Event
+2026-07-17  434455     362   1402   1402   100%    383      1  Pro Tour Magic: The Gathering | Marvel Super Her
+2026-07-19  443260     194    190    190   100%    194      0  2nd Chance PTQ (PT MSH)
+2026-07-26  444423     134    471    440    93%    129      1  [Brussels Sun 09:30] Destination Qualifier: Mode
+2026-08-28  441441     574   2519   2353    93%    567      0  Magic Spotlight: The Hobbit™ Main Event
+2026-09-04  462365     103    276     19     7%     31      5  FLIGHT A - $1K Modern RCQ - SCG CON Dallas
+2026-09-04  462366     102    269      9     3%     32      8  FLIGHT B - $1K Modern RCQ - SCG CON Dallas
+2026-09-04  442754     116    112    105    94%    111      0  ReCQ - Modern - Dallas - Friday - 1:00 pm
+2026-09-05  405590     932   3954   3605    91%    927      0  Magic Spotlight: The Hobbit™ - SCG CON Dallas - 
+2026-09-06  442877     157    340    295    87%    154      0  $uper $unday RCQ - Modern - SCG CON Dallas - Sun
+2026-09-11  445385     134    129    109    84%    128      0  LCQ - Modern - SCG CON Baltimore - Friday - 9:30
+2026-09-11  445437     132    383    303    79%    130      1  $1K Modern RCQ - SCG CON Baltimore - Friday - 10
+2026-09-12  451148     404   1407   1392    99%    404      0  龙盾杯 MTG China Open S13 Regional Championship
+2026-09-12  405588    1494   6363   6022    95%   1485      0  Regional Championship - SCG CON Baltimore - Seas
+2026-09-12  445383     128    364    296    81%    124      0  $5K RCQ - Modern - SCG CON Baltimore - Saturday 
+2026-09-13  445556     362    774    665    86%    358      1  $uper $unday RCQ - Modern - SCG CON Baltimore - 
+2026-10-03  411350     537   2262   2178    96%    537      0  チャンピオンズカップファイナル　シーズン5ラウンド1　Champions Cup Final S
+2026-10-09  453109     181    175    124    71%    149      0  LCQ - Modern - SCG CON Los Angeles - Friday - 9:
+2026-10-09  453121     102     98     85    87%     95      0  LCQ - Modern - SCG CON Los Angeles - Friday - 10
+2026-10-09  453170     127    322    218    68%    123      0  $1K Modern RCQ - SCG CON Los Angeles - Friday - 
+2026-10-09  453123     111    107     49    46%     76      1  LCQ - Modern - SCG CON Los Angeles - Friday - 11
+2026-10-09  453125     118    114     73    64%     92      0  LCQ - Modern - SCG CON Los Angeles - Friday - 12
+2026-10-10  470109    1194   4203   3942    94%   1179      0  Ultimate Guard European Magic Series - Regional 
+2026-10-10  405591    1228   5145   4458    87%   1223      0  Regional Championship - SCG CON Los Angeles - Se
+2026-10-10  471573     184    643    488    76%    180      0  CAMS Regional Championship - T13
+2026-10-10  453111     170    483    313    65%    165      0  $5K RCQ - Modern - SCG CON Los Angeles - Saturda
+2026-10-11  479653     544   1809   1663    92%    536      3  [Ghent Sun 09:30] Ultimate Guard Open: Modern
+2026-10-11  453138     270    567    403    71%    258      0  $uper $unday RCQ - Modern - SCG CON Los Angeles 
+2026-10-17  482105     184    551    486    88%    181      0  MTG SEA Championship Final 2026-27 Round 1
+
+31 events, 36416 Modern Swiss matches, 32637 with both decks known (90%)
+10388 decklists referenced, 7577 usable, 246064 card lines, 10734 players
+
+wrote 5 tables to data/silver/melee: events=31, matches=37722, decklists=10388, decklist_cards=246064, players=10734

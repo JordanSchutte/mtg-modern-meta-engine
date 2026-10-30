@@ -1,0 +1,76 @@
+rules: config/archetypes/modern-2026-05-18.yml (58 rules)
+7557 lists classified; 151 unclassified (2.0%)
+    905  12.0%  Broodscale Combo
+    788  10.4%  Izzet Prowess
+    627   8.3%  Reanimator  [Esper Goryo's 508, Grixis Reanimator 98, Mono-Black Reanimator 14, Esper Reanimator 7]
+    550   7.3%  Energy  [Boros Energy 506, Azorius Energy 44]
+    497   6.6%  Blink  [Esper Blink 418, Jeskai Blink 79]
+    449   5.9%  Affinity  [Affinity 439, Classic Affinity 10]
+    365   4.8%  Azorius Control  [Scepter Control 289, Snapcaster Control 43, Teferi Control 24, Miracles 9]
+    341   4.5%  Eldrazi Tron  [Eldrazi Tron 316, Emrakul Tron 16, Breach Tron 9]
+    275   3.6%  Domain Zoo
+    261   3.5%  Devoted Druid
+    235   3.1%  Amulet Titan
+    227   3.0%  Ruby Storm
+    183   2.4%  Dimir Midrange
+    179   2.4%  Fight Rigging
+    168   2.2%  Living End
+    167   2.2%  Ponza
+    146   1.9%  Neobrand
+     98   1.3%  Emry Combo
+     71   0.9%  Yawgmoth
+     69   0.9%  Tameshi Belcher
+     67   0.9%  Rakdos Phoenix
+     58   0.8%  Hollow One
+     57   0.8%  Necro  [Necro 47, Necro Rite 10]
+     55   0.7%  Green Tron
+     51   0.7%  Ritual Oculus
+     51   0.7%  Esper Midrange
+     44   0.6%  Samwise Combo
+     43   0.6%  Mill
+     41   0.5%  Burn
+     40   0.5%  Jeskai Control
+     36   0.5%  Ritual Omnath
+     32   0.4%  Death's Shadow
+     32   0.4%  Cosmogoyf Thud
+     28   0.4%  Izzet Murktide
+     24   0.3%  Merfolk
+     19   0.3%  Hammer
+     18   0.2%  Dredge
+     18   0.2%  Creativity
+     17   0.2%  Darklight Phoenix
+     17   0.2%  Eldrazi Aggro
+     16   0.2%  Rhinos
+     15   0.2%  Mono-Red Belcher
+     10   0.1%  Song of Creation
+      8   0.1%  Infect
+      8   0.1%  Nantuko Combo
+
+151 unclassified lists; most common non-land cards among them:
+    27%  Thoughtseize
+    22%  Fatal Push
+    20%  Lightning Bolt
+    14%  Inquisition of Kozilek
+    14%  Ragavan, Nimble Pilferer
+    12%  Wrenn and Six
+    12%  Solitude
+    12%  Orcish Bowmasters
+    10%  Green Sun's Zenith
+     9%  Pithing Needle
+     9%  Force of Negation
+     9%  Quantum Riddler
+     9%  Teferi, Time Raveler
+     9%  Shadowspear
+     9%  Mishra's Bauble
+     9%  Nihil Spellbomb
+     9%  Mox Opal
+     9%  Emrakul, the Aeons Torn
+     9%  Aether Vial
+     8%  Ephemerate
+     7%  Blood Moon
+     7%  Psychic Frog
+     7%  Orim's Chant
+     7%  Utopia Sprawl
+     7%  Malevolent Rumble
+
+wrote data/silver/melee/decklist_archetypes.parquet

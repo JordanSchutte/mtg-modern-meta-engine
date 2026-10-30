@@ -66,7 +66,9 @@ python scripts/build_silver.py
 # Archetypes: card table, mined draft rules, then classify with the rules you keep
 python scripts/update_cards.py
 python scripts/mine_archetypes.py --period-start 2026-05-18     # -> config/archetypes/*.draft.yml
-python scripts/classify_decklists.py                            # newest non-draft rules file
+python scripts/classify_decklists.py                            # rules file chosen per event date
+python scripts/propose_rules.py                                 # what the weekly PR would propose
+python scripts/new_period.py --start 2026-12-15 --ban "Card"    # B&R day: new period file
 
 pytest
 ```

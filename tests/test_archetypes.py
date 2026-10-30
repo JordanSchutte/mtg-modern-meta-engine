@@ -136,3 +136,69 @@ def test_draft_yaml_is_loadable_with_notes_ignored(tmp_path):
     assert "_mined" in text and "# DRAFT" in text
     rs = load_rules(Path(tmp_path / "d.yml").write_text(text) and tmp_path / "d.yml")
     assert len(rs.rules) == len(big)
+
+
+def test_rules_for_date_picks_the_governing_period(tmp_path):
+    from mtgmeta.archetypes.rules import rules_for_date
+    for name in ("modern-2026-05-18.yml", "modern-2026-12-15.yml",
+                 "modern-2027-01-01.draft.yml", "pioneer-2026-01-01.yml"):
+        (tmp_path / name).write_text("rules: []")
+    assert rules_for_date(tmp_path, "2026-05-17") is None
+    assert rules_for_date(tmp_path, "2026-05-18").name == "modern-2026-05-18.yml"
+    assert rules_for_date(tmp_path, "2026-11-30").name == "modern-2026-05-18.yml"
+    assert rules_for_date(tmp_path, "2026-12-15").name == "modern-2026-12-15.yml"
+    assert rules_for_date(tmp_path, "2027-06-01").name == "modern-2026-12-15.yml"  # draft ignored
+
+
+def _write_rules(path, rules):
+    path.write_text(yaml.safe_dump({"format": "Modern", "period_start": "2026-05-18",
+                                    "rules": rules}, sort_keys=False))
+
+
+def test_propose_adds_new_deck_trims_and_extends(tmp_path):
+    from mtgmeta.archetypes.propose import propose
+    decks, truth = synthetic(per=30)
+    cards = {r["key"]: r for r in card_rows()}
+    # Rules cover three of the four decks; Blink's rule carries a card nobody plays
+    # any more (Subtlety) and misses one everybody plays (Witch Enchanter).
+    path = tmp_path / "modern-2026-05-18.yml"
+    _write_rules(path, [
+        {"archetype": "Blink", "variant": "Esper Blink",
+         "signature": ["Phelia, Exuberant Shepherd", "Flickerwisp", "Solitude", "Subtlety"],
+         "min_signature": 2},
+        {"archetype": "Dimir Control", "variant": "Dimir Control",
+         "signature": ["Psychic Frog", "Counterspell", "Murktide Regent"], "min_signature": 2},
+        {"archetype": "Energy", "variant": "Boros Energy",
+         "signature": ["Guide of Souls", "Ocelot Pride", "Ajani, Nacatl Pariah"],
+         "min_signature": 2},
+    ])
+    rs = load_rules(path)
+    result = propose(decks, rs, path, cards, min_new=10, min_rule_lists=10, add_above=0.8,
+                     today="2026-11-04")
+    kinds = {(p.kind, p.variant) for p in result.proposals}
+    assert ("new", next(v for k, v in kinds if k == "new")) in kinds   # Eldrazi Tron found
+    assert ("trim", "Esper Blink") in kinds
+    assert any(k == "add" and v == "Esper Blink" for k, v in kinds)
+    assert result.changes_file
+    new_rules = yaml.safe_load(result.rules_text)["rules"]
+    blink = next(r for r in new_rules if r["variant"] == "Esper Blink")
+    assert "Subtlety" not in blink["signature"] and "Witch Enchanter" in blink["signature"]
+    assert blink["note"].startswith("proposed 2026-11-04")
+    assert any(r["archetype"].startswith("NEW: ") for r in new_rules)
+    # the file on disk is untouched; applying is the workflow's job
+    assert "NEW:" not in path.read_text()
+    assert result.after[UNCLASSIFIED] < result.before[UNCLASSIFIED]
+    assert "Unclassified in window" in result.summary_md
+
+
+def test_propose_is_quiet_when_rules_fit(tmp_path):
+    from mtgmeta.archetypes.propose import propose
+    decks, _ = synthetic(per=30)
+    cards = {r["key"]: r for r in card_rows()}
+    big, small = mine.mine(decks, cards, min_cluster=5)
+    path = tmp_path / "modern-2026-05-18.yml"
+    path.write_text(mine.draft_yaml(big, small, "Modern", "2026-05-18", len(decks)))
+    rs = load_rules(path)
+    result = propose(decks, rs, path, cards, min_new=10, min_rule_lists=10)
+    assert not result.changes_file
+    assert "No changes proposed" in result.summary_md

@@ -35,3 +35,17 @@ def load_main_decks(data_root: Path, fmt: str = "Modern", since: str | None = No
     for did, qty, card in rows:
         decks.setdefault(did, []).append((int(qty), card))
     return decks
+
+
+def load_deck_dates(data_root: Path, fmt: str = "Modern") -> dict[str, str]:
+    """``{decklist_id: 'YYYY-MM-DD'}`` — the start date of the list's first event."""
+    root = silver_root(data_root)
+    con = duckdb.connect()
+    rows = con.execute(f"""
+        select d.decklist_id, substr(e.start, 1, 10)
+        from '{(root / "decklists.parquet").as_posix()}' d
+        join '{(root / "events.parquet").as_posix()}' e on e.tournament_id = d.first_tournament_id
+        where d.usable and d.format = ?
+    """, [fmt]).fetchall()
+    con.close()
+    return {did: day for did, day in rows if day}

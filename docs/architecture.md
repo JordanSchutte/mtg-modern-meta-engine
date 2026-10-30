@@ -58,3 +58,13 @@ An event is fetched once its start is two days past, but decklists can be publis
 ## Imputation
 
 Melee lets players reuse an exact 75 they've already submitted, so an unpublished list at a side event is most likely the player's most recent Modern submission. Imputed rows use the same player's latest list before the event (ideally within two weeks) and carry an `imputed_same_75` flag so the matrix can down-weight them.
+
+## Archetypes
+
+Rules live in `config/archetypes/<format>-<period-start>.yml` and name only a deck's **signature** cards — the engine, not the list — so flex slots can change with the meta without changing the classification. A list is scored by how many signature cards it holds; the rule with the most hits wins. `archetype` is the level the matrix uses; `variant` is the color/build label underneath (Esper vs Jeskai Blink). Unknown shells stay in one archetype row on purpose: an unsolved deck (Darklight Phoenix) gets a signature of its invariant cards and its sub-packages are *measured* inside the archetype, not written into rules, until a package stabilises and earns a variant.
+
+**Periods.** Each rules file governs events from its date until the next file's date. A B&R announcement is `scripts/new_period.py --start <date> --ban ...`: the newest file is copied, banned cards leave every signature, the old file keeps classifying old events. The classifier picks the file per event date, so history never silently reclassifies.
+
+**Bootstrapping and drift.** The first file was mined (`scripts/mine_archetypes.py`): IDF-weighted clustering of the period's lists, each cluster's high-presence/high-lift cards as a draft signature, then named by hand. Every Wednesday `propose-rules.yml` re-mines the last 30 days and opens one pull request with mechanical proposals only — `NEW:` rules for unclassified clusters, trims of signature cards that fell out of their own deck, additions of cards that became ubiquitous in it — plus variant candidates in the PR text. It never renames, merges or deletes. A person names and merges; nothing changes until then. The job replaces only its own commits (a branch with a human commit is left alone), closes its PR when a later week finds nothing, and the twice-daily report names any proposal PR still open.
+
+**Failure modes.** No rules file for a list's date fails the classify step loudly instead of writing an empty table; the file is in git, so an accidental delete is a checkout. Leftover lists (staples only, no shared engine) are `Unclassified` and are reported with their most common cards.

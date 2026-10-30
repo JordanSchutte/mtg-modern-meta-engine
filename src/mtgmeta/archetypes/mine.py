@@ -60,8 +60,15 @@ def _present_cards(main, cards, drop_lands=True) -> set[str]:
 def mine(decklists: dict[str, list[tuple[int, str]]], cards: dict[str, dict] | None,
          distance_threshold: float = 0.55, min_cluster: int = 8,
          signature_presence: float = 0.75, signature_lift: float = 2.5,
-         max_signature: int = 6) -> tuple[list[ClusterDraft], list[ClusterDraft]]:
-    """Return (clusters large enough for a rule, small clusters) sorted by size."""
+         max_signature: int = 6,
+         background: tuple[Counter, int] | None = None,
+         ) -> tuple[list[ClusterDraft], list[ClusterDraft]]:
+    """Return (clusters large enough for a rule, small clusters) sorted by size.
+
+    ``background``: (card presence counts, number of lists) of the whole
+    population, for lift. Pass it when mining a subset (e.g. the unclassified
+    lists), otherwise a deck that dominates the subset looks like noise to itself.
+    """
     from sklearn.cluster import AgglomerativeClustering
 
     ids = list(decklists)
@@ -101,6 +108,7 @@ def mine(decklists: dict[str, list[tuple[int, str]]], cards: dict[str, dict] | N
         for _, name in decklists[d]:
             display.setdefault(normalize(name), name.split(" // ")[0])
 
+    bg_df, bg_n = background if background else (df, n)
     drafts: list[ClusterDraft] = []
     for lab, rows in members.items():
         size = len(rows)
@@ -110,7 +118,7 @@ def mine(decklists: dict[str, list[tuple[int, str]]], cards: dict[str, dict] | N
         sig = []
         for c, k in presence.items():
             p_in = k / size
-            p_out = (df[c] - k) / max(1, n - size)
+            p_out = (bg_df.get(c, 0) - k) / max(1, bg_n - size)
             lift = p_in / p_out if p_out > 0 else float("inf")
             if p_in >= signature_presence and lift >= signature_lift:
                 sig.append((display.get(c, c), p_in, lift))

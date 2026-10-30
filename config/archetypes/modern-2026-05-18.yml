@@ -217,7 +217,6 @@ rules:
   - Nethergoyf
   - Fear of Missing Out
   - Dark Matter Manipulator
-  - Troll of Khazad-dûm
   min_signature: 3
   note: 'new: Moonshadow, Detective''s Phoenix, delirium; shell still being figured out'
 - archetype: Yawgmoth
@@ -502,12 +501,11 @@ rules:
   signature:
   - Darklight Phoenix
   - Flare of Malice
-  - Stitcher's Supplier
   - Dark Matter Manipulator
-  - Bloodghast
-  - Carrion Feeder
-  min_signature: 3
-  note: Stitcher's Supplier / Bloodghast build; color pairing still settling
+  - Stitcher's Supplier
+  min_signature: 2
+  note: 'signature kept to the invariant core on purpose: the deck isn''t solved and shells differ (Rakdos
+    / Golgari / 3-color); sub-packages are measured, not ruled'
 - archetype: Dredge
   variant: Dredge
   signature:

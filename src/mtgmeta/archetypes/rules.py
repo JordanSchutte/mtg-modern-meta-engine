@@ -79,6 +79,29 @@ class Classification:
     extra: dict = field(default_factory=dict)
 
 
+def rules_files(folder: Path) -> list[Path]:
+    """Non-draft rules files, oldest period first (``<format>-<YYYY-MM-DD>.yml``)."""
+    return sorted(p for p in folder.glob("*.yml") if ".draft" not in p.name
+                  and ".proposed" not in p.name)
+
+
+def rules_for_date(folder: Path, day: str, fmt: str = "modern") -> Path | None:
+    """The newest rules file whose period starts on or before ``day``.
+
+    A B&R announcement starts a new period: a new file with that date. Old
+    files keep governing old events, so history classifies consistently.
+    """
+    best = None
+    for p in rules_files(folder):
+        stem = p.stem
+        if not stem.lower().startswith(fmt.lower() + "-"):
+            continue
+        start = stem[len(fmt) + 1:]
+        if start <= day:
+            best = p
+    return best
+
+
 def load_rules(path: Path) -> RuleSet:
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     rules = []

@@ -42,7 +42,8 @@ defaults:
     shell: bash -eo pipefail {0}   # a failing command inside a pipe fails the step
 
 permissions:
-  contents: write   # to push run reports to the reports branch
+  contents: write        # to push run reports to the reports branch
+  pull-requests: read    # to mention open archetype proposals in the report
 
 concurrency:
   group: melee-bronze
@@ -141,7 +142,11 @@ jobs:
         if: always()
         run: |
           python scripts/classify_decklists.py | tee archetype-report.txt
+          open_pr=$(gh pr list --state open --search "Archetype proposals in:title" --json number,createdAt --jq '.[] | "#\(.number) open since \(.createdAt[:10])"' 2>/dev/null || true)
+          if [ -n "$open_pr" ]; then echo "" | tee -a archetype-report.txt; echo "Open archetype proposals awaiting review: $open_pr" | tee -a archetype-report.txt; fi
           { echo '## Archetypes'; echo '```'; cat archetype-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Push silver to R2
         if: always()

@@ -1,0 +1,126 @@
+name: Propose archetype rules
+
+# Weekly, Wednesday morning US Eastern (weekend events have settled by then).
+# Re-mines the last 30 days, proposes rule changes, and opens or refreshes ONE
+# pull request on branch archetype-proposals. Nothing changes until merged.
+#
+# Rules of the road:
+#   * only the bot's own commits on the proposal branch are ever replaced; if a
+#     person has pushed to it, that PR is left alone and a dated branch is used;
+#   * no proposals -> no PR, and a stale bot-only PR is closed;
+#   * the rules file on main is never touched by this job.
+
+on:
+  schedule:
+    - cron: "23 13 * * 3"   # Wed 09:23 EDT / 08:23 EST
+  workflow_dispatch:
+    inputs:
+      window_days:
+        description: "Days of lists to consider"
+        required: false
+        default: "30"
+      min_new:
+        description: "Unclassified lists needed to propose a NEW deck"
+        required: false
+        default: "25"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+defaults:
+  run:
+    shell: bash -eo pipefail {0}
+
+env:
+  RCLONE_CONFIG_R2_TYPE: s3
+  RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+  BUCKET: mtgmeta-bronze
+  BRANCH: archetype-proposals
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install -e .
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+      - name: Pull silver from R2
+        run: |
+          mkdir -p data/silver
+          rclone sync "r2:$BUCKET/silver" data/silver --fast-list
+          python scripts/update_cards.py
+
+      - name: Propose
+        id: propose
+        run: |
+          set +e
+          python scripts/propose_rules.py --window-days "${{ inputs.window_days || '30' }}" \
+            --min-new "${{ inputs.min_new || '25' }}" --apply --summary proposals.md | tee propose-log.txt
+          code=${PIPESTATUS[0]}
+          set -e
+          if [ "$code" = "0" ]; then echo "changes=true" >> "$GITHUB_OUTPUT";
+          elif [ "$code" = "3" ]; then echo "changes=false" >> "$GITHUB_OUTPUT";
+          else exit "$code"; fi
+          { cat proposals.md; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Decide which branch to use
+        id: branch
+        # The bot replaces only its own work. A branch with a human commit on
+        # it is left alone and a dated branch is used instead.
+        run: |
+          git config user.name "melee-watcher[bot]"
+          git config user.email "noreply@github.com"
+          target="$BRANCH"
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+            git fetch -q origin "$BRANCH"
+            base=$(git merge-base origin/main "origin/$BRANCH")
+            humans=$(git log --format=%an "$base..origin/$BRANCH" | grep -v '^melee-watcher\[bot\]$' | sort -u || true)
+            if [ -n "$humans" ]; then
+              echo "human commits on $BRANCH by: $humans — leaving it alone"
+              target="$BRANCH-$(date -u +%Y%m%d)"
+            fi
+          fi
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+
+      - name: Open or refresh the pull request
+        if: steps.propose.outputs.changes == 'true'
+        run: |
+          target="${{ steps.branch.outputs.target }}"
+          git checkout -q -B "$target" origin/main
+          git add config/archetypes/*.yml
+          git commit -q -m "Archetype proposals $(date -u +%F) (last ${{ inputs.window_days || '30' }} days)"
+          git push -q -f origin "$target"
+          existing=$(gh pr list --head "$target" --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh pr edit "$existing" --title "Archetype proposals — $(date -u +%F)" --body-file proposals.md
+            gh pr comment "$existing" --body "Refreshed $(date -u +%F): proposals recomputed against main over the last ${{ inputs.window_days || '30' }} days. Earlier bot commits were replaced."
+            echo "refreshed PR #$existing"
+          else
+            gh pr create --head "$target" --base main --title "Archetype proposals — $(date -u +%F)" --body-file proposals.md --label archetype-proposals || \
+            gh pr create --head "$target" --base main --title "Archetype proposals — $(date -u +%F)" --body-file proposals.md
+          fi
+
+      - name: Close a stale bot-only PR when nothing is proposed
+        if: steps.propose.outputs.changes == 'false' && steps.branch.outputs.target == env.BRANCH
+        run: |
+          existing=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh pr close "$existing" --comment "Closing: this week's run found nothing to propose against the current rules, so the earlier proposals are stale. A new PR opens when the data changes." --delete-branch
+            echo "closed stale PR #$existing"
+          else
+            echo "no proposals and no open PR"
+          fi

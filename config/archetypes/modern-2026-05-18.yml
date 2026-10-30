@@ -60,8 +60,11 @@ rules:
   - Skateboard
   - Claws of Gix
   - Weapons Manufacturing
+  - Mox Opal
+  - Pithing Needle
   min_signature: 3
-  note: Pinnacle Emissary / Kappa Cannoneer build
+  note: 'proposed 2026-10-30: added Pithing Needle. proposed 2026-10-30: added Mox Opal. Pinnacle Emissary
+    / Kappa Cannoneer build'
 - archetype: Blink
   variant: Esper Blink
   signature:
@@ -113,8 +116,11 @@ rules:
   - Vizier of Remedies
   - Leyline of Abundance
   - Birds of Paradise
+  - Tyvar, Jubilant Brawler
+  - Shang-Chi, Master of Kung Fu
   min_signature: 3
-  note: Badgermole Cub / Vizier combo
+  note: 'proposed 2026-10-30: added Shang-Chi, Master of Kung Fu. proposed 2026-10-30: added Tyvar, Jubilant
+    Brawler. Badgermole Cub / Vizier combo'
 - archetype: Amulet Titan
   variant: Amulet Titan
   signature:
@@ -124,7 +130,10 @@ rules:
   - Spelunking
   - Cultivator Colossus
   - Scapeshift
+  - Summoner's Pact
+  - Green Sun's Zenith
   min_signature: 3
+  note: 'proposed 2026-10-30: added Green Sun''s Zenith. proposed 2026-10-30: added Summoner''s Pact.'
 - archetype: Ruby Storm
   variant: Ruby Storm
   signature:
@@ -134,7 +143,10 @@ rules:
   - Ral, Monsoon Mage
   - Reckless Impulse
   - Pyretic Ritual
+  - Past in Flames
+  - Desperate Ritual
   min_signature: 3
+  note: 'proposed 2026-10-30: added Desperate Ritual. proposed 2026-10-30: added Past in Flames.'
 - archetype: Dimir Midrange
   variant: Dimir Midrange
   signature:
@@ -144,8 +156,11 @@ rules:
   - Tamiyo, Inquisitive Student
   - Orcish Bowmasters
   - Counterspell
+  - Subtlety
+  - Psychic Frog
   min_signature: 3
-  note: Kaito, Murktide, Edict
+  note: 'proposed 2026-10-30: added Psychic Frog. proposed 2026-10-30: added Subtlety. Kaito, Murktide,
+    Edict'
 - archetype: Fight Rigging
   variant: Mono-Green Fight Rigging
   signature:
@@ -153,9 +168,12 @@ rules:
   - Fanatic of Rhonas
   - Slumbering Trudge
   - Ulamog, the Ceaseless Hunger
-  - Drowner of Truth
   - Disciple of Freyalise
+  - Ugin, Eye of the Storms
+  - Green Sun's Zenith
   min_signature: 3
+  note: 'proposed 2026-10-30: added Green Sun''s Zenith. proposed 2026-10-30: added Ugin, Eye of the Storms.
+    proposed 2026-10-30: trimmed Drowner of Truth.'
 - archetype: Living End
   variant: Living End
   signature:
@@ -165,7 +183,10 @@ rules:
   - Wistfulness
   - Violent Outburst
   - Oliphaunt
+  - Endurance
+  - Subtlety
   min_signature: 3
+  note: 'proposed 2026-10-30: added Subtlety. proposed 2026-10-30: added Endurance.'
 - archetype: Ponza
   variant: Boros Ponza
   signature:
@@ -186,7 +207,10 @@ rules:
   - Allosaurus Rider
   - Neoform
   - Pact of Negation
+  - Planar Genesis
+  - Disciple of Freyalise
   min_signature: 3
+  note: 'proposed 2026-10-30: added Disciple of Freyalise. proposed 2026-10-30: added Planar Genesis.'
 - archetype: Reanimator
   variant: Grixis Reanimator
   signature:
@@ -217,8 +241,10 @@ rules:
   - Nethergoyf
   - Fear of Missing Out
   - Dark Matter Manipulator
+  - Street Wraith
   min_signature: 3
-  note: 'new: Moonshadow, Detective''s Phoenix, delirium; shell still being figured out'
+  note: 'proposed 2026-10-30: added Street Wraith. new: Moonshadow, Detective''s Phoenix, delirium; shell
+    still being figured out'
 - archetype: Yawgmoth
   variant: Yawgmoth
   signature:
@@ -228,7 +254,10 @@ rules:
   - Dredger's Insight
   - Agatha's Soul Cauldron
   - Strangleroot Geist
+  - Walking Ballista
+  - Badgermole Cub
   min_signature: 3
+  note: 'proposed 2026-10-30: added Badgermole Cub. proposed 2026-10-30: added Walking Ballista.'
 - archetype: Tameshi Belcher
   variant: Tameshi Belcher
   signature:
@@ -238,7 +267,10 @@ rules:
   - Whir of Invention
   - Goblin Charbelcher
   - Jwari Disruption
+  - Waterlogged Teachings
+  - Lotus Bloom
   min_signature: 3
+  note: 'proposed 2026-10-30: added Lotus Bloom. proposed 2026-10-30: added Waterlogged Teachings.'
 - archetype: Hollow One
   variant: Hollow One
   signature:
@@ -280,8 +312,9 @@ rules:
   - Spell Snare
   - Prismatic Ending
   - Ephemerate
+  - March of Otherworldly Light
   min_signature: 3
-  note: Ketramose, Frog, Ephemerate
+  note: 'proposed 2026-10-30: added March of Otherworldly Light. Ketramose, Frog, Ephemerate'
 - archetype: Necro
   variant: Necro
   signature:
@@ -291,8 +324,11 @@ rules:
   - Fell the Profane
   - March of Wretched Sorrow
   - Force of Despair
+  - Orcish Bowmasters
+  - Boggart Trawler
   min_signature: 3
-  note: 'mono-black midrange/control: Necrodominance, Soul Spike'
+  note: 'proposed 2026-10-30: added Boggart Trawler. proposed 2026-10-30: added Orcish Bowmasters. mono-black
+    midrange/control: Necrodominance, Soul Spike'
 - archetype: Samwise Combo
   variant: Samwise Combo
   signature:
@@ -302,8 +338,9 @@ rules:
   - Gilded Goose
   - Cauldron Familiar
   - Young Wolf
+  - Carrion Feeder
   min_signature: 3
-  note: Birthing Ritual / Chord / Cauldron Familiar
+  note: 'proposed 2026-10-30: added Carrion Feeder. Birthing Ritual / Chord / Cauldron Familiar'
 - archetype: Azorius Control
   variant: Snapcaster Control
   signature:
@@ -388,8 +425,10 @@ rules:
   - Plunge into Darkness
   - Thud
   - Chancellor of the Dross
+  - Summoner's Pact
   min_signature: 3
-  note: 'two-card combo: Cosmogoyf + Thud (Spoils of the Vault, Serum Powder)'
+  note: 'proposed 2026-10-30: added Summoner''s Pact. two-card combo: Cosmogoyf + Thud (Spoils of the
+    Vault, Serum Powder)'
 - archetype: Izzet Murktide
   variant: Izzet Murktide
   signature:

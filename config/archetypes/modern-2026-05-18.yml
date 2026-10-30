@@ -209,7 +209,7 @@ rules:
   - Ragavan, Nimble Pilferer
   min_signature: 3
   note: Phelia + Solitude/Quantum Riddler with Ephemerate
-- archetype: Rakdos Phoenix
+- archetype: Phoenix
   variant: Rakdos Phoenix
   signature:
   - Moonshadow
@@ -219,7 +219,7 @@ rules:
   - Dark Matter Manipulator
   - Troll of Khazad-dûm
   min_signature: 3
-  note: 'new: Moonshadow, Detective''s Phoenix, delirium'
+  note: 'new: Moonshadow, Detective''s Phoenix, delirium; shell still being figured out'
 - archetype: Yawgmoth
   variant: Yawgmoth
   signature:
@@ -293,7 +293,7 @@ rules:
   - March of Wretched Sorrow
   - Force of Despair
   min_signature: 3
-  note: Necrodominance, Soul Spike
+  note: 'mono-black midrange/control: Necrodominance, Soul Spike'
 - archetype: Samwise Combo
   variant: Samwise Combo
   signature:
@@ -316,8 +316,8 @@ rules:
   - Counterspell
   min_signature: 3
   note: Cling to Dust, Snapcaster, Wan Shi Tong
-- archetype: Emry Combo
-  variant: Emry Combo
+- archetype: Grinding Station
+  variant: Grinding Station (Emry)
   signature:
   - Mox Amber
   - Aether Spellbomb
@@ -326,7 +326,7 @@ rules:
   - Metallic Rebuke
   - Mox Opal
   min_signature: 3
-  note: Mox Amber / Emry / Aether Spellbomb
+  note: Mox Amber / Emry shell of the Station combo
 - archetype: Mill
   variant: Mill
   signature:
@@ -348,7 +348,7 @@ rules:
   - Eidolon of the Great Revel
   min_signature: 3
 - archetype: Grinding Station
-  variant: Grinding Station
+  variant: Grinding Station (Loki/Oswald)
   signature:
   - Sewer-veillance Cam
   - Grinding Station
@@ -357,6 +357,7 @@ rules:
   - Aether Spellbomb
   - Oswald Fiddlebender
   min_signature: 3
+  note: always a combo deck; sub-packages differ
 - archetype: Energy
   variant: Azorius Energy
   signature:
@@ -379,8 +380,8 @@ rules:
   - Subtlety
   min_signature: 3
   note: Birthing Ritual / Shardless Agent / Omnath
-- archetype: Cosmogoyf Thud
-  variant: Cosmogoyf Thud
+- archetype: Goyf Fling
+  variant: Goyf Fling
   signature:
   - Cosmogoyf
   - Spoils of the Vault
@@ -389,7 +390,7 @@ rules:
   - Thud
   - Chancellor of the Dross
   min_signature: 3
-  note: Spoils of the Vault, Serum Powder, Thud | CHECK NAME
+  note: 'two-card combo: Cosmogoyf + Thud (Spoils of the Vault, Serum Powder)'
 - archetype: Izzet Murktide
   variant: Izzet Murktide
   signature:
@@ -473,7 +474,7 @@ rules:
   - Ugin, Eye of the Storms
   - Kozilek's Command
   min_signature: 3
-  note: 'Portent of Calamity into Emrakul | CHECK: own archetype?'
+  note: Portent of Calamity into Emrakul; low count, kept under Eldrazi Tron
 - archetype: Mono-Red Belcher
   variant: Mono-Red Belcher
   signature:
@@ -485,8 +486,8 @@ rules:
   - Pinnacle Monk
   min_signature: 3
   note: Sundering Eruption / Irencrag Feat
-- archetype: Jeskai Control
-  variant: Jeskai Control
+- archetype: Wizards
+  variant: Jeskai Wizards
   signature:
   - Flame of Anor
   - Snapcaster Mage
@@ -495,8 +496,8 @@ rules:
   - Subtlety
   - Spell Snare
   min_signature: 3
-  note: Flame of Anor, Snapcaster | CHECK NAME
-- archetype: Darklight Phoenix
+  note: Flame of Anor wizard package
+- archetype: Phoenix
   variant: Darklight Phoenix
   signature:
   - Darklight Phoenix
@@ -506,7 +507,7 @@ rules:
   - Bloodghast
   - Carrion Feeder
   min_signature: 3
-  note: Stitcher's Supplier, Flare of Malice | CHECK NAME
+  note: Stitcher's Supplier / Bloodghast build; color pairing still settling
 - archetype: Dredge
   variant: Dredge
   signature:
@@ -527,7 +528,7 @@ rules:
   - Persist
   - Troll of Khazad-dûm
   min_signature: 3
-  note: Flare of Malice / Eyetwitch / Persist into Archon | CHECK
+  note: Flare of Malice / Eyetwitch / Persist into Archon
 - archetype: Song of Creation
   variant: Song of Creation
   signature:
@@ -540,7 +541,7 @@ rules:
   min_signature: 3
   note: Jace, Wielder of Mysteries combo
 - archetype: Necro
-  variant: Necro Rite
+  variant: Necro (Rite of Consumption)
   signature:
   - Rite of Consumption
   - Cosmogoyf
@@ -549,7 +550,7 @@ rules:
   - Witherbloom Charm
   - Plunge into Darkness
   min_signature: 3
-  note: 'Rite of Consumption / Cosmogoyf | CHECK: own archetype?'
+  note: mono-black midrange/control shell with the Rite of Consumption / Cosmogoyf package
 - archetype: Azorius Control
   variant: Miracles
   signature:
@@ -571,7 +572,7 @@ rules:
   - Devourer of Destiny
   - Kozilek's Command
   min_signature: 3
-  note: Through the Breach into Ulamog/Emrakul | CHECK
+  note: Through the Breach into Ulamog/Emrakul; low count, kept under Eldrazi Tron
 - archetype: Reanimator
   variant: Esper Reanimator
   signature:
@@ -624,4 +625,5 @@ rules:
   - Nissa, Resurgent Animist
   - Enduring Vitality
   min_signature: 3
-  note: Springheart Nantuko / Ouroboroid | CHECK NAME
+  note: '8 lists: Springheart Nantuko / Quirion Ranger / Ouroboroid | CHECK: unknown deck, may belong
+    in Other'

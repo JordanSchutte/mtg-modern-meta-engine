@@ -41,6 +41,9 @@ defaults:
   run:
     shell: bash -eo pipefail {0}   # a failing command inside a pipe fails the step
 
+permissions:
+  contents: write   # to push run reports to the reports branch
+
 concurrency:
   group: melee-bronze
   cancel-in-progress: false   # never interrupt a run mid-fetch
@@ -143,6 +146,24 @@ jobs:
       - name: Push silver to R2
         if: always()
         run: rclone copy data/silver "r2:$BUCKET/silver" --fast-list --stats-one-line -v
+
+      - name: Publish reports to the reports branch
+        # Coverage and archetype reports as plain files, readable without the
+        # Actions UI (git show origin/reports:reports/archetypes.txt).
+        if: always()
+        run: |
+          mkdir -p /tmp/reports
+          cp silver-report.txt /tmp/reports/coverage.txt 2>/dev/null || true
+          cp archetype-report.txt /tmp/reports/archetypes.txt 2>/dev/null || true
+          git config user.name "melee-watcher[bot]"
+          git config user.email "noreply@github.com"
+          git fetch -q origin reports || true
+          git checkout -q -B reports origin/reports 2>/dev/null || git checkout -q --orphan reports
+          git rm -rq --cached . 2>/dev/null || true
+          mkdir -p reports && cp /tmp/reports/* reports/ 2>/dev/null || true
+          git add -f reports/
+          git commit -q -m "Reports from run ${{ github.run_number }} ($(date -u +%FT%TZ))" || echo "no report changes"
+          git push -q origin reports
 
       - name: Keep this run's discovery output
         if: always()

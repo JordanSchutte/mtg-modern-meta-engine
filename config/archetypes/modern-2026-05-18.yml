@@ -1,0 +1,627 @@
+# Archetype rules for Modern, period starting 2026-05-18 (post-B&R).
+# Mined from 7,557 Melee lists on 2026-10-28, then named by hand. Edit freely:
+# the classifier scores a list by how many signature cards it has; the rule
+# with the most hits wins (ties: larger share of its signature, then priority).
+# 'archetype' is the level the matchup matrix uses; 'variant' is the color/
+# build label. 'note' is for people and ignored by the classifier.
+# Optional per rule: colors (WUBRG letters the list must equal), excludes,
+# priority. See src/mtgmeta/archetypes/rules.py.
+
+format: Modern
+period_start: '2026-05-18'
+rules:
+- archetype: Broodscale Combo
+  variant: Broodscale Combo
+  signature:
+  - Basking Broodscale
+  - Blade of the Bloodchief
+  - Ancient Stirrings
+  - Springleaf Drum
+  - Soul-Guide Lantern
+  - Haywire Mite
+  min_signature: 3
+- archetype: Izzet Prowess
+  variant: Izzet Prowess
+  signature:
+  - Cori-Steel Cutter
+  - Lava Dart
+  - Dragon's Rage Channeler
+  - Monastery Swiftspear
+  - Mutagenic Growth
+  - Expressive Iteration
+  min_signature: 3
+- archetype: Reanimator
+  variant: Esper Goryo's
+  signature:
+  - Goryo's Vengeance
+  - Faithful Mending
+  - Atraxa, Grand Unifier
+  - Griselbrand
+  - Psychic Frog
+  - Ephemerate
+  min_signature: 3
+  note: Goryo's into Atraxa/Griselbrand
+- archetype: Energy
+  variant: Boros Energy
+  signature:
+  - Ajani, Nacatl Pariah
+  - Guide of Souls
+  - Goblin Bombardment
+  - Ocelot Pride
+  - Voice of Victory
+  - Thraben Charm
+  min_signature: 3
+- archetype: Affinity
+  variant: Affinity
+  signature:
+  - Pinnacle Emissary
+  - Kappa Cannoneer
+  - Engineered Explosives
+  - Skateboard
+  - Claws of Gix
+  - Weapons Manufacturing
+  min_signature: 3
+  note: Pinnacle Emissary / Kappa Cannoneer build
+- archetype: Blink
+  variant: Esper Blink
+  signature:
+  - Overlord of the Balemurk
+  - Flickerwisp
+  - Boggart Trawler
+  - Witch Enchanter
+  - Emperor of Bones
+  - Phelia, Exuberant Shepherd
+  min_signature: 3
+  note: Overlord of the Balemurk, Phelia, Flickerwisp
+- archetype: Eldrazi Tron
+  variant: Eldrazi Tron
+  signature:
+  - Karn, the Great Creator
+  - Expedition Map
+  - Ugin, Eye of the Storms
+  - Devourer of Destiny
+  - Dismember
+  - Kozilek's Command
+  min_signature: 3
+- archetype: Azorius Control
+  variant: Scepter Control
+  signature:
+  - Orim's Chant
+  - Consult the Star Charts
+  - Narset, Parter of Veils
+  - Isochron Scepter
+  - Day's Undoing
+  - Supreme Verdict
+  min_signature: 3
+  note: Orim's Chant + Isochron Scepter
+- archetype: Domain Zoo
+  variant: Domain Zoo
+  signature:
+  - Scion of Draco
+  - Leyline Binding
+  - Leyline of the Guildpact
+  - Territorial Kavu
+  - Stubborn Denial
+  - Ragavan, Nimble Pilferer
+  min_signature: 3
+- archetype: Devoted Druid
+  variant: Devoted Druid
+  signature:
+  - Badgermole Cub
+  - Nature's Rhythm
+  - Devoted Druid
+  - Vizier of Remedies
+  - Leyline of Abundance
+  - Birds of Paradise
+  min_signature: 3
+  note: Badgermole Cub / Vizier combo
+- archetype: Amulet Titan
+  variant: Amulet Titan
+  signature:
+  - Amulet of Vigor
+  - Primeval Titan
+  - Arboreal Grazer
+  - Spelunking
+  - Cultivator Colossus
+  - Scapeshift
+  min_signature: 3
+- archetype: Ruby Storm
+  variant: Ruby Storm
+  signature:
+  - Ruby Medallion
+  - Manamorphose
+  - Wish
+  - Ral, Monsoon Mage
+  - Reckless Impulse
+  - Pyretic Ritual
+  min_signature: 3
+- archetype: Dimir Midrange
+  variant: Dimir Midrange
+  signature:
+  - Sheoldred's Edict
+  - Kaito, Bane of Nightmares
+  - Murktide Regent
+  - Tamiyo, Inquisitive Student
+  - Orcish Bowmasters
+  - Counterspell
+  min_signature: 3
+  note: Kaito, Murktide, Edict
+- archetype: Fight Rigging
+  variant: Mono-Green Fight Rigging
+  signature:
+  - Fight Rigging
+  - Fanatic of Rhonas
+  - Slumbering Trudge
+  - Ulamog, the Ceaseless Hunger
+  - Drowner of Truth
+  - Disciple of Freyalise
+  min_signature: 3
+- archetype: Living End
+  variant: Living End
+  signature:
+  - Living End
+  - Generous Ent
+  - Shardless Agent
+  - Wistfulness
+  - Violent Outburst
+  - Oliphaunt
+  min_signature: 3
+- archetype: Ponza
+  variant: Boros Ponza
+  signature:
+  - Price of Freedom
+  - Cleansing Wildfire
+  - Path to Exile
+  - Erode
+  - Avengers Disassembled
+  - Wrath of the Skies
+  min_signature: 3
+  note: 'land destruction: Cleansing Wildfire, Price of Freedom'
+- archetype: Neobrand
+  variant: Neobrand
+  signature:
+  - Xenagos, God of Revels
+  - Ghalta, Stampede Tyrant
+  - Eldritch Evolution
+  - Allosaurus Rider
+  - Neoform
+  - Pact of Negation
+  min_signature: 3
+- archetype: Reanimator
+  variant: Grixis Reanimator
+  signature:
+  - Unearth
+  - Archon of Cruelty
+  - Abhorrent Oculus
+  - Persist
+  - Faithless Looting
+  - Thought Scour
+  min_signature: 3
+  note: Unearth/Persist into Archon or Oculus
+- archetype: Blink
+  variant: Jeskai Blink
+  signature:
+  - Fable of the Mirror-Breaker
+  - Phelia, Exuberant Shepherd
+  - Wrath of the Skies
+  - Galvanic Discharge
+  - March of Otherworldly Light
+  - Ragavan, Nimble Pilferer
+  min_signature: 3
+  note: Phelia + Solitude/Quantum Riddler with Ephemerate
+- archetype: Rakdos Phoenix
+  variant: Rakdos Phoenix
+  signature:
+  - Moonshadow
+  - Detective's Phoenix
+  - Nethergoyf
+  - Fear of Missing Out
+  - Dark Matter Manipulator
+  - Troll of Khazad-dûm
+  min_signature: 3
+  note: 'new: Moonshadow, Detective''s Phoenix, delirium'
+- archetype: Yawgmoth
+  variant: Yawgmoth
+  signature:
+  - Yawgmoth, Thran Physician
+  - Young Wolf
+  - Grist, the Hunger Tide
+  - Dredger's Insight
+  - Agatha's Soul Cauldron
+  - Strangleroot Geist
+  min_signature: 3
+- archetype: Tameshi Belcher
+  variant: Tameshi Belcher
+  signature:
+  - Tameshi, Reality Architect
+  - Suppression Ray
+  - Sea Gate Restoration
+  - Whir of Invention
+  - Goblin Charbelcher
+  - Jwari Disruption
+  min_signature: 3
+- archetype: Hollow One
+  variant: Hollow One
+  signature:
+  - Burning Inquiry
+  - Faithless Looting
+  - Hollow One
+  - Detective's Phoenix
+  - Marauding Mako
+  - Street Wraith
+  min_signature: 3
+- archetype: Green Tron
+  variant: Green Tron
+  signature:
+  - Utopia Sprawl
+  - World Breaker
+  - Icetill Explorer
+  - Talisman of Impulse
+  - Ugin, Eye of the Storms
+  - Sire of Seven Deaths
+  min_signature: 3
+  note: Utopia Sprawl ramp into Ugin/World Breaker
+- archetype: Ritual Oculus
+  variant: Ritual Oculus
+  signature:
+  - Birthing Ritual
+  - Ice-Fang Coatl
+  - Flare of Denial
+  - Abhorrent Oculus
+  - Harbinger of the Seas
+  - Coiling Oracle
+  min_signature: 3
+  note: Birthing Ritual into Abhorrent Oculus
+- archetype: Esper Midrange
+  variant: Esper Midrange
+  signature:
+  - Ketramose, the New Dawn
+  - Relic of Progenitus
+  - Psychic Frog
+  - Spell Snare
+  - Prismatic Ending
+  - Ephemerate
+  min_signature: 3
+  note: Ketramose, Frog, Ephemerate
+- archetype: Necro
+  variant: Necro
+  signature:
+  - Necrodominance
+  - Soul Spike
+  - Sheoldred, the Apocalypse
+  - Fell the Profane
+  - March of Wretched Sorrow
+  - Force of Despair
+  min_signature: 3
+  note: Necrodominance, Soul Spike
+- archetype: Samwise Combo
+  variant: Samwise Combo
+  signature:
+  - Birthing Ritual
+  - Chord of Calling
+  - Samwise Gamgee
+  - Gilded Goose
+  - Cauldron Familiar
+  - Young Wolf
+  min_signature: 3
+  note: Birthing Ritual / Chord / Cauldron Familiar
+- archetype: Azorius Control
+  variant: Snapcaster Control
+  signature:
+  - Cling to Dust
+  - Snapcaster Mage
+  - Wan Shi Tong, Librarian
+  - Sheoldred's Edict
+  - Consult the Star Charts
+  - Counterspell
+  min_signature: 3
+  note: Cling to Dust, Snapcaster, Wan Shi Tong
+- archetype: Emry Combo
+  variant: Emry Combo
+  signature:
+  - Mox Amber
+  - Aether Spellbomb
+  - Tamiyo, Inquisitive Student
+  - Emry, Lurker of the Loch
+  - Metallic Rebuke
+  - Mox Opal
+  min_signature: 3
+  note: Mox Amber / Emry / Aether Spellbomb
+- archetype: Mill
+  variant: Mill
+  signature:
+  - Archive Trap
+  - Hedron Crab
+  - Ruin Crab
+  - Surgical Extraction
+  - Fractured Sanity
+  - Visions of Beyond
+  min_signature: 3
+- archetype: Burn
+  variant: Burn
+  signature:
+  - Lava Spike
+  - Skewer the Critics
+  - Boltwave
+  - Goblin Guide
+  - Searing Blaze
+  - Eidolon of the Great Revel
+  min_signature: 3
+- archetype: Grinding Station
+  variant: Grinding Station
+  signature:
+  - Sewer-veillance Cam
+  - Grinding Station
+  - Mox Amber
+  - Loki, God of Mischief
+  - Aether Spellbomb
+  - Oswald Fiddlebender
+  min_signature: 3
+- archetype: Energy
+  variant: Azorius Energy
+  signature:
+  - Starfield Shepherd
+  - White Orchid Phantom
+  - Ocelot Pride
+  - Guide of Souls
+  - Witch Enchanter
+  - Phelia, Exuberant Shepherd
+  min_signature: 3
+  note: energy shell with a blink package (Starfield Shepherd, Phelia)
+- archetype: Ritual Omnath
+  variant: Ritual Omnath
+  signature:
+  - Birthing Ritual
+  - Omnath, Locus of Creation
+  - Elesh Norn, Mother of Machines
+  - Shardless Agent
+  - Leyline Binding
+  - Subtlety
+  min_signature: 3
+  note: Birthing Ritual / Shardless Agent / Omnath
+- archetype: Cosmogoyf Thud
+  variant: Cosmogoyf Thud
+  signature:
+  - Cosmogoyf
+  - Spoils of the Vault
+  - Serum Powder
+  - Plunge into Darkness
+  - Thud
+  - Chancellor of the Dross
+  min_signature: 3
+  note: Spoils of the Vault, Serum Powder, Thud | CHECK NAME
+- archetype: Izzet Murktide
+  variant: Izzet Murktide
+  signature:
+  - Murktide Regent
+  - Unholy Heat
+  - Counterspell
+  - Expressive Iteration
+  - Spell Snare
+  - Dragon's Rage Channeler
+  min_signature: 3
+- archetype: Merfolk
+  variant: Merfolk
+  signature:
+  - Lord of Atlantis
+  - Tide Shaper
+  - Vodalian Hexcatcher
+  - Master of the Pearl Trident
+  - Harbinger of the Seas
+  - Flare of Denial
+  min_signature: 3
+- archetype: Death's Shadow
+  variant: Death's Shadow
+  signature:
+  - Death's Shadow
+  - Moonshadow
+  - Street Wraith
+  - Mishra's Bauble
+  - Thoughtseize
+  min_signature: 3
+- archetype: Creativity
+  variant: Creativity
+  signature:
+  - Indomitable Creativity
+  - Archon of Cruelty
+  - Pawpatch Formation
+  - Wrenn and Six
+  - Fable of the Mirror-Breaker
+  - Teferi, Time Raveler
+  min_signature: 3
+  note: Indomitable Creativity into Archon
+- archetype: Hammer
+  variant: Hammer
+  signature:
+  - Colossus Hammer
+  - Puresteel Paladin
+  - Ornithopter
+  - Stoneforge Mystic
+  - Leyline Axe
+  - Shadowspear
+  min_signature: 3
+  note: Colossus Hammer / Puresteel Paladin
+- archetype: Eldrazi Aggro
+  variant: Eldrazi Aggro
+  signature:
+  - Eldrazi Linebreaker
+  - It That Heralds the End
+  - Wastescape Battlemage
+  - Thought-Knot Seer
+  - Glaring Fleshraker
+  - Sire of Seven Deaths
+  min_signature: 3
+  note: Linebreaker, It That Heralds the End
+- archetype: Rhinos
+  variant: Rhinos
+  signature:
+  - Fire
+  - Crashing Footfalls
+  - Violent Outburst
+  - Dead
+  - Shardless Agent
+  - Subtlety
+  min_signature: 3
+  note: Crashing Footfalls cascade
+- archetype: Eldrazi Tron
+  variant: Emrakul Tron
+  signature:
+  - Portent of Calamity
+  - Emrakul, the Aeons Torn
+  - Stock Up
+  - Expedition Map
+  - Ugin, Eye of the Storms
+  - Kozilek's Command
+  min_signature: 3
+  note: 'Portent of Calamity into Emrakul | CHECK: own archetype?'
+- archetype: Mono-Red Belcher
+  variant: Mono-Red Belcher
+  signature:
+  - Sundering Eruption
+  - Irencrag Feat
+  - Strike It Rich
+  - Goblin Charbelcher
+  - Shatterskull Smashing
+  - Pinnacle Monk
+  min_signature: 3
+  note: Sundering Eruption / Irencrag Feat
+- archetype: Jeskai Control
+  variant: Jeskai Control
+  signature:
+  - Flame of Anor
+  - Snapcaster Mage
+  - Tamiyo, Inquisitive Student
+  - Counterspell
+  - Subtlety
+  - Spell Snare
+  min_signature: 3
+  note: Flame of Anor, Snapcaster | CHECK NAME
+- archetype: Darklight Phoenix
+  variant: Darklight Phoenix
+  signature:
+  - Darklight Phoenix
+  - Flare of Malice
+  - Stitcher's Supplier
+  - Dark Matter Manipulator
+  - Bloodghast
+  - Carrion Feeder
+  min_signature: 3
+  note: Stitcher's Supplier, Flare of Malice | CHECK NAME
+- archetype: Dredge
+  variant: Dredge
+  signature:
+  - Creeping Chill
+  - Arclight Phoenix
+  - Life from the Loam
+  - Otherworldly Gaze
+  - Burning Inquiry
+  - Stinkweed Imp
+  min_signature: 3
+- archetype: Reanimator
+  variant: Mono-Black Reanimator
+  signature:
+  - Flare of Malice
+  - Eyetwitch
+  - Archon of Cruelty
+  - Stitcher's Supplier
+  - Persist
+  - Troll of Khazad-dûm
+  min_signature: 3
+  note: Flare of Malice / Eyetwitch / Persist into Archon | CHECK
+- archetype: Song of Creation
+  variant: Song of Creation
+  signature:
+  - Jace, Wielder of Mysteries
+  - Mox Amber
+  - Six
+  - Song of Creation
+  - Tamiyo, Inquisitive Student
+  - Engineered Explosives
+  min_signature: 3
+  note: Jace, Wielder of Mysteries combo
+- archetype: Necro
+  variant: Necro Rite
+  signature:
+  - Rite of Consumption
+  - Cosmogoyf
+  - Soul Spike
+  - Necrodominance
+  - Witherbloom Charm
+  - Plunge into Darkness
+  min_signature: 3
+  note: 'Rite of Consumption / Cosmogoyf | CHECK: own archetype?'
+- archetype: Azorius Control
+  variant: Miracles
+  signature:
+  - Brainsurge
+  - Terminus
+  - Jace, the Mind Sculptor
+  - Isochron Scepter
+  - Orim's Chant
+  - Counterspell
+  min_signature: 3
+  note: Brainsurge / Terminus
+- archetype: Eldrazi Tron
+  variant: Breach Tron
+  signature:
+  - Through the Breach
+  - Ulamog, the Defiler
+  - Emrakul, the Aeons Torn
+  - Yggdrasil, Rebirth Engine
+  - Devourer of Destiny
+  - Kozilek's Command
+  min_signature: 3
+  note: Through the Breach into Ulamog/Emrakul | CHECK
+- archetype: Reanimator
+  variant: Esper Reanimator
+  signature:
+  - Archon of Cruelty
+  - Persist
+  - Faithful Mending
+  - Emperor of Bones
+  - Psychic Frog
+  - Ephemerate
+  min_signature: 3
+  note: Persist into Archon, no Goryo's
+- archetype: Affinity
+  variant: Classic Affinity
+  signature:
+  - Ornithopter
+  - Memnite
+  - Cranial Plating
+  - Basim Ibn Ishaq
+  - Pinnacle Emissary
+  - Kappa Cannoneer
+  min_signature: 3
+  note: Ornithopter / Memnite / Cranial Plating
+- archetype: Azorius Control
+  variant: Teferi Control
+  signature:
+  - Teferi, Hero of Dominaria
+  - Wan Shi Tong, Librarian
+  - Supreme Verdict
+  - Consult the Star Charts
+  - Counterspell
+  - Wrath of the Skies
+  min_signature: 3
+  note: Teferi, Hero of Dominaria
+- archetype: Infect
+  variant: Infect
+  signature:
+  - Might of Old Krosa
+  - Noble Hierarch
+  - Blighted Agent
+  - Scale Up
+  - Vines of Vastwood
+  min_signature: 3
+- archetype: Nantuko Combo
+  variant: Nantuko Combo
+  signature:
+  - Springheart Nantuko
+  - Quirion Ranger
+  - Ouroboroid
+  - Ashaya, Soul of the Wild
+  - Nissa, Resurgent Animist
+  - Enduring Vitality
+  min_signature: 3
+  note: Springheart Nantuko / Ouroboroid | CHECK NAME

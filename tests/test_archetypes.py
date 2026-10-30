@@ -174,7 +174,7 @@ def test_propose_adds_new_deck_trims_and_extends(tmp_path):
     ])
     rs = load_rules(path)
     result = propose(decks, rs, path, cards, min_new=10, min_rule_lists=10, add_above=0.8,
-                     today="2026-11-04")
+                     add_lift=2.5, max_global=0.5, today="2026-11-04")
     kinds = {(p.kind, p.variant) for p in result.proposals}
     assert ("new", next(v for k, v in kinds if k == "new")) in kinds   # Eldrazi Tron found
     assert ("trim", "Esper Blink") in kinds
@@ -202,3 +202,21 @@ def test_propose_is_quiet_when_rules_fit(tmp_path):
     result = propose(decks, rs, path, cards, min_new=10, min_rule_lists=10)
     assert not result.changes_file
     assert "No changes proposed" in result.summary_md
+
+
+def test_propose_never_adds_format_staples(tmp_path):
+    from mtgmeta.archetypes.propose import propose
+    decks, _ = synthetic(per=30)
+    # Thoughtseize is in every Blink and Dimir list (and some others): a staple.
+    for main in decks.values():
+        if not any(c == "Thoughtseize" for _, c in main):
+            main.append((4, "Thoughtseize"))
+    cards = {r["key"]: r for r in card_rows()}
+    path = tmp_path / "modern-2026-05-18.yml"
+    _write_rules(path, [
+        {"archetype": "Blink", "variant": "Esper Blink",
+         "signature": ["Phelia, Exuberant Shepherd", "Flickerwisp"], "min_signature": 2},
+    ])
+    result = propose(decks, load_rules(path), path, cards, min_new=1000, min_rule_lists=10)
+    added = [c for p in result.proposals if p.kind == "add" for c in p.cards]
+    assert "Thoughtseize" not in added

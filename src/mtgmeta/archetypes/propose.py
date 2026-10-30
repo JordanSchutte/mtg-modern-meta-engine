@@ -65,8 +65,12 @@ def _display_names(decklists: dict[str, list[tuple[int, str]]]) -> dict[str, str
 def propose(decklists: dict[str, list[tuple[int, str]]], ruleset: RuleSet,
             rules_path: Path, cards: dict[str, dict] | None,
             min_new: int = 25, min_rule_lists: int = 15, trim_below: float = 0.5,
-            add_above: float = 0.9, add_lift: float = 2.5, max_signature: int = 8,
+            add_above: float = 0.9, add_lift: float = 6.0, max_signature: int = 8,
+            max_global: float = 0.12, max_adds: int = 2,
             variant_min: int = 40, today: str | None = None) -> ProposalResult:
+    """See the module docstring. Additions must be engine cards, not staples: a
+    card in more than ``max_global`` of all lists in the window is never
+    proposed, whatever its lift, and at most ``max_adds`` are proposed per rule."""
     today = today or datetime.now(UTC).strftime("%Y-%m-%d")
     results = classify_all(decklists, ruleset, cards)
     before = Counter(r.archetype for r in results)
@@ -128,12 +132,13 @@ def propose(decklists: dict[str, list[tuple[int, str]]], ruleset: RuleSet,
                 if k in sig_keys:
                     continue
                 p_in = c / n
+                p_global = presence_all[k] / max(1, n_all)
                 p_out = (presence_all[k] - c) / max(1, n_all - n)
                 lift = p_in / p_out if p_out > 0 else float("inf")
-                if p_in >= add_above and lift >= add_lift:
+                if p_in >= add_above and lift >= add_lift and p_global <= max_global:
                     cands.append((p_in * min(lift, 50.0), k, p_in))
             cands.sort(reverse=True)
-            room = max_signature - len(sig_keys)
+            room = min(max_adds, max_signature - len(sig_keys))
             for _, k, p_in in cands[:room]:
                 name = display.get(k, k)
                 proposals.append(Proposal(

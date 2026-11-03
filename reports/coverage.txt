@@ -31,8 +31,9 @@ start           id players modern  known  share  lists  empty  name
 2026-10-11  479653     544   1809   1663    92%    536      3  [Ghent Sun 09:30] Ultimate Guard Open: Modern
 2026-10-11  453138     270    567    403    71%    258      0  $uper $unday RCQ - Modern - SCG CON Los Angeles 
 2026-10-17  482105     184    551    486    88%    181      0  MTG SEA Championship Final 2026-27 Round 1
+2026-11-01  469603     162    140      0     0%      0      0  马年单淘赛2 / Year of the Horse Single-Elimination Ev
 
-31 events, 36416 Modern Swiss matches, 32637 with both decks known (90%)
-10388 decklists referenced, 7577 usable, 246064 card lines, 10734 players
+32 events, 36556 Modern Swiss matches, 32637 with both decks known (89%)
+10388 decklists referenced, 7577 usable, 246064 card lines, 10896 players
 
-wrote 5 tables to data/silver/melee: events=31, matches=37722, decklists=10388, decklist_cards=246064, players=10734
+wrote 5 tables to data/silver/melee: events=32, matches=37864, decklists=10388, decklist_cards=246064, players=10896

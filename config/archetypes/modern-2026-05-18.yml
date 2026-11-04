@@ -6,6 +6,8 @@
 # build label. 'note' is for people and ignored by the classifier.
 # Optional per rule: colors (WUBRG letters the list must equal), excludes,
 # priority. See src/mtgmeta/archetypes/rules.py.
+# To reject a weekly proposal for good: locked: true (never propose changes to
+# this rule), never_add: [cards], never_trim: [cards].
 
 format: Modern
 period_start: '2026-05-18'

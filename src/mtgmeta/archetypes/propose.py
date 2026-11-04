@@ -12,6 +12,10 @@ Runs weekly over the last ``window_days`` of lists. It detects, mechanically:
 4. **Variant candidates** — a distinct sub-cluster inside a big archetype.
    Reported only; naming a variant is a human decision.
 
+Per rule, a person can say no for good: ``locked: true`` (never touch this
+rule), ``never_add: [cards]`` and ``never_trim: [cards]``. The weekly job
+honours them, so a rejected proposal stays rejected.
+
 It never renames, merges or deletes archetypes. The result is a modified
 rules file plus a Markdown summary; the workflow turns those into a pull
 request. Rules with fewer than ``min_rule_lists`` matches in the window are
@@ -103,13 +107,16 @@ def propose(decklists: dict[str, list[tuple[int, str]]], ruleset: RuleSet,
             pres.update(sets_by_id[did])
         n = len(ids)
         raw_rule = raw_rules.get(rule.variant)
-        if raw_rule is None:
-            continue
+        if raw_rule is None or raw_rule.get("locked"):
+            continue  # locked: a person owns this signature; never propose changes
+        never_add = {normalize(str(c)) for c in (raw_rule.get("never_add") or [])}
+        never_trim = {normalize(str(c)) for c in (raw_rule.get("never_trim") or [])}
         sig_keys = list(rule.signature)
         sig_display = list(raw_rule["signature"])
 
         # trims
-        drop = [i for i, k in enumerate(sig_keys) if pres[k] / n < trim_below]
+        drop = [i for i, k in enumerate(sig_keys)
+                if pres[k] / n < trim_below and k not in never_trim]
         if drop:
             kept = [c for i, c in enumerate(sig_display) if i not in drop]
             names = [sig_display[i] for i in drop]
@@ -129,7 +136,7 @@ def propose(decklists: dict[str, list[tuple[int, str]]], ruleset: RuleSet,
         if len(sig_keys) < max_signature:
             cands = []
             for k, c in pres.items():
-                if k in sig_keys:
+                if k in sig_keys or k in never_add:
                     continue
                 p_in = c / n
                 p_global = presence_all[k] / max(1, n_all)

@@ -220,3 +220,28 @@ def test_propose_never_adds_format_staples(tmp_path):
     result = propose(decks, load_rules(path), path, cards, min_new=1000, min_rule_lists=10)
     added = [c for p in result.proposals if p.kind == "add" for c in p.cards]
     assert "Thoughtseize" not in added
+
+
+def test_locked_and_never_add_are_honoured(tmp_path):
+    from mtgmeta.archetypes.propose import propose
+    decks, _ = synthetic(per=30)
+    cards = {r["key"]: r for r in card_rows()}
+    path = tmp_path / "modern-2026-05-18.yml"
+    _write_rules(path, [
+        {"archetype": "Blink", "variant": "Esper Blink",
+         "signature": ["Phelia, Exuberant Shepherd", "Flickerwisp", "Subtlety"],
+         "min_signature": 2, "never_add": ["Witch Enchanter", "Solitude"],
+         "never_trim": ["Subtlety"]},
+        {"archetype": "Energy", "variant": "Boros Energy", "locked": True,
+         "signature": ["Guide of Souls", "Subtlety"], "min_signature": 1},
+    ])
+    result = propose(decks, load_rules(path), path, cards, min_new=1000, min_rule_lists=10,
+                     add_above=0.8, add_lift=2.5, max_global=0.5)
+    by_rule = {}
+    for p in result.proposals:
+        by_rule.setdefault(p.variant, []).append((p.kind, tuple(p.cards)))
+    assert "Boros Energy" not in by_rule                       # locked: untouched
+    blink = by_rule.get("Esper Blink", [])
+    assert not any(k == "trim" for k, _ in blink)             # Subtlety protected
+    added = {c for k, cs in blink for c in cs if k == "add"}
+    assert not added & {"Witch Enchanter", "Solitude"}

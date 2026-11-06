@@ -1,23 +1,23 @@
 rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 7557 lists
-7557 lists classified; 135 unclassified (1.8%)
+7557 lists classified; 134 unclassified (1.8%)
     904  12.0%  Broodscale Combo
     788  10.4%  Izzet Prowess
-    626   8.3%  Reanimator  [Esper Goryo's 507, Grixis Reanimator 98, Mono-Black Reanimator 14, Esper Reanimator 7]
+    624   8.3%  Reanimator  [Esper Goryo's 507, Grixis Reanimator 95, Mono-Black Reanimator 14, Esper Reanimator 8]
     550   7.3%  Energy  [Boros Energy 506, Azorius Energy 44]
-    497   6.6%  Blink  [Esper Blink 418, Jeskai Blink 79]
-    456   6.0%  Affinity  [Affinity 447, Classic Affinity 9]
+    496   6.6%  Blink  [Esper Blink 418, Jeskai Blink 78]
+    451   6.0%  Affinity  [Affinity 442, Classic Affinity 9]
     364   4.8%  Azorius Control  [Scepter Control 289, Snapcaster Control 41, Teferi Control 25, Miracles 9]
     341   4.5%  Eldrazi Tron  [Eldrazi Tron 316, Emrakul Tron 16, Breach Tron 9]
     275   3.6%  Domain Zoo
     261   3.5%  Devoted Druid
     239   3.2%  Amulet Titan
     226   3.0%  Ruby Storm
-    195   2.6%  Dimir Midrange
+    198   2.6%  Dimir Midrange
     179   2.4%  Fight Rigging
     168   2.2%  Ponza
     168   2.2%  Living End
     146   1.9%  Neobrand
-     93   1.2%  Grinding Station
+     98   1.3%  Grinding Station
      87   1.2%  Phoenix  [Rakdos Phoenix 70, Darklight Phoenix 17]
      73   1.0%  Yawgmoth
      69   0.9%  Tameshi Belcher
@@ -29,15 +29,15 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 7557 lists
      44   0.6%  Samwise Combo
      43   0.6%  Mill
      41   0.5%  Burn
-     37   0.5%  Wizards
-     36   0.5%  Ritual Omnath
+     38   0.5%  Ritual Omnath
+     35   0.5%  Wizards
      32   0.4%  Goyf Fling
      29   0.4%  Death's Shadow
      27   0.4%  Izzet Murktide
      24   0.3%  Merfolk
      19   0.3%  Hammer
+     19   0.3%  Creativity
      18   0.2%  Dredge
-     18   0.2%  Creativity
      17   0.2%  Eldrazi Aggro
      16   0.2%  Rhinos
      15   0.2%  Mono-Red Belcher
@@ -45,31 +45,31 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 7557 lists
       8   0.1%  Infect
       8   0.1%  Nantuko Combo
 
-135 unclassified lists; most common non-land cards among them:
-    27%  Thoughtseize
+134 unclassified lists; most common non-land cards among them:
+    28%  Thoughtseize
     21%  Fatal Push
     19%  Lightning Bolt
     14%  Inquisition of Kozilek
     13%  Ragavan, Nimble Pilferer
-    12%  Solitude
+    11%  Solitude
     11%  Orcish Bowmasters
     10%  Emrakul, the Aeons Torn
     10%  Aether Vial
-    10%  Wrenn and Six
     10%  Nihil Spellbomb
      9%  Pithing Needle
-     9%  Teferi, Time Raveler
-     9%  Green Sun's Zenith
+     9%  Wrenn and Six
      8%  Blood Moon
+     8%  Teferi, Time Raveler
      8%  Ephemerate
      8%  Shadowspear
+     8%  Green Sun's Zenith
      8%  Utopia Sprawl
      7%  Mox Opal
      7%  Force of Negation
-     7%  Orim's Chant
      7%  Mishra's Bauble
      7%  Fable of the Mirror-Breaker // Reflection of Kiki-Jiki
      7%  Malevolent Rumble
-     7%  Emeritus of Abundance // Regrowth
+     7%  Orim's Chant
+     7%  Witch Enchanter // Witch-Blessed Meadow
 
 wrote data/silver/melee/decklist_archetypes.parquet

@@ -222,8 +222,9 @@ rules:
   - Persist
   - Faithless Looting
   - Thought Scour
+  - Emperor of Bones
   min_signature: 3
-  note: Unearth/Persist into Archon or Oculus
+  note: 'proposed 2026-11-06: added Emperor of Bones. Unearth/Persist into Archon or Oculus'
 - archetype: Blink
   variant: Jeskai Blink
   signature:
@@ -341,8 +342,10 @@ rules:
   - Cauldron Familiar
   - Young Wolf
   - Carrion Feeder
+  - Yawgmoth, Thran Physician
   min_signature: 3
-  note: 'proposed 2026-10-30: added Carrion Feeder. Birthing Ritual / Chord / Cauldron Familiar'
+  note: 'proposed 2026-11-06: added Yawgmoth, Thran Physician. proposed 2026-10-30: added Carrion Feeder.
+    Birthing Ritual / Chord / Cauldron Familiar'
 - archetype: Azorius Control
   variant: Snapcaster Control
   signature:
@@ -363,8 +366,9 @@ rules:
   - Emry, Lurker of the Loch
   - Metallic Rebuke
   - Mox Opal
+  - Skateboard
   min_signature: 3
-  note: Mox Amber / Emry shell of the Station combo
+  note: 'proposed 2026-11-06: added Skateboard. Mox Amber / Emry shell of the Station combo'
 - archetype: Mill
   variant: Mill
   signature:
@@ -416,8 +420,9 @@ rules:
   - Shardless Agent
   - Leyline Binding
   - Subtlety
+  - Endurance
   min_signature: 3
-  note: Birthing Ritual / Shardless Agent / Omnath
+  note: 'proposed 2026-11-06: added Endurance. Birthing Ritual / Shardless Agent / Omnath'
 - archetype: Goyf Fling
   variant: Goyf Fling
   signature:
@@ -533,10 +538,9 @@ rules:
   - Snapcaster Mage
   - Tamiyo, Inquisitive Student
   - Counterspell
-  - Subtlety
   - Spell Snare
   min_signature: 3
-  note: Flame of Anor wizard package
+  note: 'proposed 2026-11-06: trimmed Subtlety. Flame of Anor wizard package'
 - archetype: Phoenix
   variant: Darklight Phoenix
   signature:

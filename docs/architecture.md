@@ -50,6 +50,10 @@ An event is fetched once its start is two days past, but decklists can be publis
 
 ## Matchup matrix
 
+Built in `gold/matrix.py` from silver on every run: one row per ordered archetype pair per period (Modern, Swiss, no byes, both decks known and classified; draws count half; mirrors kept as share but fixed at 50%). Win rates are shrunk toward 50% by 10 pseudo-matches with a 90% Wilson interval on the raw rate, and game-level rates sit beside match-level. The archetype summary adds share of match slots, record vs the field, and **position**: the share-weighted shrunk win rate against every other archetype, i.e. how well a deck is placed against the field as it currently is. The forecast later swaps the current field for an expected one in that same formula.
+
+## Matchup matrix — design notes
+
 - Mirrors are excluded.
 - Within a format period every match counts equally; a matchup is mostly a property of the two decks. A light decay for list drift is added only if a backtest shows it helps.
 - Each match keeps its round number so late-round effects can be checked.

@@ -63,6 +63,9 @@ python scripts/fetch_melee_event.py 453138
 # Parse bronze into silver Parquet tables and print per-event coverage
 python scripts/build_silver.py
 
+# Gold: matchup matrix + archetype summary from silver
+python scripts/build_gold.py
+
 # Archetypes: card table, mined draft rules, then classify with the rules you keep
 python scripts/update_cards.py
 python scripts/mine_archetypes.py --period-start 2026-05-18     # -> config/archetypes/*.draft.yml
@@ -72,6 +75,17 @@ python scripts/new_period.py --start 2026-12-15 --ban "Card"    # B&R day: new p
 
 pytest
 ```
+
+## Ask the data a question (MCP server)
+
+The tables are exposed as tools for Claude Code or Claude Desktop, so a coverage or matchup question is a sentence:
+
+```bash
+pip install -e ".[mcp]"
+rclone copy r2:mtgmeta-bronze/silver data/silver && rclone copy r2:mtgmeta-bronze/gold data/gold
+```
+
+`.mcp.json` in the repo registers it for Claude Code (open the repo and the `mtg-modern-meta` tools appear). For Claude Desktop, add the same command (`python -m mtgmeta.mcp.server`, cwd = this repo) to its MCP config. Tools: `coverage`, `failed_events`, `meta_share`, `matchup`, `matrix`, `archetype_cards` (core / package / slot breakdown with the flex budget), `card_usage`, `archetypes`, and read-only `run_sql`. It reads local Parquet only; refresh with rclone when you want current numbers.
 
 ## Unattended runs
 
@@ -92,6 +106,9 @@ src/mtgmeta/
     parse.py                tournament page, round matches, decklist parsers
     fetch.py                fetches one event into bronze (idempotent)
   silver/melee.py           bronze -> Parquet tables (events, matches, decklists, cards, players)
+  gold/matrix.py            matchup matrix + archetype summary (shrunk win rates, intervals, position)
+  mcp/queries.py            questions over the tables as plain functions
+  mcp/server.py             those functions as MCP tools (stdio) for Claude Code / Desktop
   cards/scryfall.py         Scryfall bulk data -> silver/cards.parquet (colors, types, lands)
   archetypes/rules.py       rules file format and the signature-based classifier
   archetypes/mine.py        drafts rules by clustering the period's decklists

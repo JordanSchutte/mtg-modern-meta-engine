@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mtg-modern-meta": {
+      "command": "python",
+      "args": ["-m", "mtgmeta.mcp.server"],
+      "env": { "DATA_ROOT": "data" }
+    }
+  }
+}

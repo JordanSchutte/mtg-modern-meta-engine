@@ -19,7 +19,11 @@ dependencies = [
     "scikit-learn>=1.4",
 ]
 
+[project.scripts]
+mtgmeta-mcp = "mtgmeta.mcp.server:main"
+
 [project.optional-dependencies]
+mcp = ["mcp>=2.0"]
 dev = ["pytest>=8.0", "ruff>=0.5"]
 
 [tool.setuptools.packages.find]

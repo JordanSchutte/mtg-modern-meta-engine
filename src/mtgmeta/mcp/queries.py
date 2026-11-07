@@ -157,31 +157,41 @@ def matrix(data_root: Path, period: str | None = None, top: int = 12,
 
 
 def archetype_cards(data_root: Path, archetype: str, period: str | None = None,
-                    section: str = "main") -> dict:
+                    section: str = "main", variant: str | None = None) -> dict:
     """MTGGoldfish-style breakdown with core / package / slot tags and the flex budget.
 
     core    : in 90%+ of lists at a steady count — the deck
     package : in a minority of lists but nearly always as a 3-4-of when present —
               a decision ("which package"), not a slot
     slot    : everything else — the loose slots pilots tune
+
+    ``variant`` narrows to one build (e.g. "Rakdos Phoenix"); without it an
+    archetype that holds several builds shows their shells as packages.
     """
     con = connect(data_root)
     period = period or _latest_period(con)
     name = _resolve(con, archetype, period)
-    rows = _rows(con, """
+    vfilter = "and variant = ?" if variant else ""
+    vparams = [variant] if variant else []
+    rows = _rows(con, f"""
         with lists as (
             select decklist_id from decklist_archetypes
-            where archetype = ? and rules_file like ?
+            where archetype = ? and rules_file like ? {vfilter}
         )
         select c.card, count(distinct c.decklist_id) as lists, avg(c.qty) as avg_qty,
                sum(case when c.qty >= 3 then 1 else 0 end) as three_plus
         from decklist_cards c join lists using (decklist_id)
         where c.section = ?
         group by c.card
-    """, [name, f"%{period}%", section])
-    n = con.execute("""
-        select count(*) from decklist_archetypes where archetype = ? and rules_file like ?
-    """, [name, f"%{period}%"]).fetchone()[0]
+    """, [name, f"%{period}%", *vparams, section])
+    n = con.execute(f"""
+        select count(*) from decklist_archetypes
+        where archetype = ? and rules_file like ? {vfilter}
+    """, [name, f"%{period}%", *vparams]).fetchone()[0]
+    variants = [r["variant"] for r in _rows(con, """
+        select variant, count(*) n from decklist_archetypes
+        where archetype = ? and rules_file like ? group by variant order by n desc
+    """, [name, f"%{period}%"])]
     land = {r["key"]: r["is_land"] for r in _rows(con, "select key, is_land from cards")} \
         if _has(con, "cards") else {}
     con.close()
@@ -201,8 +211,8 @@ def archetype_cards(data_root: Path, archetype: str, period: str | None = None,
         cards.append({"card": r["card"], "share": round(p, 3), "avg_copies": round(r["avg_qty"], 2),
                       "tag": tag, "is_land": is_land})
     cards.sort(key=lambda c: (-c["share"], -c["avg_copies"]))
-    return {"period": period, "archetype": name, "lists": n, "section": section,
-            "core_copies": round(core_copies, 1),
+    return {"period": period, "archetype": name, "variant": variant, "variants": variants,
+            "lists": n, "section": section, "core_copies": round(core_copies, 1),
             "flex_budget": round((60 if section == "main" else 15) - core_copies, 1),
             "cards": cards}
 

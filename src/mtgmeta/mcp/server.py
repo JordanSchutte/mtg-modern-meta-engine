@@ -87,10 +87,13 @@ def matrix(period: str | None = None, top: int = 12, min_matches: int = 20) -> d
 
 @server.tool()
 @safe
-def archetype_cards(archetype: str, period: str | None = None, section: str = "main") -> dict:
+def archetype_cards(archetype: str, period: str | None = None, section: str = "main",
+                    variant: str | None = None) -> dict:
     """MTGGoldfish-style card breakdown of an archetype with core / package / slot tags
-    and the flex budget (60 minus core copies). section: main or side."""
-    return q.archetype_cards(_root, archetype, period, section)
+    and the flex budget (60 minus core copies). section: main or side. variant narrows to
+    one build (the result lists the archetype's variants); without it a multi-build
+    archetype shows each shell as packages."""
+    return q.archetype_cards(_root, archetype, period, section, variant)
 
 
 @server.tool()

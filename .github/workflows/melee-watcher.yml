@@ -113,7 +113,7 @@ jobs:
         # clean event boundary with time to push; leftovers go to the next run.
         run: |
           python scripts/fetch_melee_event.py --from-discovery --from-watchlist \
-            --refresh-days 14 \
+            --refresh-days 14 --repair-decklists \
             --min-players "${{ inputs.min_players || '100' }}" \
             --min-age-days "${{ inputs.min_age_days || '2' }}" \
             --max-events "${{ inputs.max_events || '0' }}" \

@@ -28,6 +28,7 @@ import json
 import logging
 import shutil
 import tempfile
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -293,3 +294,60 @@ def fetch_event(
              tournament_id, len(meta.rounds), len(decklist_ids), len(new_decks),
              manifest["requests"])
     return manifest
+
+
+def missing_decklists(data_root: Path) -> dict[str, int]:
+    """Decklist ids named in event manifests whose page is not in bronze -> tournament id.
+
+    Pages can go missing when an upload fails after the manifest landed; the
+    event then looks complete and nothing comes back for them. This is the
+    list the repair pass works through.
+    """
+    root = bronze_root(data_root)
+    deck_dir = root / "decklists"
+    missing: dict[str, int] = {}
+    events_dir = root / "events"
+    if not events_dir.exists():
+        return missing
+    for event_root in sorted(events_dir.iterdir(), key=lambda p: int(p.name)):
+        version = latest_version(event_root)
+        if version is None:
+            continue
+        manifest = json.loads((version / "manifest.json").read_text(encoding="utf-8"))
+        for did in manifest.get("decklist_ids") or []:
+            if not (deck_dir / f"{did}.html").exists():
+                missing.setdefault(did, int(event_root.name))
+    return missing
+
+
+def repair_decklists(data_root: Path, client: PoliteClient, budget_minutes: float = 0.0,
+                     max_pages: int = 0) -> dict:
+    """Fetch decklist pages that manifests reference but bronze lacks.
+
+    Shared, unversioned files, so no new event version is written. Empty
+    lists are kept like everywhere else (so they aren't re-requested). Stops
+    at ``budget_minutes`` or ``max_pages`` and reports what is left.
+    """
+    missing = missing_decklists(data_root)
+    deck_dir = bronze_root(data_root) / "decklists"
+    deck_dir.mkdir(parents=True, exist_ok=True)
+    t0 = time.monotonic()
+    fetched = unusable = 0
+    for did, tid in missing.items():
+        if budget_minutes and (time.monotonic() - t0) / 60 >= budget_minutes:
+            break
+        if max_pages and fetched + unusable >= max_pages:
+            break
+        page = client.get_text(f"/Decklist/View/{did}",
+                               referer=f"{BASE_URL}/Tournament/View/{tid}")
+        try:
+            parse_decklist_page(page, did)
+        except UnusableDecklistError as exc:
+            log.warning("%s; keeping page", exc)
+            unusable += 1
+        else:
+            fetched += 1
+        (deck_dir / f"{did}.html").write_text(page, encoding="utf-8")
+    done = fetched + unusable
+    return {"missing_before": len(missing), "fetched": fetched, "unusable": unusable,
+            "remaining": len(missing) - done}

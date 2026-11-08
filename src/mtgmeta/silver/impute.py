@@ -161,7 +161,7 @@ def validate(data_root: Path, window: int = DEFAULT_WINDOW_DAYS) -> dict:
     con.close()
 
     buckets: dict[str, Counter] = defaultdict(Counter)
-    for pid, pl in lists.items():
+    for pl in lists.values():
         if len(pl) < 2:
             continue
         for d, t, lst in pl:
@@ -218,7 +218,7 @@ def report(imputations: list[Imputation], validation: dict, gain: dict | None = 
     n = len(imputations)
     by_gap = Counter("0-1d" if abs(i.days_delta) <= 1 else "2-3d" if abs(i.days_delta) <= 3
                      else "4-7d" if abs(i.days_delta) <= 7 else "8-14d" for i in imputations)
-    lines.append(f"  filled {n} match sides"
-                 + (" (" + ", ".join(f"{k} {v}" for k, v in sorted(by_gap.items())) + ")" if n else ""))
+    gaps = ", ".join(f"{k} {v}" for k, v in sorted(by_gap.items()))
+    lines.append(f"  filled {n} match sides" + (f" ({gaps})" if n else ""))
     lines.append(f"  of which {sum(1 for i in imputations if i.had_record)} had an empty list on record")
     return "\n".join(lines)

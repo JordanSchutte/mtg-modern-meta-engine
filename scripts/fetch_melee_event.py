@@ -24,7 +24,12 @@ from pathlib import Path
 from mtgmeta.config import Settings
 from mtgmeta.contracts import ContractError
 from mtgmeta.sources.melee import watchlist
-from mtgmeta.sources.melee.fetch import TooSmallError, events_to_refresh, fetch_event
+from mtgmeta.sources.melee.fetch import (
+    TooSmallError,
+    events_to_refresh,
+    fetch_event,
+    repair_decklists,
+)
 from mtgmeta.sources.melee.http import PoliteClient, RateLimitedError
 from mtgmeta.sources.melee.parse import NoRoundsError
 
@@ -42,6 +47,9 @@ def main() -> int:
     ap.add_argument("--min-players", type=int, default=100,
                     help="with --from-watchlist: minimum players, judged from round 1 "
                          "(default 100)")
+    ap.add_argument("--repair-decklists", action="store_true",
+                    help="after the events: fetch decklist pages that manifests reference but "
+                         "bronze lacks (shares the --budget-minutes)")
     ap.add_argument("--refresh-days", type=float, default=0.0,
                     help="re-check events in bronze that started within this many days (at most "
                          "once per ~20h each): tournament page + rounds only; a new version is "
@@ -90,7 +98,7 @@ def main() -> int:
     if args.refresh_days:
         refresh_ids = events_to_refresh(settings.data_root, args.refresh_days)
         logging.info("refresh: %d recent event(s) to re-check", len(refresh_ids))
-    if not ids and not refresh_ids:
+    if not ids and not refresh_ids and not args.repair_decklists:
         if args.from_watchlist or args.from_discovery or args.refresh_days:
             print("nothing to fetch")
             return 0
@@ -153,6 +161,17 @@ def main() -> int:
             total = sum(r["matches"] for r in swiss)
             print(f"{tid}: {manifest['name'][:60]} | swiss matches {total}, "
                   f"both decks known {known}")
+        if args.repair_decklists:
+            left = (args.budget_minutes - (time.monotonic() - t0) / 60) if args.budget_minutes \
+                else 0.0
+            if args.budget_minutes and left <= 0:
+                print("\nrepair: no budget left this run")
+            else:
+                rep = repair_decklists(settings.data_root, client, budget_minutes=left)
+                print(f"\nrepair: {rep['missing_before']} decklist page(s) missing from bronze; "
+                      f"fetched {rep['fetched']}, empty {rep['unusable']}, "
+                      f"remaining {rep['remaining']}")
+
     if deferred:
         print(f"\n{len(deferred)} event(s) left for the next run (budget or max-events): "
               f"{deferred}")

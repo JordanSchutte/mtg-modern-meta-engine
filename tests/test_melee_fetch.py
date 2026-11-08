@@ -181,3 +181,27 @@ def test_refresh_retries_empty_decklists_and_keeps_the_old_copy(tmp_path, melee_
     decks = sorted(p.name for p in (bronze_root(tmp_path) / "decklists").iterdir())
     assert len([d for d in decks if ".superseded-" in d]) == 3
     assert len([d for d in decks if ".superseded-" not in d]) == 3
+
+
+def test_repair_fetches_decklists_missing_from_bronze(tmp_path, fake_melee):
+    handler, state = fake_melee
+    from mtgmeta.sources.melee.fetch import missing_decklists, repair_decklists
+    client = client_for(handler)
+    manifest = fetch_event(453138, client, tmp_path)
+    deck_dir = bronze_root(tmp_path) / "decklists"
+    assert not missing_decklists(tmp_path)
+    # Simulate an upload that lost two pages after the manifest landed.
+    lost = manifest["decklist_ids"][:2]
+    for did in lost:
+        (deck_dir / f"{did}.html").unlink()
+    assert set(missing_decklists(tmp_path)) == set(lost)
+    before = client.requests_made
+    rep = repair_decklists(tmp_path, client)
+    assert rep == {"missing_before": 2, "fetched": 2, "unusable": 0, "remaining": 0}
+    assert client.requests_made - before == 2
+    assert not missing_decklists(tmp_path)
+    # max_pages bounds a pass and reports what is left
+    for did in lost:
+        (deck_dir / f"{did}.html").unlink()
+    rep = repair_decklists(tmp_path, client, max_pages=1)
+    assert rep["fetched"] == 1 and rep["remaining"] == 1

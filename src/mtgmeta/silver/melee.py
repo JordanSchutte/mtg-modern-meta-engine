@@ -147,6 +147,8 @@ def _read_event(event_root: Path, version_dir: Path) -> tuple[dict, list[dict], 
         "modern_swiss_known": sum(1 for r in usable if r["both_decks_known"]),
         "formats": ",".join(sorted({r["format"] for r in match_rows if r["format"]})),
         "decklist_ids": len(manifest.get("decklist_ids") or []),
+        "decklists_missing": sum(1 for d in (manifest.get("decklist_ids") or [])
+                                 if not (event_root.parent.parent / "decklists" / f"{d}.html").exists()),
         "unusable_decklists": len(manifest.get("unusable_decklists") or {}),
         "versions": sum(1 for p in event_root.iterdir()
                         if p.is_dir() and (p / "manifest.json").exists()),
@@ -260,15 +262,17 @@ def _frame(rows: list[dict]):
 
 def coverage_report(build_: SilverBuild) -> str:
     lines = [f"{'start':<11}{'id':>7}{'players':>8}{'modern':>7}{'known':>7}{'share':>7}"
-             f"{'lists':>7}{'empty':>7}  name",
-             "  (modern = Modern Swiss matches excluding byes; known = both decks published)"]
+             f"{'lists':>7}{'empty':>7}{'missing':>8}  name",
+             "  (modern = Modern Swiss matches excluding byes; known = both decks published; "
+             "missing = decklist pages not in bronze)"]
     for e in sorted(build_.events, key=lambda e: e["start"] or ""):
         n, k = e["modern_swiss_matches"], e["modern_swiss_known"]
         share = k / n if n else 0.0
         lines.append(
             f"{(e['start'] or '')[:10]:<11}{e['tournament_id']:>7}"
             f"{e['players_estimate'] or 0:>8}{n:>7}{k:>7}"
-            f"{share:>7.0%}{e['decklist_ids']:>7}{e['unusable_decklists']:>7}  {e['name'][:48]}"
+            f"{share:>7.0%}{e['decklist_ids']:>7}{e['unusable_decklists']:>7}"
+            f"{e['decklists_missing']:>8}  {e['name'][:48]}"
         )
     total_n = sum(e["modern_swiss_matches"] for e in build_.events)
     total_k = sum(e["modern_swiss_known"] for e in build_.events)
@@ -276,6 +280,10 @@ def coverage_report(build_: SilverBuild) -> str:
                  f"{total_k} with both decks known "
                  f"({total_k / total_n:.0%})" if total_n else "\nno events")
     usable = sum(1 for d in build_.decklists if d["usable"])
+    missing = sum(e["decklists_missing"] for e in build_.events)
+    if missing:
+        lines.append(f"WARNING: {missing} referenced decklist pages are missing from bronze "
+                     "(fetch_melee_event.py --repair-decklists)")
     lines.append(f"{len(build_.decklists)} decklists referenced, {usable} usable, "
                  f"{len(build_.decklist_cards)} card lines, {len(build_.players)} players")
     return "\n".join(lines)

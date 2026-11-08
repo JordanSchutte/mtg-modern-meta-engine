@@ -77,7 +77,10 @@ def test_impute_fills_missing_and_empty_from_nearby_events(tmp_path):
     v = impute.validate(root, 14)
     assert v["0-1d"]["pairs"] == 2 and v["0-1d"]["same_75"] == 1.0
     assert v["0-1d"]["same_archetype"] == 1.0
-    assert "filled 2 match sides" in impute.report(imps, v)
+    gain = impute.coverage_gain(root, imps)
+    assert (gain["both_known_before"], gain["both_known_after"]) == (1, 2)
+    assert "filled 2 match sides" in impute.report(imps, v, gain)
+    assert "1 -> 2 of 4" in impute.report(imps, v, gain)
 
     # Gold: without imputation only f1 counts; with it, s1 and s2 join in.
     plain, arch = matrix.load_inputs(root, impute=False)

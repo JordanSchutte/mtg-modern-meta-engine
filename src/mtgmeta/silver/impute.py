@@ -185,8 +185,27 @@ def validate(data_root: Path, window: int = DEFAULT_WINDOW_DAYS) -> dict:
     return out
 
 
-def report(imputations: list[Imputation], validation: dict) -> str:
+def coverage_gain(data_root: Path, imputations: list[Imputation]) -> dict:
+    """Modern Swiss matches with both decks known, before and after imputation."""
+    events, usable, matches = load(data_root)
+    filled = {(i.match_guid, i.side) for i in imputations}
+    before = after = 0
+    for guid, _tid, _pa, da, _pb, db in matches:
+        a_known = da in usable
+        b_known = db in usable
+        before += a_known and b_known
+        after += (a_known or (guid, "a") in filled) and (b_known or (guid, "b") in filled)
+    return {"matches": len(matches), "both_known_before": before, "both_known_after": after}
+
+
+def report(imputations: list[Imputation], validation: dict, gain: dict | None = None) -> str:
     lines = ["Same-75 imputation"]
+    if gain:
+        n = gain["matches"]
+        lines.append(f"  Modern Swiss matches with both decks known: "
+                     f"{gain['both_known_before']} -> {gain['both_known_after']} of {n} "
+                     f"({gain['both_known_before'] / n:.1%} -> {gain['both_known_after'] / n:.1%})"
+                     if n else "  no matches")
     if validation:
         lines.append("  evidence (players with published lists at two nearby events):")
         lines.append(f"  {'gap':<7}{'pairs':>7}{'same 75':>9}{'same archetype':>16}")

@@ -1,11 +1,11 @@
 Same-75 imputation
-  Modern Swiss matches with both decks known: 18357 -> 22328 of 36556 (50.2% -> 61.1%)
+  Modern Swiss matches with both decks known: 32591 -> 33979 of 36556 (89.2% -> 93.0%)
   evidence (players with published lists at two nearby events):
   gap      pairs  same 75  same archetype
-  0-1d      1798      39%             78%
-  2-3d       442      31%             74%
-  4-7d       180       7%             77%
-  8-14d       17       0%             59%
-  filled 7287 match sides (0-1d 6614, 2-3d 142, 4-7d 486, 8-14d 45)
-  of which 4495 had an empty list on record
+  0-1d      3565      41%             79%
+  2-3d       417      30%             73%
+  4-7d       213       6%             78%
+  8-14d        9       0%             56%
+  filled 3628 match sides (0-1d 3462, 2-3d 24, 4-7d 125, 8-14d 17)
+  of which 53 had an empty list on record
 wrote data/silver/melee/imputations.parquet

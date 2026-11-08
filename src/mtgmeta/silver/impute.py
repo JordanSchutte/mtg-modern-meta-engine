@@ -220,5 +220,6 @@ def report(imputations: list[Imputation], validation: dict, gain: dict | None = 
                      else "4-7d" if abs(i.days_delta) <= 7 else "8-14d" for i in imputations)
     gaps = ", ".join(f"{k} {v}" for k, v in sorted(by_gap.items()))
     lines.append(f"  filled {n} match sides" + (f" ({gaps})" if n else ""))
-    lines.append(f"  of which {sum(1 for i in imputations if i.had_record)} had an empty list on record")
+    had_record = sum(1 for i in imputations if i.had_record)
+    lines.append(f"  of which {had_record} had an empty list on record")
     return "\n".join(lines)

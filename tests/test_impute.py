@@ -11,7 +11,8 @@ from mtgmeta.silver.melee import silver_root
 
 
 def test_nearest_prefers_closest_then_earlier():
-    lists = [(date(2026, 9, 4), 1, "fri"), (date(2026, 9, 6), 3, "sun"), (date(2026, 9, 20), 4, "late")]
+    lists = [(date(2026, 9, 4), 1, "fri"), (date(2026, 9, 6), 3, "sun"),
+             (date(2026, 9, 20), 4, "late")]
     # Saturday event (id 2): Friday and Sunday are both 1 day away -> earlier wins
     assert impute.nearest(lists, 2, date(2026, 9, 5), 14) == (date(2026, 9, 4), 1, "fri")
     # the player's own list at this event is never a candidate

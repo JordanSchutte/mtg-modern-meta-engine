@@ -147,8 +147,9 @@ def _read_event(event_root: Path, version_dir: Path) -> tuple[dict, list[dict], 
         "modern_swiss_known": sum(1 for r in usable if r["both_decks_known"]),
         "formats": ",".join(sorted({r["format"] for r in match_rows if r["format"]})),
         "decklist_ids": len(manifest.get("decklist_ids") or []),
-        "decklists_missing": sum(1 for d in (manifest.get("decklist_ids") or [])
-                                 if not (event_root.parent.parent / "decklists" / f"{d}.html").exists()),
+        "decklists_missing": sum(
+            1 for d in (manifest.get("decklist_ids") or [])
+            if not (event_root.parent.parent / "decklists" / f"{d}.html").exists()),
         "unusable_decklists": len(manifest.get("unusable_decklists") or {}),
         "versions": sum(1 for p in event_root.iterdir()
                         if p.is_dir() and (p / "manifest.json").exists()),

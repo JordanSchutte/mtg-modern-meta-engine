@@ -31,7 +31,7 @@ Mill                         0.6%      196  38.6%       33%–44% 43.7%
 Burn                         0.5%      186  42.9%       37%–49% 45.4%
 Wizards                      0.4%      155  49.1%       43%–56% 48.2%
 
-unclassified share of match slots: 1.5%
+unclassified share of match slots: 1.5%; matches using an imputed list: 0 of 31871 (0.0%)
 
 Matchups, period 2026-05-18: shrunk match win rate of row vs column (blank = under 20 matches); share and position per row
                       Broodscal Izzet Pro Reanimato    Energy  Affinity     Blink Eldrazi T Azorius C Devoted D Domain Zo Amulet Ti Ruby Stor

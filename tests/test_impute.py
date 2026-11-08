@@ -36,19 +36,27 @@ def _silver(tmp_path):
     ]), root / "decklists.parquet")
     base = {"is_swiss": True, "format": "Modern", "result": "win", "round_number": 1,
             "game_draws": 0, "game_wins_a": 2, "game_wins_b": 0}
+    # PlayerId is per tournament on Melee, so Saturday's ids differ; usernames match.
     pq.write_table(pa.Table.from_pylist([
         # Friday: everyone published
         {**base, "match_guid": "f1", "tournament_id": 1, "player_a_id": 1, "decklist_a": "p1-fri",
-         "player_b_id": 2, "decklist_b": "p2-fri", "winner_player_id": 1, "both_decks_known": True},
+         "player_a_user": "alice", "player_a_name": "Alice", "player_b_id": 2,
+         "decklist_b": "p2-fri", "player_b_user": "bob", "player_b_name": "Bob",
+         "winner_player_id": 1, "both_decks_known": True},
         {**base, "match_guid": "f2", "tournament_id": 1, "player_a_id": 3, "decklist_a": "p3-fri",
-         "player_b_id": 4, "decklist_b": None, "winner_player_id": 3, "both_decks_known": False},
+         "player_a_user": None, "player_a_name": "Carol", "player_b_id": 4, "decklist_b": None,
+         "player_b_user": "dan", "player_b_name": "Dan", "winner_player_id": 3,
+         "both_decks_known": False},
         # Saturday: player 1 has no list (-> p1-fri), player 3 has an empty record (-> p3-fri),
         # player 2 published, player 4 never published anywhere
-        {**base, "match_guid": "s1", "tournament_id": 2, "player_a_id": 1, "decklist_a": None,
-         "player_b_id": 2, "decklist_b": "p2-sat", "winner_player_id": 2, "both_decks_known": False},
-        {**base, "match_guid": "s2", "tournament_id": 2, "player_a_id": 3,
-         "decklist_a": "p3-sat-empty", "player_b_id": 4, "decklist_b": None,
-         "winner_player_id": 3, "both_decks_known": True},
+        {**base, "match_guid": "s1", "tournament_id": 2, "player_a_id": 11, "decklist_a": None,
+         "player_a_user": "alice", "player_a_name": "Alice", "player_b_id": 12,
+         "decklist_b": "p2-sat", "player_b_user": "bob", "player_b_name": "Bob",
+         "winner_player_id": 12, "both_decks_known": False},
+        {**base, "match_guid": "s2", "tournament_id": 2, "player_a_id": 13,
+         "decklist_a": "p3-sat-empty", "player_a_user": None, "player_a_name": "Carol",
+         "player_b_id": 14, "decklist_b": None, "player_b_user": "dan", "player_b_name": "Dan",
+         "winner_player_id": 13, "both_decks_known": True},
     ]), root / "matches.parquet")
     pq.write_table(pa.Table.from_pylist([
         {"decklist_id": d, "section": "main", "qty": 4, "card": c}

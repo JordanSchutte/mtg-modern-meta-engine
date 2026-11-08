@@ -11,7 +11,7 @@ events          one row per event (latest version): counts and coverage
 matches         one row per match; competitors flattened to a/b (a bye has no b)
 decklists       one row per decklist page: usable or not, sizes, name as submitted
 decklist_cards  one row per card line: decklist_id, section, qty, card
-players         one row per player id: latest names, events played
+players         one row per Melee account (username): latest name, events played
 
 Unknown decks are kept, not dropped: ``deck_a_known`` / ``deck_b_known`` and
 ``both_decks_known`` flag what the matrix can use. ``format`` is kept per match
@@ -82,11 +82,13 @@ def _match_row(m: MatchRecord, version: str, is_swiss: bool) -> dict:
         "game_draws": m.game_draws,
         "player_a_id": a.player_id if a else None,
         "player_a_name": a.display_name if a else None,
+        "player_a_user": (a.username or "").lower() or None if a else None,
         "decklist_a": a.decklist_id if a else None,
         "deck_a_known": a_known,
         "game_wins_a": a.game_wins if a else None,
         "player_b_id": b.player_id if b else None,
         "player_b_name": b.display_name if b else None,
+        "player_b_user": (b.username or "").lower() or None if b else None,
         "decklist_b": b.decklist_id if b else None,
         "deck_b_known": b_known,
         "game_wins_b": b.game_wins if b else None,
@@ -185,19 +187,21 @@ def _read_decklists(deck_dir: Path, facts: dict[str, dict]) -> tuple[list[dict],
 
 
 def _players(match_rows: Iterable[dict]) -> list[dict]:
-    seen: dict[int, dict] = {}
+    """One row per Melee account. ``PlayerId`` is per tournament; the username
+    is the stable key across events (display name as a fallback)."""
+    seen: dict[str, dict] = {}
     for r in match_rows:
         for side in ("a", "b"):
-            pid = r[f"player_{side}_id"]
-            if pid is None:
+            if r[f"player_{side}_id"] is None:
                 continue
-            p = seen.setdefault(pid, {"player_id": pid, "display_name": None,
+            key = r[f"player_{side}_user"] or f"name:{r[f'player_{side}_name']}"
+            p = seen.setdefault(key, {"username": key, "display_name": None,
                                       "tournaments": set(), "matches": 0})
             p["display_name"] = r[f"player_{side}_name"] or p["display_name"]
             p["tournaments"].add(r["tournament_id"])
             p["matches"] += 1
     return [{**p, "tournaments": len(p["tournaments"])}
-            for p in sorted(seen.values(), key=lambda p: p["player_id"])]
+            for p in sorted(seen.values(), key=lambda p: p["username"])]
 
 
 # --------------------------------------------------------------------------

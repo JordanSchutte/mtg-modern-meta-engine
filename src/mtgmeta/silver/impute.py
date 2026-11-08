@@ -39,7 +39,7 @@ class Imputation:
     match_guid: str
     tournament_id: int
     side: str
-    player_id: int
+    player: str        # Melee username (or "name:<display name>" when missing)
     decklist_id: str
     from_tournament_id: int
     days_delta: int
@@ -61,8 +61,11 @@ def load(data_root: Path):
     usable = {r[0] for r in con.execute(
         f"select decklist_id from '{(root / 'decklists.parquet').as_posix()}' "
         "where usable and format = 'Modern'").fetchall()}
+    # Melee's PlayerId is per tournament; the username is the cross-event key.
     matches = con.execute(f"""
-        select match_guid, tournament_id, player_a_id, decklist_a, player_b_id, decklist_b
+        select match_guid, tournament_id,
+               coalesce(player_a_user, 'name:' || player_a_name) as player_a, decklist_a,
+               coalesce(player_b_user, 'name:' || player_b_name) as player_b, decklist_b
         from '{(root / 'matches.parquet').as_posix()}'
         where is_swiss and format = 'Modern' and result <> 'bye'
     """).fetchall()
@@ -70,9 +73,9 @@ def load(data_root: Path):
     return events, usable, matches
 
 
-def player_lists(matches, events, usable) -> dict[int, list[tuple[date, int, str]]]:
+def player_lists(matches, events, usable) -> dict[str, list[tuple[date, int, str]]]:
     """Each player's usable published lists: (event day, tournament, decklist)."""
-    seen: dict[int, dict[tuple[int, str], date]] = defaultdict(dict)
+    seen: dict[str, dict[tuple[int, str], date]] = defaultdict(dict)
     for _, tid, pa_, da, pb, db in matches:
         day = events.get(tid)
         if day is None:

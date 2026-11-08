@@ -48,6 +48,10 @@ Results are derived from structured fields (`GameWins`, `GameDraws`, `ByeReason`
 
 An event is fetched once its start is two days past, but decklists can be published and results corrected after that. For 14 days after an event the watcher re-pulls just its tournament page and round JSON (about 17 requests for an RC, once a day) and compares a signature of who played whom, with which lists, and the result. Unchanged: nothing is written except a line in `events/<id>/refreshes.json`. Changed: a new version is written beside the old one and newly published lists are fetched; a list that was empty before is kept as `<guid>.superseded-<version>.html`. The refresh log is the data for deciding whether the two-day wait and the refresh window are right.
 
+## Imputation
+
+`silver/impute.py` fills a player's missing list from their own nearest usable published Modern list at another event within 14 days (earlier event wins ties), as its own table `imputations.parquet`; nothing in silver is overwritten and the matrix can be built without it (`--no-impute`). A list that exists but is empty counts as missing. The assumption is measured, not assumed: for players with published lists at two nearby events, the report gives the share with the same archetype and the identical 75 per day-gap bucket — that evidence sets the window. Matchup rows carry `imputed_matches` so a cell's dependence on imputation is always visible.
+
 ## Matchup matrix
 
 Built in `gold/matrix.py` from silver on every run: one row per ordered archetype pair per period (Modern, Swiss, no byes, both decks known and classified; draws count half; mirrors kept as share but fixed at 50%). Win rates are shrunk toward 50% by 10 pseudo-matches with a 90% Wilson interval on the raw rate, and game-level rates sit beside match-level. The archetype summary adds share of match slots, record vs the field, and **position**: the share-weighted shrunk win rate against every other archetype, i.e. how well a deck is placed against the field as it currently is. The forecast later swaps the current field for an expected one in that same formula.

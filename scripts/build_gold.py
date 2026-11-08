@@ -18,11 +18,13 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--top", type=int, default=12)
     ap.add_argument("--no-write", action="store_true")
+    ap.add_argument("--no-impute", action="store_true",
+                    help="published lists only (default: use silver/melee/imputations.parquet)")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     settings = Settings.from_env()
 
-    matches, archetypes = matrix.load_inputs(settings.data_root)
+    matches, archetypes = matrix.load_inputs(settings.data_root, impute=not args.no_impute)
     matchups, summary = matrix.build(matches, archetypes)
     print(matrix.summary_text(summary))
     print()

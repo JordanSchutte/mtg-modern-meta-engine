@@ -53,6 +53,7 @@ class Pair:
     n: int = 0
     game_wins: int = 0
     game_losses: int = 0
+    imputed: int = 0    # matches where at least one side's list was imputed
 
 
 def wilson(p: float, n: int, z: float = Z90) -> tuple[float, float]:
@@ -68,26 +69,59 @@ def shrink(wins: float, n: int, prior_n: float = PRIOR_N) -> float:
     return (wins + prior_n / 2) / (n + prior_n)
 
 
-def load_inputs(data_root: Path) -> tuple[list[dict], dict[str, tuple[str, str]]]:
-    """Usable matches and ``{decklist_id: (archetype, period)}``."""
+def load_inputs(data_root: Path, impute: bool = True,
+                ) -> tuple[list[dict], dict[str, tuple[str, str]]]:
+    """Matches with both decks known (published, or imputed when ``impute``) and
+    ``{decklist_id: (archetype, period)}``.
+
+    Imputed sides come from ``silver/melee/imputations.parquet`` (same player's
+    nearby published list); each match row carries ``imputed_a`` / ``imputed_b``.
+    A decklist that exists but is unusable counts as unknown unless imputed.
+    """
     root = silver_root(data_root)
     con = duckdb.connect()
+    imp_path = root / "imputations.parquet"
+    use_imp = impute and imp_path.exists()
+    imp_join = f"""
+        left join (select match_guid, decklist_id as imp_a
+                   from '{imp_path.as_posix()}' where side = 'a') ia using (match_guid)
+        left join (select match_guid, decklist_id as imp_b
+                   from '{imp_path.as_posix()}' where side = 'b') ib using (match_guid)
+    """ if use_imp else ""
+    imp_cols = "imp_a, imp_b" if use_imp else "null as imp_a, null as imp_b"
     matches = con.execute(f"""
-        select tournament_id, round_number, result, winner_player_id, game_draws,
-               player_a_id, decklist_a, game_wins_a, player_b_id, decklist_b, game_wins_b
-        from '{(root / "matches.parquet").as_posix()}'
-        where is_swiss and format = 'Modern' and result <> 'bye' and both_decks_known
+        with usable as (
+            select decklist_id from '{(root / "decklists.parquet").as_posix()}' where usable
+        )
+        select m.tournament_id, m.round_number, m.result, m.winner_player_id, m.game_draws,
+               m.player_a_id,
+               case when m.decklist_a in (select decklist_id from usable) then m.decklist_a end
+                   as decklist_a,
+               m.game_wins_a, m.player_b_id,
+               case when m.decklist_b in (select decklist_id from usable) then m.decklist_b end
+                   as decklist_b,
+               m.game_wins_b, {imp_cols}
+        from '{(root / "matches.parquet").as_posix()}' m {imp_join}
+        where m.is_swiss and m.format = 'Modern' and m.result <> 'bye'
     """).fetchall()
     cols = ["tournament_id", "round_number", "result", "winner_player_id", "game_draws",
             "player_a_id", "decklist_a", "game_wins_a", "player_b_id", "decklist_b",
-            "game_wins_b"]
+            "game_wins_b", "imp_a", "imp_b"]
+    rows = []
+    for r in matches:
+        d = dict(zip(cols, r, strict=True))
+        d["imputed_a"] = d["decklist_a"] is None and d["imp_a"] is not None
+        d["imputed_b"] = d["decklist_b"] is None and d["imp_b"] is not None
+        d["decklist_a"] = d["decklist_a"] or d["imp_a"]
+        d["decklist_b"] = d["decklist_b"] or d["imp_b"]
+        if d["decklist_a"] and d["decklist_b"]:
+            rows.append(d)
     arch = con.execute(f"""
         select decklist_id, archetype, rules_file
         from '{(root / "decklist_archetypes.parquet").as_posix()}'
     """).fetchall()
     con.close()
-    return ([dict(zip(cols, r, strict=True)) for r in matches],
-            {d: (a, _period(f)) for d, a, f in arch})
+    return rows, {d: (a, _period(f)) for d, a, f in arch}
 
 
 def _period(rules_file: str) -> str:
@@ -120,12 +154,14 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
         else:
             continue  # unreported
         ga, gb = int(m["game_wins_a"] or 0), int(m["game_wins_b"] or 0)
+        imputed = bool(m.get("imputed_a") or m.get("imputed_b"))
         for x, y, wx, gx, gy in ((aa, bb, wa, ga, gb), (bb, aa, wb, gb, ga)):
             p = pairs[(period, x, y)]
             p.wins += wx
             p.n += 1
             p.game_wins += gx
             p.game_losses += gy
+            p.imputed += imputed
 
     matchup_rows = []
     for (period, x, y), p in sorted(pairs.items()):
@@ -134,7 +170,7 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
         games = p.game_wins + p.game_losses
         matchup_rows.append({
             "period": period, "archetype": x, "opponent": y, "is_mirror": x == y,
-            "matches": p.n, "wins": p.wins, "win_rate": raw,
+            "matches": p.n, "imputed_matches": p.imputed, "wins": p.wins, "win_rate": raw,
             "win_rate_shrunk": 0.5 if x == y else shrink(p.wins, p.n, prior_n),
             "wr_lo": lo, "wr_hi": hi,
             "games": games, "game_win_rate": (p.game_wins / games) if games else None,
@@ -151,6 +187,7 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
         for a, rows in archs.items():
             n = sum(r["matches"] for r in rows if not r["is_mirror"])
             w = sum(r["wins"] for r in rows if not r["is_mirror"])
+            imp = sum(r["imputed_matches"] for r in rows if not r["is_mirror"])
             # position: share-weighted shrunk win rate vs each other archetype
             weight = sum(share.get(r["opponent"], 0.0) for r in rows if not r["is_mirror"])
             position = (sum(share.get(r["opponent"], 0.0) * r["win_rate_shrunk"]
@@ -158,7 +195,8 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
             lo, hi = wilson(w / n, n) if n else (0.0, 1.0)
             summary_rows.append({
                 "period": period, "archetype": a, "share": share[a],
-                "matches": n, "wins": w, "win_rate": (w / n) if n else None,
+                "matches": n, "imputed_matches": imp, "wins": w,
+                "win_rate": (w / n) if n else None,
                 "win_rate_shrunk": shrink(w, n, prior_n) if n else None,
                 "wr_lo": lo, "wr_hi": hi,
                 "position": position, "opponents": len(rows) - (1 if a in archs and any(
@@ -225,5 +263,9 @@ def summary_text(summary: list[dict], period: str | None = None, top: int = 30) 
         lines.append(f"{r['archetype'][:25]:<26}{r['share']:>7.1%}{r['matches']:>9}{wr:>7}"
                      f"{ci:>14}{pos:>6}")
     u = rows[0]["unclassified_share"] if rows else 0.0
-    lines.append(f"\nunclassified share of match slots: {u:.1%}")
+    n_all = sum(r["matches"] for r in rows)
+    imp_all = sum(r.get("imputed_matches", 0) for r in rows)
+    lines.append(f"\nunclassified share of match slots: {u:.1%}; "
+                 f"matches using an imputed list: {imp_all} of {n_all}"
+                 + (f" ({imp_all / n_all:.1%})" if n_all else ""))
     return "\n".join(lines)

@@ -63,8 +63,9 @@ python scripts/fetch_melee_event.py 453138
 # Parse bronze into silver Parquet tables and print per-event coverage
 python scripts/build_silver.py
 
-# Gold: matchup matrix + archetype summary from silver
-python scripts/build_gold.py
+# Same-75 imputation (needs classify first), then gold: matchup matrix + archetype summary
+python scripts/build_imputations.py
+python scripts/build_gold.py            # --no-impute for published lists only
 
 # Archetypes: card table, mined draft rules, then classify with the rules you keep
 python scripts/update_cards.py
@@ -106,6 +107,7 @@ src/mtgmeta/
     parse.py                tournament page, round matches, decklist parsers
     fetch.py                fetches one event into bronze (idempotent)
   silver/melee.py           bronze -> Parquet tables (events, matches, decklists, cards, players)
+  silver/impute.py          same-75 imputation from a player's nearby published list, with evidence
   gold/matrix.py            matchup matrix + archetype summary (shrunk win rates, intervals, position)
   mcp/queries.py            questions over the tables as plain functions
   mcp/server.py             those functions as MCP tools (stdio) for Claude Code / Desktop

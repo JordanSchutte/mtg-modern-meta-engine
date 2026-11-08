@@ -148,6 +148,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Impute missing decklists (same player, nearby event)
+        if: always()
+        run: |
+          python scripts/build_imputations.py | tee impute-report.txt
+          { echo '## Imputation'; echo '```'; cat impute-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Push silver to R2
         if: always()
         run: rclone copy data/silver "r2:$BUCKET/silver" --fast-list --stats-one-line -v
@@ -168,6 +174,7 @@ jobs:
           cp silver-report.txt /tmp/reports/coverage.txt 2>/dev/null || true
           cp archetype-report.txt /tmp/reports/archetypes.txt 2>/dev/null || true
           cp gold-report.txt /tmp/reports/matchups.txt 2>/dev/null || true
+          cp impute-report.txt /tmp/reports/imputation.txt 2>/dev/null || true
           git config user.name "melee-watcher[bot]"
           git config user.email "noreply@github.com"
           git fetch -q origin reports || true

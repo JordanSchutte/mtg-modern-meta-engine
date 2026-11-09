@@ -29,7 +29,7 @@ def main() -> int:
     validation = impute.validate(root, args.window_days)
     imputations = impute.impute(root, args.window_days)
     gain = impute.coverage_gain(root, imputations)
-    print(impute.report(imputations, validation, gain))
+    print(impute.report(imputations, validation, gain, impute.per_event(root, imputations)))
     if not args.no_write:
         print(f"wrote {impute.write(imputations, root)}")
     return 0

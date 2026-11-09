@@ -206,7 +206,36 @@ def coverage_gain(data_root: Path, imputations: list[Imputation]) -> dict:
     return {"matches": len(matches), "both_known_before": before, "both_known_after": after}
 
 
-def report(imputations: list[Imputation], validation: dict, gain: dict | None = None) -> str:
+def per_event(data_root: Path, imputations: list[Imputation]) -> list[dict]:
+    """Per event: players with no usable list, how many got one by imputation,
+    and how many of those came from an event within a day (the same weekend)."""
+    events, usable, matches = load(data_root)
+    root = silver_root(data_root)
+    con = duckdb.connect()
+    names = dict(con.execute(
+        f"select tournament_id, name from '{(root / 'events.parquet').as_posix()}'").fetchall())
+    con.close()
+    missing: dict[int, set[str]] = defaultdict(set)
+    for _guid, tid, pa_, da, pb, db in matches:
+        for pid, did in ((pa_, da), (pb, db)):
+            if pid is not None and did not in usable:
+                missing[tid].add(pid)
+    filled: dict[int, set[str]] = defaultdict(set)
+    weekend: dict[int, set[str]] = defaultdict(set)
+    for i in imputations:
+        filled[i.tournament_id].add(i.player)
+        if abs(i.days_delta) <= 1:
+            weekend[i.tournament_id].add(i.player)
+    out = []
+    for tid, players in missing.items():
+        out.append({"tournament_id": tid, "start": str(events.get(tid) or ""),
+                    "name": names.get(tid, ""), "players_without_list": len(players),
+                    "filled": len(filled[tid]), "filled_same_weekend": len(weekend[tid])})
+    return sorted(out, key=lambda r: -r["players_without_list"])
+
+
+def report(imputations: list[Imputation], validation: dict, gain: dict | None = None,
+           events: list[dict] | None = None) -> str:
     lines = ["Same-75 imputation"]
     if gain:
         n = gain["matches"]
@@ -227,4 +256,13 @@ def report(imputations: list[Imputation], validation: dict, gain: dict | None = 
     lines.append(f"  filled {n} match sides" + (f" ({gaps})" if n else ""))
     had_record = sum(1 for i in imputations if i.had_record)
     lines.append(f"  of which {had_record} had an empty list on record")
+    if events:
+        tot_missing = sum(e["players_without_list"] for e in events)
+        tot_filled = sum(e["filled"] for e in events)
+        lines.append(f"  players without a usable list: {tot_missing}; given one by imputation: "
+                     f"{tot_filled} ({tot_filled / tot_missing:.0%})" if tot_missing else "")
+        lines.append(f"  {'start':<11}{'id':>7}{'no list':>8}{'filled':>7}{'same wknd':>10}  event")
+        for e in events[:20]:
+            lines.append(f"  {e['start']:<11}{e['tournament_id']:>7}{e['players_without_list']:>8}"
+                         f"{e['filled']:>7}{e['filled_same_weekend']:>10}  {e['name'][:44]}")
     return "\n".join(lines)

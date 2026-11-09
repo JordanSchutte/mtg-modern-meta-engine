@@ -90,6 +90,12 @@ def test_impute_fills_missing_and_empty_from_nearby_events(tmp_path):
     assert (gain["both_known_before"], gain["both_known_after"]) == (1, 2)
     assert "filled 2 match sides" in impute.report(imps, v, gain)
     assert "1 -> 2 of 4" in impute.report(imps, v, gain)
+    pe = {e["tournament_id"]: e for e in impute.per_event(root, imps)}
+    # Saturday: alice, carol and dan had no usable list; alice and carol were filled
+    assert pe[2]["players_without_list"] == 3 and pe[2]["filled"] == 2
+    assert pe[2]["filled_same_weekend"] == 2
+    assert "players without a usable list: 4; given one by imputation: 2" in \
+        impute.report(imps, v, gain, list(pe.values()))
 
     # Gold: without imputation only f1 counts; with it, s1 and s2 join in.
     plain, arch = matrix.load_inputs(root, impute=False)

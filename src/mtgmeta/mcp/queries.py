@@ -30,9 +30,9 @@ TABLES = {
     "mtgo_decklist_cards": "silver/mtgo/decklist_cards.parquet",
     "mtgo_decklist_archetypes": "silver/mtgo/decklist_archetypes.parquet",
     "matchups": "gold/melee/matchups.parquet",
-    "field_forecast": "gold/forecast/field_forecast.parquet",
-    "position_forecast": "gold/forecast/position_forecast.parquet",
-    "forecast_backtest": "gold/forecast/backtest.parquet",
+    "field_forecast": "gold/melee/forecast/field_forecast.parquet",
+    "position_forecast": "gold/melee/forecast/position_forecast.parquet",
+    "forecast_backtest": "gold/melee/forecast/backtest.parquet",
     "archetype_summary": "gold/melee/archetype_summary.parquet",
 }
 
@@ -323,7 +323,7 @@ def forecast(data_root: Path, top: int = 15) -> dict:
     archetype's expected win rate against that field."""
     con = connect(data_root)
     if not _has(con, "field_forecast"):
-        return {"error": "no forecast yet (gold/forecast/field_forecast.parquet missing)"}
+        return {"error": "no forecast yet (gold/melee/forecast/field_forecast.parquet missing)"}
     field = _rows(con, "select * from field_forecast order by share desc limit ?", [top])
     pos = _rows(con, "select * from position_forecast order by expected_wr desc limit ?", [top])
     bt = _rows(con, """

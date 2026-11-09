@@ -21,7 +21,7 @@ best mean log-loss picks the model. ``position`` then weights the current
 period's shrunk matchup win rates by the forecast field: an archetype's
 expected match win rate against the field it will actually meet.
 
-Tables (``gold/forecast/``)
+Tables (``gold/melee/forecast/``)
 --------------------------
 backtest           one row per (model, week): lists, log_loss, tvd
 field_forecast     archetype, share (chosen model), paper_recent, mtgo_recent

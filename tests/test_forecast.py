@@ -86,3 +86,14 @@ def test_position_weights_matrix_by_forecast(tmp_path):
     written = fc.write(fc.Backtest([], {}, None), field, pos, tmp_path)
     assert set(written) == {"field_forecast", "position_forecast"}
     assert Path(written["position_forecast"]).exists()
+
+
+def test_mcp_tables_point_at_written_forecast_files(tmp_path):
+    from mtgmeta.mcp.queries import TABLES
+    fc.gold_root(tmp_path).mkdir(parents=True)
+    written = fc.write(fc.Backtest([{"model": "m", "week": "w", "log_loss": 1.0, "tvd": 0.1,
+                                     "lists": 1}], {}, None),
+                       [{"archetype": "A", "share": 1.0}], [{"archetype": "A"}], tmp_path)
+    for table, key in (("forecast_backtest", "backtest"), ("field_forecast", "field_forecast"),
+                       ("position_forecast", "position_forecast")):
+        assert Path(written[key]) == tmp_path / TABLES[table]

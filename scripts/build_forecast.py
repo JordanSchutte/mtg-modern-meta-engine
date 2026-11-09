@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Forecast next weekend's paper field and each archetype's position against it.
 
-    python scripts/build_forecast.py            # writes gold/forecast/*.parquet
+    python scripts/build_forecast.py            # writes gold/melee/forecast/*.parquet
     python scripts/build_forecast.py --no-write
 
 Backtests every candidate model on past paper weeks (Melee), picks the best by

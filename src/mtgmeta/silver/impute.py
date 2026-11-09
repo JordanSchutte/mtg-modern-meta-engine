@@ -12,6 +12,11 @@ at two events inside the window tell us how often it really was the same deck
 (same archetype, and exactly the same 75). ``validate`` reports that rate per
 day-gap, which is what decides the window.
 
+Measured (Nov 2026, ~3,600 same-weekend pairs): same archetype 79% within a
+day and 78% at 4-7 days, but the identical 75 only 41% / 6%. So imputed lists
+are used for the **archetype-level** matrix only, never for card-level work
+(packages, flex slots), and the window is a week.
+
 Tables
 ------
 imputations   one row per (match, side) filled: the list used, its source event
@@ -31,7 +36,7 @@ import pyarrow.parquet as pq
 
 from .melee import silver_root
 
-DEFAULT_WINDOW_DAYS = 14
+DEFAULT_WINDOW_DAYS = 7  # 8-14d: 56% same archetype on 9 pairs
 
 
 @dataclass

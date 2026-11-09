@@ -50,7 +50,7 @@ An event is fetched once its start is two days past, but decklists can be publis
 
 ## Imputation
 
-`silver/impute.py` fills a player's missing list from their own nearest usable published Modern list at another event within 14 days (earlier event wins ties), as its own table `imputations.parquet`; nothing in silver is overwritten and the matrix can be built without it (`--no-impute`). A list that exists but is empty counts as missing. The assumption is measured, not assumed: for players with published lists at two nearby events, the report gives the share with the same archetype and the identical 75 per day-gap bucket — that evidence sets the window. Matchup rows carry `imputed_matches` so a cell's dependence on imputation is always visible.
+`silver/impute.py` fills a player's missing list from their own nearest usable published Modern list at another event within 7 days (earlier event wins ties), as its own table `imputations.parquet`; nothing in silver is overwritten and the matrix can be built without it (`--no-impute`). A list that exists but is empty counts as missing. The assumption is measured, not assumed: for players with published lists at two nearby events, the report gives the share with the same archetype and the identical 75 per day-gap bucket — that evidence sets the window. Matchup rows carry `imputed_matches` so a cell's dependence on imputation is always visible. Measured on ~3,600 same-weekend pairs: 79% same archetype, 41% identical 75 — so imputed lists feed the archetype-level matrix only; card-level views (`archetype_cards`, packages) use published lists, which card tables already do because imputations are a separate table.
 
 ## Matchup matrix
 

@@ -25,8 +25,8 @@ def _silver(tmp_path):
     root = silver_root(tmp_path)
     root.mkdir(parents=True)
     pq.write_table(pa.Table.from_pylist([
-        {"tournament_id": 1, "start": "2026-09-04"},   # Friday RCQ
-        {"tournament_id": 2, "start": "2026-09-05"},   # Saturday RC
+        {"tournament_id": 1, "start": "2026-09-04", "name": "Friday RCQ"},
+        {"tournament_id": 2, "start": "2026-09-05", "name": "Saturday RC"},
     ]), root / "events.parquet")
     pq.write_table(pa.Table.from_pylist([
         {"decklist_id": "p1-fri", "usable": True, "format": "Modern"},

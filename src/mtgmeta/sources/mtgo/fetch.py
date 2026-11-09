@@ -10,8 +10,10 @@ Layout (append-only, like Melee's)::
 An event is "known" once its manifest says complete; later runs skip it.
 Published MTGO lists do not change after publication, so there is no refresh
 pass. A page that arrives without decklists is logged in attempts.json and
-retried on the next run; after ``MAX_ATTEMPTS`` it is recorded as empty so the
-run stops asking (the file stays, so the decision is reversible).
+retried on the next run; after ``MAX_ATTEMPTS``, or once the event is
+``STALE_DAYS`` old (MTGO publishes within a day; an old event that still
+redirects to /decklists never had its lists published), it is recorded as empty
+so the run stops asking (the file stays, so the decision is reversible).
 """
 
 from __future__ import annotations
@@ -33,6 +35,7 @@ from mtgmeta.sources.mtgo.parse import IncompleteEventError, parse_event
 log = logging.getLogger(__name__)
 PARSER_VERSION = 1
 MAX_ATTEMPTS = 6
+STALE_DAYS = 7
 
 
 def bronze_root(data_root: Path) -> Path:
@@ -91,13 +94,14 @@ def fetch_event(ref: EventRef, client: PoliteClient, data_root: Path) -> str:
         attempts = _attempts(d) + [{"at": now, "reason": str(exc), "bytes": len(html)}]
         (d / "attempts.json").write_text(json.dumps(attempts, indent=1), encoding="utf-8")
         (d / "page.incomplete.html").write_text(html, encoding="utf-8")
-        if len(attempts) >= MAX_ATTEMPTS:
+        age = (datetime.now(UTC).date() - ref.day).days
+        if len(attempts) >= MAX_ATTEMPTS or age >= STALE_DAYS:
             (d / "manifest.json").write_text(json.dumps({
                 "site_name": ref.site_name, "status": "empty", "attempts": len(attempts),
                 "fetched_at": now, "day": ref.day.isoformat(), "kind": ref.kind,
             }, indent=1), encoding="utf-8")
-            log.warning("%s: no decklists after %d attempts; recorded as empty",
-                        ref.site_name, len(attempts))
+            log.warning("%s: no decklists (%d attempts, %d days old); recorded as empty",
+                        ref.site_name, len(attempts), age)
             return "empty"
         log.info("%s: %s (attempt %d)", ref.site_name, exc, len(attempts))
         return "incomplete"

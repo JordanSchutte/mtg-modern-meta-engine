@@ -81,7 +81,7 @@ def test_fetch_new_then_silver(tmp_path, monkeypatch):
         "/decklist/modern-league-2026-11-0111161":
             (FIX / "league.html").read_text(encoding="utf-8"),
         # not ready yet: a shell with no data
-        "/decklist/modern-challenge-32-2026-11-0112857398": "<html>loading</html>",
+        "/decklist/modern-challenge-32-2026-11-0712857682": "<html>loading</html>",
     }
     hits: list[str] = []
     # fix "today" so min_age_days is deterministic
@@ -95,28 +95,34 @@ def test_fetch_new_then_silver(tmp_path, monkeypatch):
     monkeypatch.setattr(fmod, "datetime", FakeDT)
 
     counts = fetch.fetch_new(_client(pages, hits), tmp_path, since=date(2026, 11, 1))
-    # 2 real pages, 1 not-ready page, and every other link 404s: all retried later
-    refs = discovery.parse_index(pages["/decklists/2026/11"])
-    n = len([r for r in refs if r.day <= date(2026, 11, 8)])
-    assert counts == {"complete": 2, "incomplete": n - 2, "empty": 0, "skipped": 0}
+    # 2 real pages; the not-ready page and every 404 are attempts. Events a week
+    # old or more are given up on at once (empty); fresher ones are retried later.
+    refs = [r for r in discovery.parse_index(pages["/decklists/2026/11"])
+            if r.day <= date(2026, 11, 8)]
+    stale = len([r for r in refs if r.day <= date(2026, 11, 2)]) - 1   # the league is real
+    assert counts == {"complete": 2, "incomplete": len(refs) - 2 - stale, "empty": stale,
+                      "skipped": 0}
     assert hits[0] == "/decklists/2026/11"
     assert (tmp_path / "bronze/mtgo/index/2026-11/2026-11-09.html").exists()
     ev = tmp_path / "bronze/mtgo/events/modern-challenge-16-2026-11-0312857420"
     mf = json.loads((ev / "manifest.json").read_text())
     assert mf["status"] == "complete" and mf["decklists"] == 3 and mf["player_count"] == 34
-    inc = tmp_path / "bronze/mtgo/events/modern-challenge-32-2026-11-0112857398"
+    inc = tmp_path / "bronze/mtgo/events/modern-challenge-32-2026-11-0712857682"
     assert not (inc / "manifest.json").exists() and (inc / "attempts.json").exists()
-    # a 404 (unknown page) is also an attempt, not a crash
+    # a 404 (unknown page) is also an attempt, not a crash; a stale one is recorded empty
     assert "modern-challenge-16-2026-11-0312857420" in fetch.known(tmp_path)
+    old = tmp_path / "bronze/mtgo/events/modern-challenge-32-2026-11-0112857398"
+    assert json.loads((old / "manifest.json").read_text())["status"] == "empty"
 
     # second run: known events are skipped, the incomplete one is retried
     hits.clear()
-    fetch.fetch_new(_client(pages, hits), tmp_path, since=date(2026, 11, 1), max_events=1)
+    fetch.fetch_new(_client(pages, hits), tmp_path, since=date(2026, 11, 1))
     assert "/decklist/modern-challenge-16-2026-11-0312857420" not in hits
-    assert "/decklist/modern-challenge-32-2026-11-0112857398" in hits
+    assert "/decklist/modern-challenge-32-2026-11-0712857682" in hits
 
     b = silver.build(tmp_path)
-    assert b.counts() == {"events": 2, "decklists": 5, "decklist_cards": len(b.decklist_cards)}
+    assert b.counts() == {"events": 2 + stale, "decklists": 5,   # empty events are rows too
+                          "decklist_cards": len(b.decklist_cards)}
     assert all(d["usable"] for d in b.decklists)
     silver.write_parquet(b, silver.silver_root(tmp_path))
     decks = load_main_decks(tmp_path, source="mtgo")

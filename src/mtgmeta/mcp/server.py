@@ -131,8 +131,8 @@ def recommend(min_coverage: float = 0.6, min_matches: int = 100, top: int = 5) -
 def run_sql(sql: str, limit: int = 200) -> dict:
     """Read-only SQL over Melee tables (events, matches, decklists, decklist_cards, players,
     decklist_archetypes, imputations), MTGO tables (mtgo_events, mtgo_decklists,
-    mtgo_decklist_cards, mtgo_decklist_archetypes), cards, matchups, archetype_summary,
-    field_forecast, position_forecast, forecast_backtest.
+    mtgo_decklist_cards, mtgo_decklist_archetypes, mtgo_matches), cards, matchups,
+    archetype_summary, field_forecast, position_forecast, forecast_backtest.
     Rows capped by limit."""
     return q.run_sql(_root, sql, limit)
 

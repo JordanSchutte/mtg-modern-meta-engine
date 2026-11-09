@@ -2,12 +2,18 @@
 
 Inputs: silver ``matches`` (one row per match, competitors a/b) and
 ``decklist_archetypes`` (decklist -> archetype, with the rules file that
-governs it, i.e. the format period).
+governs it, i.e. the format period), from both sources:
 
-What counts: Modern, Swiss rounds, not a bye, both decklists known and both
-classified (``Unclassified`` is excluded from pairs but still counted in meta
-share). Draws count half a win. A mirror is kept as a row (it's real meta
-share) but its win rate is 50% by definition and it's flagged.
+* paper (Melee): Modern, Swiss rounds, not a bye, both decklists known and
+  both classified. These also define meta share.
+* mtgo: the published top-8 bracket of each challenge, where both lists are on
+  the same page. The Swiss rounds are not published, so MTGO adds matchup
+  results but never meta share (a top 8 is not the field). Every row carries
+  ``source`` and each pair reports how many of its matches came from MTGO.
+
+``Unclassified`` is excluded from pairs but still counted in meta share. Draws
+count half a win. A mirror is kept as a row (it's real meta share) but its win
+rate is 50% by definition and it's flagged.
 
 Shrinkage: each pair's win rate is pulled toward 50% by ``prior_n`` pseudo
 matches, so 3-1 reads as about 56%, not 75%, and the pull fades as matches
@@ -38,6 +44,7 @@ import pyarrow.parquet as pq
 
 from mtgmeta.archetypes.rules import UNCLASSIFIED
 from mtgmeta.silver.melee import silver_root
+from mtgmeta.silver.mtgo import silver_root as mtgo_silver_root
 
 PRIOR_N = 10.0
 Z90 = 1.6449
@@ -54,6 +61,7 @@ class Pair:
     game_wins: int = 0
     game_losses: int = 0
     imputed: int = 0    # matches where at least one side's list was imputed
+    mtgo: int = 0       # matches from MTGO top-8 brackets
 
 
 def wilson(p: float, n: int, z: float = Z90) -> tuple[float, float]:
@@ -72,11 +80,13 @@ def shrink(wins: float, n: int, prior_n: float = PRIOR_N) -> float:
 def load_inputs(data_root: Path, impute: bool = True,
                 ) -> tuple[list[dict], dict[str, tuple[str, str]]]:
     """Matches with both decks known (published, or imputed when ``impute``) and
-    ``{decklist_id: (archetype, period)}``.
+    ``{decklist_id: (archetype, period)}``, over both sources.
 
     Imputed sides come from ``silver/melee/imputations.parquet`` (same player's
     nearby published list); each match row carries ``imputed_a`` / ``imputed_b``.
     A decklist that exists but is unusable counts as unknown unless imputed.
+    MTGO bracket matches (``silver/mtgo/matches.parquet``) are appended with
+    ``source = 'mtgo'``; paper rows carry ``source = 'paper'``.
     """
     root = silver_root(data_root)
     con = duckdb.connect()
@@ -114,14 +124,35 @@ def load_inputs(data_root: Path, impute: bool = True,
         d["imputed_b"] = d["decklist_b"] is None and d["imp_b"] is not None
         d["decklist_a"] = d["decklist_a"] or d["imp_a"]
         d["decklist_b"] = d["decklist_b"] or d["imp_b"]
+        d["source"] = "paper"
         if d["decklist_a"] and d["decklist_b"]:
             rows.append(d)
     arch = con.execute(f"""
         select decklist_id, archetype, rules_file
         from '{(root / "decklist_archetypes.parquet").as_posix()}'
     """).fetchall()
+    archetypes = {d: (a, _period(f)) for d, a, f in arch}
+
+    oroot = mtgo_silver_root(data_root)
+    if (oroot / "matches.parquet").exists() and (oroot / "decklist_archetypes.parquet").exists():
+        for r in con.execute(f"""
+            select site_name, bracket, loginid_a, decklist_a, game_wins_a,
+                   loginid_b, decklist_b, game_wins_b, winner_loginid
+            from '{(oroot / "matches.parquet").as_posix()}'
+        """).fetchall():
+            site, bracket, la, da, ga, lb, db, gb, win = r
+            rows.append({"tournament_id": site, "round_number": bracket, "result": "win",
+                         "winner_player_id": win, "game_draws": 0,
+                         "player_a_id": la, "decklist_a": da, "game_wins_a": ga,
+                         "player_b_id": lb, "decklist_b": db, "game_wins_b": gb,
+                         "imputed_a": False, "imputed_b": False, "source": "mtgo"})
+        for d, a, f in con.execute(f"""
+            select decklist_id, archetype, rules_file
+            from '{(oroot / "decklist_archetypes.parquet").as_posix()}'
+        """).fetchall():
+            archetypes[d] = (a, _period(f))
     con.close()
-    return rows, {d: (a, _period(f)) for d, a, f in arch}
+    return rows, archetypes
 
 
 def _period(rules_file: str) -> str:
@@ -141,9 +172,11 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
             continue
         period = a[1]
         aa, bb = a[0], b[0]
-        slots_total[period] += 2
-        slots[(period, aa)] += 1
-        slots[(period, bb)] += 1
+        from_mtgo = m.get("source") == "mtgo"
+        if not from_mtgo:                  # meta share is the paper Swiss field only
+            slots_total[period] += 2
+            slots[(period, aa)] += 1
+            slots[(period, bb)] += 1
         if UNCLASSIFIED in (aa, bb):
             continue
         if m["result"] == "draw":
@@ -162,6 +195,7 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
             p.game_wins += gx
             p.game_losses += gy
             p.imputed += imputed
+            p.mtgo += from_mtgo
 
     matchup_rows = []
     for (period, x, y), p in sorted(pairs.items()):
@@ -170,7 +204,8 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
         games = p.game_wins + p.game_losses
         matchup_rows.append({
             "period": period, "archetype": x, "opponent": y, "is_mirror": x == y,
-            "matches": p.n, "imputed_matches": p.imputed, "wins": p.wins, "win_rate": raw,
+            "matches": p.n, "imputed_matches": p.imputed, "mtgo_matches": p.mtgo,
+            "wins": p.wins, "win_rate": raw,
             "win_rate_shrunk": 0.5 if x == y else shrink(p.wins, p.n, prior_n),
             "wr_lo": lo, "wr_hi": hi,
             "games": games, "game_win_rate": (p.game_wins / games) if games else None,
@@ -182,12 +217,13 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
         by_period[r["period"]][r["archetype"]].append(r)
     for period, archs in by_period.items():
         total = slots_total[period]
-        share = {a: slots[(period, a)] / total for a in archs}
+        share = {a: (slots[(period, a)] / total if total else 0.0) for a in archs}
         unclassified_share = slots[(period, UNCLASSIFIED)] / total if total else 0.0
         for a, rows in archs.items():
             n = sum(r["matches"] for r in rows if not r["is_mirror"])
             w = sum(r["wins"] for r in rows if not r["is_mirror"])
             imp = sum(r["imputed_matches"] for r in rows if not r["is_mirror"])
+            mtgo_n = sum(r["mtgo_matches"] for r in rows if not r["is_mirror"])
             # position: share-weighted shrunk win rate vs each other archetype
             weight = sum(share.get(r["opponent"], 0.0) for r in rows if not r["is_mirror"])
             position = (sum(share.get(r["opponent"], 0.0) * r["win_rate_shrunk"]
@@ -195,7 +231,7 @@ def build(matches: list[dict], archetypes: dict[str, tuple[str, str]],
             lo, hi = wilson(w / n, n) if n else (0.0, 1.0)
             summary_rows.append({
                 "period": period, "archetype": a, "share": share[a],
-                "matches": n, "imputed_matches": imp, "wins": w,
+                "matches": n, "imputed_matches": imp, "mtgo_matches": mtgo_n, "wins": w,
                 "win_rate": (w / n) if n else None,
                 "win_rate_shrunk": shrink(w, n, prior_n) if n else None,
                 "wr_lo": lo, "wr_hi": hi,
@@ -265,7 +301,10 @@ def summary_text(summary: list[dict], period: str | None = None, top: int = 30) 
     u = rows[0]["unclassified_share"] if rows else 0.0
     n_all = sum(r["matches"] for r in rows)
     imp_all = sum(r.get("imputed_matches", 0) for r in rows)
+    mtgo_all = sum(r.get("mtgo_matches", 0) for r in rows)
     lines.append(f"\nunclassified share of match slots: {u:.1%}; "
                  f"matches using an imputed list: {imp_all} of {n_all}"
-                 + (f" ({imp_all / n_all:.1%})" if n_all else ""))
+                 + (f" ({imp_all / n_all:.1%})" if n_all else "")
+                 + f"; from MTGO top-8 brackets: {mtgo_all}"
+                 + (f" ({mtgo_all / n_all:.1%})" if n_all else ""))
     return "\n".join(lines)

@@ -29,6 +29,7 @@ TABLES = {
     "mtgo_decklists": "silver/mtgo/decklists.parquet",
     "mtgo_decklist_cards": "silver/mtgo/decklist_cards.parquet",
     "mtgo_decklist_archetypes": "silver/mtgo/decklist_archetypes.parquet",
+    "mtgo_matches": "silver/mtgo/matches.parquet",
     "matchups": "gold/melee/matchups.parquet",
     "field_forecast": "gold/melee/forecast/field_forecast.parquet",
     "position_forecast": "gold/melee/forecast/position_forecast.parquet",
@@ -125,7 +126,7 @@ def matchup(data_root: Path, archetype: str, opponent: str, period: str | None =
     a = _resolve(con, archetype, period)
     b = _resolve(con, opponent, period)
     rows = _rows(con, """
-        select archetype, opponent, matches, wins, round(win_rate, 4) as win_rate,
+        select archetype, opponent, matches, mtgo_matches, wins, round(win_rate, 4) as win_rate,
                round(win_rate_shrunk, 4) as win_rate_shrunk, round(wr_lo, 3) as wr_lo,
                round(wr_hi, 3) as wr_hi, games, round(game_win_rate, 4) as game_win_rate
         from matchups where period = ? and archetype = ? and opponent = ?
@@ -138,7 +139,8 @@ def matchup(data_root: Path, archetype: str, opponent: str, period: str | None =
     r["period"] = period
     r["reading"] = (f"{a} vs {b}: {r['win_rate_shrunk']:.0%} shrunk match win rate over "
                     f"{r['matches']} matches (raw {r['win_rate']:.0%}, 90% CI "
-                    f"{r['wr_lo']:.0%}–{r['wr_hi']:.0%}); games {r['game_win_rate']:.0%}"
+                    f"{r['wr_lo']:.0%}–{r['wr_hi']:.0%}; {r['mtgo_matches']} from MTGO top-8 "
+                    f"brackets, the rest paper Swiss); games {r['game_win_rate']:.0%}"
                     if r["game_win_rate"] is not None else "")
     return r
 

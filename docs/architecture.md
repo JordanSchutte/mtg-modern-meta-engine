@@ -91,10 +91,20 @@ each link (`modern-challenge-32-2026-11-07<id>`) gives kind, date and id.
 * `sources/mtgo/parse.py` — the embedded JSON to lists; `Wear/Tear` → `Wear // Tear`
 * `sources/mtgo/fetch.py` — `bronze/mtgo/events/<site_name>/{page.html,manifest.json}`,
   append-only; a page served before its lists land is logged in `attempts.json`
-  and retried (recorded as `empty` after 6 tries, reversibly)
-* `silver/mtgo.py` — `silver/mtgo/{events,decklists,decklist_cards}` with the
-  same card-table shape as Melee, so `classify_decklists.py` runs the same rules
-  file over both sources (`silver/mtgo/decklist_archetypes`)
+  and retried (recorded as `empty` after 6 tries or once the event is a week
+  old, reversibly)
+* `silver/mtgo.py` — `silver/mtgo/{events,decklists,decklist_cards,matches}`;
+  the card table has the same shape as Melee's, so `classify_decklists.py` runs
+  the same rules file over both sources (`silver/mtgo/decklist_archetypes`).
+  `matches` is the published top-8 bracket of each challenge: both lists are on
+  the same page, so every bracket match is a known archetype-vs-archetype
+  result with no imputation. The Swiss rounds are not published.
+* `gold/matrix.py` takes those bracket matches into the matchup matrix with
+  `source = 'mtgo'` (paper rows are `source = 'paper'`); each pair and each
+  archetype reports `mtgo_matches`. They never count toward meta share — a top
+  8 is not the field — only toward win rates. One matrix, not two: there is not
+  enough data to keep them apart, and the MTGO grinders are largely the same
+  people doing well at the large paper events.
 * `.github/workflows/mtgo-watcher.yml` — daily, ~09:40 ET, bronze only; the
   Melee watcher builds silver for both sources at noon
 

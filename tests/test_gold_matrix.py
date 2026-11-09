@@ -54,3 +54,21 @@ def test_text_reports_render():
     assert "Energy" in matrix.summary_text(summary)
     text = matrix.matrix_text(pairs, summary, min_matches=20)
     assert "Blink" in text and "%" in text
+
+
+def test_mtgo_bracket_matches_add_results_but_not_share():
+    arch = {"e1": ("Energy", "p"), "b1": ("Blink", "p"),
+            "mtgo:x:1": ("Energy", "p"), "mtgo:x:2": ("Blink", "p"), "mtgo:x:3": ("Storm", "p")}
+    paper = [_m("e1", "b1")] * 4                                    # Energy 4-0 in paper
+    online = [_m("mtgo:x:1", "mtgo:x:2", winner="b", ga=0, gb=2) | {"source": "mtgo"},
+              _m("mtgo:x:1", "mtgo:x:3") | {"source": "mtgo"}]      # Blink beats Energy online
+    pairs, summary = matrix.build(paper + online, arch, prior_n=0)
+    by = {(r["archetype"], r["opponent"]): r for r in pairs}
+    eb = by[("Energy", "Blink")]
+    assert eb["matches"] == 5 and eb["mtgo_matches"] == 1 and eb["wins"] == 4
+    assert by[("Energy", "Storm")]["mtgo_matches"] == 1
+    s = {r["archetype"]: r for r in summary}
+    # share comes from paper Swiss slots only: 50/50, and Storm (online only) has none
+    assert s["Energy"]["share"] == 0.5 and s["Blink"]["share"] == 0.5 and s["Storm"]["share"] == 0
+    assert s["Energy"]["mtgo_matches"] == 2
+    assert "from MTGO top-8 brackets: 4 (33.3%)" in matrix.summary_text(summary)  # per side

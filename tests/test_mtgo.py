@@ -122,7 +122,13 @@ def test_fetch_new_then_silver(tmp_path, monkeypatch):
 
     b = silver.build(tmp_path)
     assert b.counts() == {"events": 2 + stale, "decklists": 5,   # empty events are rows too
-                          "decklist_cards": len(b.decklist_cards)}
+                          "decklist_cards": len(b.decklist_cards), "matches": 4}
+    # top-8 bracket matches: both lists named, winner and game score carried
+    t8 = b.matches[0]
+    assert t8["site_name"] == "modern-challenge-16-2026-11-0312857420" and t8["bracket"] == 2
+    assert t8["winner_loginid"] == t8["loginid_a"] == "3499660"
+    assert t8["decklist_b"] == f"mtgo:{t8['site_name']}:1239343"
+    assert (t8["game_wins_a"], t8["game_wins_b"]) == (2, 0)
     assert all(d["usable"] for d in b.decklists)
     silver.write_parquet(b, silver.silver_root(tmp_path))
     decks = load_main_decks(tmp_path, source="mtgo")

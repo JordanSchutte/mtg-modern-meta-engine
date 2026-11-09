@@ -103,7 +103,8 @@ def parse_event(html: str, site_name: str) -> MtgoEvent:
             ))
         pc = data.get("player_count") or {}
         day = date.fromisoformat(str(data.get("starttime", ""))[:10])
-        top8 = [m for b in data.get("brackets", []) for m in b.get("matches", [])]
+        top8 = [m | {"bracket": b.get("index")}
+                for b in data.get("brackets", []) for m in b.get("matches", [])]
         return MtgoEvent(site_name, str(data["event_id"]), data.get("description", ""),
                          "TOURNAMENT", day, int(pc["players"]) if pc.get("players") else None,
                          decks, top8)

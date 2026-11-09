@@ -1,0 +1,70 @@
+https://www.mtgo.com/decklists -> 200, 115029 bytes, final https://www.mtgo.com/decklists
+https://www.mtgo.com/decklists/2026/11 -> 200, 115029 bytes, final https://www.mtgo.com/decklists/2026/11
+modern decklist links on month page: 34
+  /decklist/modern-challenge-16-2026-11-0312857420
+  /decklist/modern-challenge-16-2026-11-0412857725
+  /decklist/modern-challenge-16-2026-11-0712857683
+  /decklist/modern-challenge-32-2026-11-0112857398
+  /decklist/modern-challenge-32-2026-11-0112857403
+  /decklist/modern-challenge-32-2026-11-0212857411
+  /decklist/modern-challenge-32-2026-11-0212857413
+  /decklist/modern-challenge-32-2026-11-0312857419
+  /decklist/modern-challenge-32-2026-11-0312857426
+  /decklist/modern-challenge-32-2026-11-0412857428
+  /decklist/modern-challenge-32-2026-11-0512857667
+  /decklist/modern-challenge-32-2026-11-0612857677
+  /decklist/modern-challenge-32-2026-11-0712857682
+  /decklist/modern-challenge-32-2026-11-0712857687
+  /decklist/modern-challenge-32-2026-11-0812857691
+  /decklist/modern-league-2026-11-0111161
+  /decklist/modern-league-2026-11-0211161
+  /decklist/modern-league-2026-11-0311161
+  /decklist/modern-league-2026-11-0411161
+  /decklist/modern-league-2026-11-0511161
+  /decklist/modern-league-2026-11-0611161
+  /decklist/modern-league-2026-11-0711161
+  /decklist/modern-league-2026-11-0811161
+  /decklist/premodern-challenge-16-2026-11-0112857404
+  /decklist/premodern-challenge-16-2026-11-0312857424
+  /decklist/premodern-challenge-16-2026-11-0512857670
+  /decklist/premodern-league-2026-11-0111145
+  /decklist/premodern-league-2026-11-0211145
+  /decklist/premodern-league-2026-11-0311145
+  /decklist/premodern-league-2026-11-0411145
+  /decklist/premodern-league-2026-11-0511145
+  /decklist/premodern-league-2026-11-0611145
+  /decklist/premodern-league-2026-11-0711145
+  /decklist/premodern-league-2026-11-0811145
+challenge: /decklist/modern-challenge-16-2026-11-0312857420 -> 200, 351895 bytes
+  embedded: window.MTGO.decklists.data
+  embedded: window.MTGO.decklists.type
+  embedded: window.MTGO.decklists.roundNames
+  'decklists' occurs 10x
+  'standings' occurs 6x
+  'brackets' occurs 1x
+  'player' occurs 72x
+  'loginid' occurs 142x
+  'wins' occurs 47x
+  'losses' occurs 47x
+  'final_rank' occurs 1x
+  'placement' occurs 0x
+  'card_attributes' occurs 1066x
+league: /decklist/modern-league-2026-11-0111161 -> 200, 334426 bytes
+  embedded: window.MTGO.decklists.data
+  embedded: window.MTGO.decklists.type
+  embedded: window.MTGO.decklists.roundNames
+  'decklists' occurs 10x
+  'standings' occurs 5x
+  'brackets' occurs 0x
+  'player' occurs 45x
+  'loginid' occurs 29x
+  'wins' occurs 59x
+  'losses' occurs 30x
+  'final_rank' occurs 0x
+  'placement' occurs 0x
+  'card_attributes' occurs 971x
+censusUrl: https://census.daybreakgames.com
+bundle: https://www.mtgo.com/minify-js?locale=en_US&files=_pages/decklist-item^imported/d3.v3.min^imported/wiz_bean_content_deck_list.charts^_components/deck^_components/get-started-modal&v=350458254
+census-looking strings in bundle: 0
+challenge page title: | Decklists | Magic: The Gathering Online
+league page title: | Decklists | Magic: The Gathering Online

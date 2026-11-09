@@ -37,3 +37,18 @@ start           id players modern  known  share  lists  empty missing  name
 10388 decklists referenced, 10366 usable, 337399 card lines, 7378 players
 
 wrote 5 tables to data/silver/melee: events=32, matches=37864, decklists=10388, decklist_cards=337399, players=7378
+
+MTGO events in bronze
+  kind                   events  lists
+  challenge-16               22    659
+  challenge-32               99   3168
+  challenge-64              128   4096
+  challenge-96               28    896
+  last-chance                 4    128
+  league                    146   7797
+  rc-qualifier                1     32
+  rc-super-qualifier          4    128
+  showcase-challenge          4    128
+  showcase-qualifier          1     32
+  2026-05-18 .. 2026-11-08
+wrote 3 tables to data/silver/mtgo: events=437, decklists=17064, decklist_cards=542920

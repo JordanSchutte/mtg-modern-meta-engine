@@ -1,11 +1,32 @@
 Same-75 imputation
-  Modern Swiss matches with both decks known: 32591 -> 33979 of 36556 (89.2% -> 93.0%)
+  Modern Swiss matches with both decks known: 32591 -> 33962 of 36556 (89.2% -> 92.9%)
   evidence (players with published lists at two nearby events):
   gap      pairs  same 75  same archetype
   0-1d      3565      41%             79%
   2-3d       417      30%             73%
   4-7d       213       6%             78%
-  8-14d        9       0%             56%
-  filled 3628 match sides (0-1d 3462, 2-3d 24, 4-7d 125, 8-14d 17)
+  filled 3611 match sides (0-1d 3462, 2-3d 24, 4-7d 125)
   of which 53 had an empty list on record
+  players without a usable list: 3902; given one by imputation: 1750 (45%)
+  start           id no list filled same wknd  event
+  2026-10-10  405591     693    245       245  Regional Championship - SCG CON Los Angeles 
+  2026-09-12  405588     450    159       127  Regional Championship - SCG CON Baltimore - 
+  2026-09-05  405590     374    151       110  Magic Spotlight: The Hobbit™ - SCG CON Dalla
+  2026-10-10  470109     332    111       111  Ultimate Guard European Magic Series - Regio
+  2026-08-28  441441     175      0         0  Magic Spotlight: The Hobbit™ Main Event
+  2026-10-11  453138     164    158       155  $uper $unday RCQ - Modern - SCG CON Los Ange
+  2026-11-01  469603     162      0         0  马年单淘赛2 / Year of the Horse Single-Eliminatio
+  2026-09-13  445556     154    134       128  $uper $unday RCQ - Modern - SCG CON Baltimor
+  2026-10-11  479653     141     86        86  [Ghent Sun 09:30] Ultimate Guard Open: Moder
+  2026-10-10  453111     129     77        77  $5K RCQ - Modern - SCG CON Los Angeles - Sat
+  2026-10-10  471573     128      0         0  CAMS Regional Championship - T13
+  2026-10-03  411350      99      0         0  チャンピオンズカップファイナル　シーズン5ラウンド1　Champions Cup Fin
+  2026-09-04  462365      99     93        92  FLIGHT A - $1K Modern RCQ - SCG CON Dallas
+  2026-09-04  462366      92     82        81  FLIGHT B - $1K Modern RCQ - SCG CON Dallas
+  2026-10-09  453170      89     83        82  $1K Modern RCQ - SCG CON Los Angeles - Frida
+  2026-09-11  445437      83     81        80  $1K Modern RCQ - SCG CON Baltimore - Friday 
+  2026-10-17  482105      77      0         0  MTG SEA Championship Final 2026-27 Round 1
+  2026-09-12  445383      76     27        27  $5K RCQ - Modern - SCG CON Baltimore - Satur
+  2026-10-09  453109      73     54        54  LCQ - Modern - SCG CON Los Angeles - Friday 
+  2026-10-09  453123      68     60        60  LCQ - Modern - SCG CON Los Angeles - Friday 
 wrote data/silver/melee/imputations.parquet

@@ -1,0 +1,51 @@
+Field forecast
+  backtest over 6 paper weeks (lower is better; log-loss per list, TVD = share mass misplaced):
+  model                   log-loss     TVD
+  blend(0.5,1,2)            3.1493   0.144  <- chosen
+  blend(0.5,1,1)            3.1495   0.147
+  blend(0.3,1,2)            3.1502   0.144
+  blend(0.5,2,1)            3.1505   0.148
+  blend(0.3,2,2)            3.1508   0.145
+  blend(0.5,2,2)            3.1508   0.146
+  blend(0.3,1,1)            3.1543   0.148
+  blend(0.3,2,1)            3.1546   0.149
+  blend(0.7,1,1)            3.1555   0.155
+  blend(0.7,1,2)            3.1573   0.154
+
+  forecast field for week of 2026-11-09 (blend(0.5,1,2)):
+  archetype                 share  paper 2w  mtgo 2w
+  Broodscale Combo          13.6%      0.0%    11.2%
+  Izzet Prowess              7.9%      0.0%     5.5%
+  Phoenix                    7.6%      0.0%    12.6%
+  Energy                     7.4%      0.0%     8.0%
+  Azorius Control            6.9%      0.0%     6.3%
+  Eldrazi Tron               6.1%      0.0%     8.2%
+  Affinity                   5.8%      0.0%     6.5%
+  Amulet Titan               5.7%      0.0%     8.0%
+  Blink                      4.8%      0.0%     2.2%
+  Reanimator                 4.5%      0.0%     3.9%
+  Domain Zoo                 3.7%      0.0%     2.1%
+  Ruby Storm                 3.2%      0.0%     3.8%
+  Dimir Midrange             2.8%      0.0%     3.5%
+  Devoted Druid              2.7%      0.0%     1.9%
+  Living End                 2.7%      0.0%     3.7%
+
+  position against that field (expected match win rate, shrunk matrix):
+  archetype                exp WR  cover fcst sh matches
+  Phoenix                   53.2%   100%    7.6%     757
+  Broodscale Combo          53.1%   100%   13.6%    9101
+  Creativity                52.6%    89%    0.4%     150
+  Azorius Control           51.8%   100%    6.9%    3534
+  Tameshi Belcher           51.7%   100%    1.2%     725
+  Devoted Druid             51.1%   100%    2.7%    2471
+  Affinity                  50.9%   100%    5.8%    4104
+  Grinding Station          50.6%    99%    0.9%     876
+  Energy                    50.2%   100%    7.4%    4593
+  Living End                49.8%   100%    2.7%    1386
+  Fight Rigging             49.8%   100%    0.6%    1597
+  Ponza                     49.7%    99%    1.1%    1455
+  Izzet Murktide            49.7%    96%    0.6%     248
+  Domain Zoo                49.6%   100%    3.7%    2384
+  Amulet Titan              49.5%   100%    5.7%    2037
+
+wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet

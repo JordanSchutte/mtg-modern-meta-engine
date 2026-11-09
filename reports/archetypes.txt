@@ -1,3 +1,4 @@
+=== melee
 rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
 10346 lists classified; 163 unclassified (1.6%)
    1303  12.6%  Broodscale Combo
@@ -73,3 +74,79 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
      7%  Green Sun's Zenith
 
 wrote data/silver/melee/decklist_archetypes.parquet
+=== mtgo
+rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 16881 lists
+16881 lists classified; 274 unclassified (1.6%)
+   1640   9.7%  Energy  [Boros Energy 1386, Azorius Energy 254]
+   1535   9.1%  Broodscale Combo
+   1417   8.4%  Reanimator  [Esper Goryo's 890, Grixis Reanimator 409, Esper Reanimator 65, Mono-Black Reanimator 53]
+   1280   7.6%  Izzet Prowess
+   1026   6.1%  Affinity  [Affinity 1007, Classic Affinity 19]
+    914   5.4%  Eldrazi Tron  [Eldrazi Tron 847, Emrakul Tron 50, Breach Tron 17]
+    720   4.3%  Blink  [Esper Blink 630, Jeskai Blink 90]
+    719   4.3%  Azorius Control  [Scepter Control 464, Teferi Control 141, Snapcaster Control 88, Miracles 26]
+    590   3.5%  Ruby Storm
+    515   3.1%  Devoted Druid
+    510   3.0%  Dimir Midrange
+    493   2.9%  Domain Zoo
+    488   2.9%  Ponza
+    469   2.8%  Amulet Titan
+    456   2.7%  Living End
+    443   2.6%  Phoenix  [Rakdos Phoenix 357, Darklight Phoenix 86]
+    344   2.0%  Fight Rigging
+    318   1.9%  Hollow One
+    254   1.5%  Neobrand
+    249   1.5%  Grinding Station  [Grinding Station (Emry) 245, Grinding Station (Loki/Oswald) 4]
+    246   1.5%  Green Tron
+    245   1.5%  Necro  [Necro 222, Necro (Rite of Consumption) 23]
+    198   1.2%  Tameshi Belcher
+    154   0.9%  Esper Midrange
+    152   0.9%  Samwise Combo
+    146   0.9%  Yawgmoth
+    145   0.9%  Burn
+    124   0.7%  Ritual Oculus
+    107   0.6%  Goyf Fling
+     97   0.6%  Wizards
+     67   0.4%  Hammer
+     66   0.4%  Izzet Murktide
+     60   0.4%  Ritual Omnath
+     57   0.3%  Mill
+     57   0.3%  Eldrazi Aggro
+     54   0.3%  Creativity
+     51   0.3%  Death's Shadow
+     42   0.2%  Rhinos
+     37   0.2%  Song of Creation
+     35   0.2%  Dredge
+     35   0.2%  Merfolk
+     31   0.2%  Mono-Red Belcher
+     19   0.1%  Nantuko Combo
+      2   0.0%  Infect
+
+274 unclassified lists; most common non-land cards among them:
+    58%  Thoughtseize
+    49%  Fatal Push
+    41%  Orcish Bowmasters
+    38%  Inquisition of Kozilek
+    33%  Pithing Needle
+    32%  Nihil Spellbomb
+    30%  Nethergoyf
+    30%  Kozilek's Command
+    29%  Shadowspear
+    29%  Mishra's Bauble
+    28%  Emperor of Bones
+    26%  Thought-Knot Seer
+    19%  Lightning Bolt
+    17%  Malevolent Rumble
+    12%  Wrenn and Six
+    11%  Ragavan, Nimble Pilferer
+    11%  Force of Negation
+    10%  Green Sun's Zenith
+    10%  Solitude
+     9%  The Underworld Cookbook
+     8%  Chthonian Nightmare
+     8%  Teferi, Time Raveler
+     8%  Gravecrawler
+     8%  Psychic Frog
+     8%  Sink into Stupor
+
+wrote data/silver/mtgo/decklist_archetypes.parquet

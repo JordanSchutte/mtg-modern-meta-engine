@@ -23,6 +23,7 @@ TABLES = {
     "decklist_cards": "silver/melee/decklist_cards.parquet",
     "players": "silver/melee/players.parquet",
     "decklist_archetypes": "silver/melee/decklist_archetypes.parquet",
+    "imputations": "silver/melee/imputations.parquet",
     "cards": "silver/cards.parquet",
     "matchups": "gold/melee/matchups.parquet",
     "archetype_summary": "gold/melee/archetype_summary.parquet",
@@ -219,7 +220,7 @@ def archetype_cards(data_root: Path, archetype: str, period: str | None = None,
 
 def run_sql(data_root: Path, sql: str, limit: int = 200) -> dict:
     """Read-only SQL over the tables (events, matches, decklists, decklist_cards,
-    players, decklist_archetypes, cards, matchups, archetype_summary)."""
+    players, decklist_archetypes, imputations, cards, matchups, archetype_summary)."""
     if re.search(r"\b(insert|update|delete|drop|create|alter|copy|attach|pragma|install|load)\b",
                  sql, re.I):
         return {"error": "read-only: select statements only"}

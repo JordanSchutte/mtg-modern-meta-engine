@@ -114,7 +114,7 @@ def archetypes(period: str | None = None) -> list[str]:
 @safe
 def run_sql(sql: str, limit: int = 200) -> dict:
     """Read-only SQL over: events, matches, decklists, decklist_cards, players,
-    decklist_archetypes, cards, matchups, archetype_summary. Rows capped by limit."""
+    decklist_archetypes, imputations, cards, matchups, archetype_summary. Rows capped by limit."""
     return q.run_sql(_root, sql, limit)
 
 

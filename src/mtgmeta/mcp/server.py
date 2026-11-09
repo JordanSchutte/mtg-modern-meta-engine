@@ -113,8 +113,10 @@ def archetypes(period: str | None = None) -> list[str]:
 @server.tool()
 @safe
 def run_sql(sql: str, limit: int = 200) -> dict:
-    """Read-only SQL over: events, matches, decklists, decklist_cards, players,
-    decklist_archetypes, imputations, cards, matchups, archetype_summary. Rows capped by limit."""
+    """Read-only SQL over Melee tables (events, matches, decklists, decklist_cards, players,
+    decklist_archetypes, imputations), MTGO tables (mtgo_events, mtgo_decklists,
+    mtgo_decklist_cards, mtgo_decklist_archetypes), cards, matchups, archetype_summary.
+    Rows capped by limit."""
     return q.run_sql(_root, sql, limit)
 
 

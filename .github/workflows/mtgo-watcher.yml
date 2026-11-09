@@ -1,0 +1,88 @@
+name: MTGO watcher
+
+# The forecast input: MTGO Modern decklists (challenges, leagues, prelims).
+#   bronze/mtgo (R2) -> runner, read the month index pages, fetch every event
+#   not yet in bronze, runner -> bronze/mtgo (R2).
+#
+# Once a day, in the US morning: MTGO publishes an event's lists a few hours
+# after it ends, and the Melee watcher (which builds silver/gold from all of
+# bronze) runs at noon ET and picks these up. Published MTGO lists never
+# change, so there is no refresh pass. Each page is one request (~350 KB).
+
+on:
+  schedule:
+    - cron: "41 13 * * *"   # 09:41 EDT / 08:41 EST
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "Read month indexes back to this date (YYYY-MM-DD). Default: 45 days ago."
+        required: false
+        type: string
+      max_events:
+        description: "Fetch at most this many new events this run (0 = all)"
+        required: false
+        type: string
+        default: "0"
+
+defaults:
+  run:
+    shell: bash -eo pipefail {0}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mtgo-watcher
+  cancel-in-progress: false
+
+env:
+  MELEE_CONTACT_EMAIL: ${{ secrets.MELEE_CONTACT_EMAIL }}
+  DATA_ROOT: data
+  RCLONE_CONFIG_R2_TYPE: s3
+  RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+  RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+  BUCKET: mtgmeta-bronze
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120   # a 6-month backfill is ~550 pages at 2.5 s = ~25 min
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          pip install -e .
+          curl -fsSL https://rclone.org/install.sh | sudo bash >/dev/null
+          rclone version | head -1
+
+      - name: Pull bronze/mtgo from R2
+        run: |
+          mkdir -p data/bronze/mtgo
+          rclone sync "r2:$BUCKET/bronze/mtgo" data/bronze/mtgo --fast-list
+          echo "MTGO events in bronze: $(ls data/bronze/mtgo/events 2>/dev/null | wc -l)"
+
+      - name: Check R2 is writable
+        run: |
+          date -u +%FT%TZ | rclone rcat "r2:$BUCKET/_last_mtgo_run_started"
+          rclone cat "r2:$BUCKET/_last_mtgo_run_started"
+
+      - name: Fetch new events
+        run: |
+          SINCE="${{ inputs.since }}"
+          if [ -z "$SINCE" ]; then SINCE=$(date -u -d '45 days ago' +%F); fi
+          python scripts/fetch_mtgo.py --since "$SINCE" \
+            --max-events "${{ inputs.max_events || '0' }}" --budget-minutes 100 \
+            | tee mtgo-report.txt
+          { echo '## MTGO fetch'; echo '```'; tail -5 mtgo-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push bronze/mtgo to R2
+        if: always()
+        run: |
+          rclone copy data/bronze/mtgo "r2:$BUCKET/bronze/mtgo" --fast-list --stats-one-line -v
+          echo "MTGO objects in R2: $(rclone size "r2:$BUCKET/bronze/mtgo" --json)"

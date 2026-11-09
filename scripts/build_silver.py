@@ -15,6 +15,7 @@ import logging
 
 from mtgmeta.config import Settings
 from mtgmeta.silver import melee as silver
+from mtgmeta.silver import mtgo as silver_mtgo
 
 
 def main() -> int:
@@ -32,6 +33,15 @@ def main() -> int:
         written = silver.write_parquet(build, out)
         print(f"\nwrote {len(written)} tables to {out}: "
               + ", ".join(f"{t}={n}" for t, n in build.counts().items()))
+
+    mtgo = silver_mtgo.build(settings.data_root)
+    print()
+    print(silver_mtgo.report(mtgo))
+    if not args.no_write and mtgo.events:
+        out = silver_mtgo.silver_root(settings.data_root)
+        written = silver_mtgo.write_parquet(mtgo, out)
+        print(f"wrote {len(written)} tables to {out}: "
+              + ", ".join(f"{t}={n}" for t, n in mtgo.counts().items()))
     return 0
 
 

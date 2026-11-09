@@ -48,6 +48,7 @@ class PoliteClient:
         transport: httpx.BaseTransport | None = None,
         sleep=time.sleep,
         clock=time.monotonic,
+        base_url: str = BASE_URL,
     ) -> None:
         if not contact_email:
             raise ValueError("Set MELEE_CONTACT_EMAIL so requests identify who is making them.")
@@ -59,7 +60,7 @@ class PoliteClient:
         self._last: float | None = None
         self.requests_made = 0
         self._client = httpx.Client(
-            base_url=BASE_URL,
+            base_url=base_url,
             timeout=timeout,
             transport=transport,
             follow_redirects=False,

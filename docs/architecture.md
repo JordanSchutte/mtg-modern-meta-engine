@@ -76,3 +76,27 @@ Rules live in `config/archetypes/<format>-<period-start>.yml` and name only a de
 **Bootstrapping and drift.** The first file was mined (`scripts/mine_archetypes.py`): IDF-weighted clustering of the period's lists, each cluster's high-presence/high-lift cards as a draft signature, then named by hand. Every Wednesday `propose-rules.yml` re-mines the last 30 days and opens one pull request with mechanical proposals only — `NEW:` rules for unclassified clusters, trims of signature cards that fell out of their own deck, additions of cards that became ubiquitous in it — plus variant candidates in the PR text. It never renames, merges or deletes. A person names and merges; nothing changes until then. The job replaces only its own commits (a branch with a human commit is left alone), closes its PR when a later week finds nothing, and the twice-daily report names any proposal PR still open.
 
 **Failure modes.** No rules file for a list's date fails the classify step loudly instead of writing an empty table; the file is in git, so an accidental delete is a checkout. Leftover lists (staples only, no shared engine) are `Unclassified` and are reported with their most common cards.
+
+## MTGO (the forecast input)
+
+MTGO publishes every Modern Challenge, Preliminary, Showcase and League 5-0
+list on `mtgo.com/decklists`. Unlike Melee there is nothing to scrape in the
+HTML: each event page embeds the whole event as JSON
+(`window.MTGO.decklists.data`) — decklists with card names, standings with
+rank and tiebreakers, win/loss records, the top-8 bracket and the entrant
+count. Discovery is the monthly index (`/decklists/YYYY/MM`); the site name in
+each link (`modern-challenge-32-2026-11-07<id>`) gives kind, date and id.
+
+* `sources/mtgo/discovery.py` — parse the month index into event refs
+* `sources/mtgo/parse.py` — the embedded JSON to lists; `Wear/Tear` → `Wear // Tear`
+* `sources/mtgo/fetch.py` — `bronze/mtgo/events/<site_name>/{page.html,manifest.json}`,
+  append-only; a page served before its lists land is logged in `attempts.json`
+  and retried (recorded as `empty` after 6 tries, reversibly)
+* `silver/mtgo.py` — `silver/mtgo/{events,decklists,decklist_cards}` with the
+  same card-table shape as Melee, so `classify_decklists.py` runs the same rules
+  file over both sources (`silver/mtgo/decklist_archetypes`)
+* `.github/workflows/mtgo-watcher.yml` — daily, ~09:40 ET, bronze only; the
+  Melee watcher builds silver for both sources at noon
+
+The MTGO field leads the paper field by a week or two (online players adopt
+new decks first), which is what the forecast uses.

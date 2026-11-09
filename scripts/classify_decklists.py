@@ -23,6 +23,7 @@ from mtgmeta.archetypes.loader import load_deck_dates, load_main_decks
 from mtgmeta.cards import scryfall
 from mtgmeta.config import Settings
 from mtgmeta.silver.melee import silver_root
+from mtgmeta.silver.mtgo import silver_root as mtgo_root
 
 
 def main() -> int:
@@ -31,6 +32,7 @@ def main() -> int:
                     help="one rules file for every list (default: pick per event date)")
     ap.add_argument("--no-write", action="store_true")
     ap.add_argument("--top", type=int, default=25, help="cards to list for unclassified")
+    ap.add_argument("--source", choices=["melee", "mtgo", "all"], default="all")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -38,8 +40,19 @@ def main() -> int:
     folder = Path("config/archetypes")
     cards = scryfall.load(settings.data_root) if scryfall.cards_path(settings.data_root).exists() \
         else None
-    decks = load_main_decks(settings.data_root, fmt="Modern")
-    dates = load_deck_dates(settings.data_root, fmt="Modern")
+    rc = 0
+    for source in (["melee", "mtgo"] if args.source == "all" else [args.source]):
+        print(f"=== {source}")
+        rc = max(rc, classify_source(source, args, settings, folder, cards))
+    return rc
+
+
+def classify_source(source: str, args, settings, folder: Path, cards) -> int:
+    decks = load_main_decks(settings.data_root, fmt="Modern", source=source)
+    dates = load_deck_dates(settings.data_root, fmt="Modern", source=source)
+    if not decks:
+        print(f"no {source} lists in silver; nothing to classify")
+        return 0
 
     # Group lists by the rules file that governs their event date.
     groups: dict[Path, dict] = {}
@@ -67,7 +80,8 @@ def main() -> int:
     print(rulesmod.unclassified_report(decks, results, cards, top=args.top))
 
     if not args.no_write:
-        out = silver_root(settings.data_root) / "decklist_archetypes.parquet"
+        root = (mtgo_root if source == "mtgo" else silver_root)(settings.data_root)
+        out = root / "decklist_archetypes.parquet"
         file_of = {did: p.name for p, g in groups.items() for did in g}
         rows = [{
             "decklist_id": r.decklist_id, "archetype": r.archetype, "variant": r.variant,

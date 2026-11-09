@@ -25,6 +25,10 @@ TABLES = {
     "decklist_archetypes": "silver/melee/decklist_archetypes.parquet",
     "imputations": "silver/melee/imputations.parquet",
     "cards": "silver/cards.parquet",
+    "mtgo_events": "silver/mtgo/events.parquet",
+    "mtgo_decklists": "silver/mtgo/decklists.parquet",
+    "mtgo_decklist_cards": "silver/mtgo/decklist_cards.parquet",
+    "mtgo_decklist_archetypes": "silver/mtgo/decklist_archetypes.parquet",
     "matchups": "gold/melee/matchups.parquet",
     "archetype_summary": "gold/melee/archetype_summary.parquet",
 }

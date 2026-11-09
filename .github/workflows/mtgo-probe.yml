@@ -1,0 +1,43 @@
+name: MTGO probe
+
+# Manual. Saves MTGO's decklists index and one page per event kind to the
+# branch mtgo-probe, so the real markup can be read before writing a parser.
+
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "YYYY/MM of the decklists index to read"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash -eo pipefail {0}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e .
+      - name: Fetch
+        run: |
+          if [ -n "${{ inputs.month }}" ]; then python scripts/probe_mtgo.py --out probe --month "${{ inputs.month }}";
+          else python scripts/probe_mtgo.py --out probe; fi
+      - name: Push to branch mtgo-probe
+        if: always()
+        run: |
+          git config user.name "melee-watcher[bot]"
+          git config user.email "noreply@github.com"
+          git checkout -q -B mtgo-probe
+          git add -f probe/
+          git commit -q -m "MTGO probe $(date -u +%FT%TZ)" || echo "nothing"
+          git push -q -f origin mtgo-probe

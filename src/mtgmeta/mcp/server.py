@@ -112,10 +112,27 @@ def archetypes(period: str | None = None) -> list[str]:
 
 @server.tool()
 @safe
+def forecast(top: int = 15) -> dict:
+    """Next weekend's forecast paper field (from Melee + MTGO history, model chosen by
+    backtest) and each archetype's expected win rate against it."""
+    return q.forecast(_root, top)
+
+
+@server.tool()
+@safe
+def recommend(min_coverage: float = 0.6, min_matches: int = 100, top: int = 5) -> dict:
+    """What to play next weekend: best expected win rate against the forecast field,
+    among archetypes with enough matchup data; also underplayed but well-positioned decks."""
+    return q.recommend(_root, min_coverage, min_matches, top)
+
+
+@server.tool()
+@safe
 def run_sql(sql: str, limit: int = 200) -> dict:
     """Read-only SQL over Melee tables (events, matches, decklists, decklist_cards, players,
     decklist_archetypes, imputations), MTGO tables (mtgo_events, mtgo_decklists,
-    mtgo_decklist_cards, mtgo_decklist_archetypes), cards, matchups, archetype_summary.
+    mtgo_decklist_cards, mtgo_decklist_archetypes), cards, matchups, archetype_summary,
+    field_forecast, position_forecast, forecast_backtest.
     Rows capped by limit."""
     return q.run_sql(_root, sql, limit)
 

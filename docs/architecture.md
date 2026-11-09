@@ -100,3 +100,18 @@ each link (`modern-challenge-32-2026-11-07<id>`) gives kind, date and id.
 
 The MTGO field leads the paper field by a week or two (online players adopt
 new decks first), which is what the forecast uses.
+
+## Forecast
+
+`gold/forecast.py` turns the two weekly share series (paper = Melee lists,
+mtgo = MTGO lists) into next weekend's expected paper field. Candidate models
+— last paper week, exponentially weighted paper, recent MTGO, paper/MTGO
+blends, and paper nudged by MTGO momentum — are backtested on every past
+paper week with at least 150 lists (multinomial log-loss per list, plus total
+variation distance), and the best one is used. The backtest table is in the
+run summary and `reports/forecast.txt`, so the choice is visible.
+
+`position_forecast` weights the current period's shrunk matchup matrix by the
+forecast field: each archetype's expected match win rate against the field it
+will actually meet, with `matchup_coverage` saying how much of that field has
+a known matchup. The MCP tools `forecast()` and `recommend()` read these.

@@ -158,11 +158,13 @@ jobs:
         if: always()
         run: rclone copy data/silver "r2:$BUCKET/silver" --fast-list --stats-one-line -v
 
-      - name: Build gold (matchup matrix) and push
+      - name: Build gold (matchup matrix, forecast) and push
         if: always()
         run: |
           python scripts/build_gold.py | tee gold-report.txt
           { echo '## Matchups'; echo '```'; cat gold-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          python scripts/build_forecast.py | tee forecast-report.txt
+          { echo '## Forecast'; echo '```'; cat forecast-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           rclone copy data/gold "r2:$BUCKET/gold" --fast-list --stats-one-line -v
 
       - name: Publish reports to the reports branch
@@ -175,6 +177,7 @@ jobs:
           cp archetype-report.txt /tmp/reports/archetypes.txt 2>/dev/null || true
           cp gold-report.txt /tmp/reports/matchups.txt 2>/dev/null || true
           cp impute-report.txt /tmp/reports/imputation.txt 2>/dev/null || true
+          cp forecast-report.txt /tmp/reports/forecast.txt 2>/dev/null || true
           git config user.name "melee-watcher[bot]"
           git config user.email "noreply@github.com"
           git fetch -q origin reports || true

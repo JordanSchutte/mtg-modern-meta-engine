@@ -30,6 +30,9 @@ TABLES = {
     "mtgo_decklist_cards": "silver/mtgo/decklist_cards.parquet",
     "mtgo_decklist_archetypes": "silver/mtgo/decklist_archetypes.parquet",
     "matchups": "gold/melee/matchups.parquet",
+    "field_forecast": "gold/forecast/field_forecast.parquet",
+    "position_forecast": "gold/forecast/position_forecast.parquet",
+    "forecast_backtest": "gold/forecast/backtest.parquet",
     "archetype_summary": "gold/melee/archetype_summary.parquet",
 }
 
@@ -313,3 +316,43 @@ def _by(rows: list[dict], key: str) -> dict:
     for r in rows:
         d[r[key]].append(r)
     return d
+
+
+def forecast(data_root: Path, top: int = 15) -> dict:
+    """Next weekend's forecast field, the chosen model and its backtest, and each
+    archetype's expected win rate against that field."""
+    con = connect(data_root)
+    if not _has(con, "field_forecast"):
+        return {"error": "no forecast yet (gold/forecast/field_forecast.parquet missing)"}
+    field = _rows(con, "select * from field_forecast order by share desc limit ?", [top])
+    pos = _rows(con, "select * from position_forecast order by expected_wr desc limit ?", [top])
+    bt = _rows(con, """
+        select model, count(*) as weeks, avg(log_loss) as log_loss, avg(tvd) as tvd
+        from forecast_backtest group by model order by log_loss limit 8
+    """) if _has(con, "forecast_backtest") else []
+    con.close()
+    return {"target_week": field[0]["target_week"] if field else None,
+            "model": field[0]["model"] if field else None,
+            "field": field, "position": pos, "backtest_top": bt,
+            "note": "expected_wr weights the shrunk matchup matrix by the forecast field; "
+                    "matchup_coverage is the share of the field with a known matchup."}
+
+
+def recommend(data_root: Path, min_coverage: float = 0.6, min_matches: int = 100,
+              top: int = 5) -> dict:
+    """Archetypes to play next weekend: best expected win rate against the forecast
+    field among those with enough matchup data, plus the underplayed ones."""
+    con = connect(data_root)
+    if not _has(con, "position_forecast"):
+        return {"error": "no forecast yet"}
+    rows = _rows(con, """
+        select * from position_forecast
+        where matchup_coverage >= ? and matches >= ? order by expected_wr desc
+    """, [min_coverage, min_matches])
+    con.close()
+    picks = rows[:top]
+    underplayed = [r for r in rows if r["forecast_share"] < 0.03][:top]
+    return {"picks": picks, "underplayed_well_positioned": underplayed,
+            "filters": {"min_coverage": min_coverage, "min_matches": min_matches},
+            "note": "expected_wr is against the forecast field; a 53% deck in a 55% field "
+                    "is still a coin flip per match. Check matchup sample sizes with matchup()."}

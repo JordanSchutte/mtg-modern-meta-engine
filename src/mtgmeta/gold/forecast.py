@@ -5,14 +5,22 @@ Two weekly series of archetype shares feed the forecast:
 * **paper** — Melee Swiss decklists (published, usable, classified), by the
   Monday of the event's week;
 * **mtgo** — MTGO Challenge / League / Prelim lists, by the Monday of the
-  publish week. Online players move first, so this is the leading signal.
+  publish week. Online players move first, so this is the leading signal. It
+  comes in two flavours: every list counting 1 (``lists``), and lists counting
+  by finish (``results``: challenge top 8 = 3, 9-16 = 2, other challenge lists
+  1, a league 5-0 = 0.5). The second encodes "people copy the list that keeps
+  top-8ing challenges, not a random 5-0" — a deck that top-8s three
+  challenges in a fortnight weighs nine lists.
 
 Candidate models for the share vector of week T, using weeks < T only:
 
 * ``paper_last``      last paper week (the naive baseline)
 * ``paper_ewma(h)``   exponentially weighted paper counts, half-life h weeks
+                      (paper memory is long: players test what won the last RC)
 * ``mtgo_recent(k)``  MTGO lists from the last k weeks
+* ``mtgo_results(k)`` the same, each list weighted by its finish
 * ``blend(a,h,k)``    a * paper_ewma(h) + (1-a) * mtgo_recent(k)
+* ``blend_r(a,h,k)``  a * paper_ewma(h) + (1-a) * mtgo_results(k)
 * ``momentum(h,b)``   paper_ewma(h) nudged by b * (MTGO last week - MTGO weeks 2-4)
 
 ``backtest`` scores every candidate on every past week with enough paper
@@ -49,7 +57,32 @@ MIN_PAPER_LISTS = 150   # a week needs this many paper lists to score a forecast
 MIN_HISTORY_WEEKS = 3
 EPS = 0.002             # smoothing so an unseen archetype is not an infinite loss
 
-Series = dict[date, Counter]   # week Monday -> archetype -> lists
+Series = dict[date, Counter]   # week Monday -> archetype -> lists (or weight)
+RESULT_WEIGHTS = {"top8": 3.0, "top16": 2.0, "tournament": 1.0, "league": 0.5}
+
+
+@dataclass
+class MtgoSeries:
+    lists: Series        # every published list counts 1
+    results: Series      # each list counts RESULT_WEIGHTS[finish]
+
+
+def _lists(mtgo) -> Series:
+    return mtgo.lists if isinstance(mtgo, MtgoSeries) else mtgo
+
+
+def _results(mtgo) -> Series:
+    return mtgo.results if isinstance(mtgo, MtgoSeries) else mtgo
+
+
+def result_weight(event_type: str | None, rank: int | None) -> float:
+    if event_type == "LEAGUE":
+        return RESULT_WEIGHTS["league"]
+    if rank is not None and rank <= 8:
+        return RESULT_WEIGHTS["top8"]
+    if rank is not None and rank <= 16:
+        return RESULT_WEIGHTS["top16"]
+    return RESULT_WEIGHTS["tournament"]
 
 
 def week_of(day: date) -> date:
@@ -62,7 +95,7 @@ def forecast_root(data_root: Path) -> Path:
 
 # -- inputs ------------------------------------------------------------------
 
-def load_series(data_root: Path) -> tuple[Series, Series, str | None]:
+def load_series(data_root: Path) -> tuple[Series, MtgoSeries, str | None]:
     """(paper, mtgo, latest rules period). Unclassified lists are dropped."""
     con = duckdb.connect()
     paper: Series = defaultdict(Counter)
@@ -82,23 +115,27 @@ def load_series(data_root: Path) -> tuple[Series, Series, str | None]:
                 continue
             paper[week_of(date.fromisoformat(day))][arch] += 1
             period = max(period or "", rules)
-    mtgo: Series = defaultdict(Counter)
+    lists: Series = defaultdict(Counter)
+    results: Series = defaultdict(Counter)
     oroot = mtgo_root(data_root)
     if (oroot / "decklist_archetypes.parquet").exists():
         rows = con.execute(f"""
-            select d.day, a.archetype
+            select d.day, a.archetype, e.type, d.rank
             from '{(oroot / "decklist_archetypes.parquet").as_posix()}' a
             join '{(oroot / "decklists.parquet").as_posix()}' d using (decklist_id)
+            left join '{(oroot / "events.parquet").as_posix()}' e using (site_name)
             where d.usable
         """).fetchall()
-        for day, arch in rows:
+        for day, arch, etype, rank in rows:
             if arch != UNCLASSIFIED and day:
-                mtgo[week_of(date.fromisoformat(day))][arch] += 1
+                wk = week_of(date.fromisoformat(day))
+                lists[wk][arch] += 1
+                results[wk][arch] += result_weight(etype, rank)
     con.close()
     if period:
         stem = period.rsplit(".", 1)[0]
         period = stem.split("-", 1)[1] if "-" in stem else stem
-    return dict(paper), dict(mtgo), period
+    return dict(paper), MtgoSeries(dict(lists), dict(results)), period
 
 
 # -- models ------------------------------------------------------------------
@@ -122,46 +159,60 @@ def _weighted(series: Series, before: date, weights) -> Counter:
     return out
 
 
-def paper_last(paper: Series, mtgo: Series, t: date) -> dict[str, float]:
+def paper_last(paper: Series, mtgo, t: date) -> dict[str, float]:
     prev = [wk for wk in paper if wk < t]
     return _norm(paper[max(prev)]) if prev else {}
 
 
 def paper_ewma(h: float):
-    def model(paper: Series, mtgo: Series, t: date) -> dict[str, float]:
+    def model(paper: Series, mtgo, t: date) -> dict[str, float]:
         return _norm(_weighted(paper, t, lambda ago: 0.5 ** ((ago - 1) / h)))
     model.__name__ = f"paper_ewma({h:g})"
     return model
 
 
 def mtgo_recent(k: int):
-    def model(paper: Series, mtgo: Series, t: date) -> dict[str, float]:
-        return _norm(_weighted(mtgo, t, lambda ago: 1.0 if ago <= k else 0.0))
+    def model(paper: Series, mtgo, t: date) -> dict[str, float]:
+        return _norm(_weighted(_lists(mtgo), t, lambda ago: 1.0 if ago <= k else 0.0))
     model.__name__ = f"mtgo_recent({k})"
     return model
 
 
-def blend(a: float, h: float, k: int):
-    pm, mm = paper_ewma(h), mtgo_recent(k)
+def mtgo_results(k: int):
+    def model(paper: Series, mtgo, t: date) -> dict[str, float]:
+        return _norm(_weighted(_results(mtgo), t, lambda ago: 1.0 if ago <= k else 0.0))
+    model.__name__ = f"mtgo_results({k})"
+    return model
 
-    def model(paper: Series, mtgo: Series, t: date) -> dict[str, float]:
+
+def _blend(a: float, pm, mm, name: str):
+    def model(paper: Series, mtgo, t: date) -> dict[str, float]:
         p, m = pm(paper, mtgo, t), mm(paper, mtgo, t)
         if not m:
             return p
         if not p:
             return m
         return {x: a * p.get(x, 0) + (1 - a) * m.get(x, 0) for x in set(p) | set(m)}
-    model.__name__ = f"blend({a:g},{h:g},{k})"
+    model.__name__ = name
     return model
+
+
+def blend(a: float, h: float, k: int):
+    return _blend(a, paper_ewma(h), mtgo_recent(k), f"blend({a:g},{h:g},{k})")
+
+
+def blend_r(a: float, h: float, k: int):
+    return _blend(a, paper_ewma(h), mtgo_results(k), f"blend_r({a:g},{h:g},{k})")
 
 
 def momentum(h: float, b: float):
     pm = paper_ewma(h)
 
-    def model(paper: Series, mtgo: Series, t: date) -> dict[str, float]:
+    def model(paper: Series, mtgo, t: date) -> dict[str, float]:
         p = pm(paper, mtgo, t)
-        last = _norm(_weighted(mtgo, t, lambda ago: 1.0 if ago == 1 else 0.0))
-        prior = _norm(_weighted(mtgo, t, lambda ago: 1.0 if 2 <= ago <= 4 else 0.0))
+        ml = _lists(mtgo)
+        last = _norm(_weighted(ml, t, lambda ago: 1.0 if ago == 1 else 0.0))
+        prior = _norm(_weighted(ml, t, lambda ago: 1.0 if 2 <= ago <= 4 else 0.0))
         if not p or not last or not prior:
             return p
         out = {x: max(0.0, p.get(x, 0) + b * (last.get(x, 0) - prior.get(x, 0)))
@@ -174,11 +225,13 @@ def momentum(h: float, b: float):
 
 def candidates() -> list:
     out = [paper_last, paper_ewma(1), paper_ewma(2), paper_ewma(4),
-           mtgo_recent(1), mtgo_recent(2), mtgo_recent(3)]
+           mtgo_recent(1), mtgo_recent(2), mtgo_recent(3),
+           mtgo_results(1), mtgo_results(2), mtgo_results(3)]
     for a in (0.3, 0.5, 0.7):
-        for h in (1, 2):
+        for h in (1, 2, 4):
             for k in (1, 2):
                 out.append(blend(a, h, k))
+                out.append(blend_r(a, h, k))
     for h in (1, 2):
         for b in (0.5, 1.0):
             out.append(momentum(h, b))
@@ -206,7 +259,7 @@ class Backtest:
     best: str | None
 
 
-def backtest(paper: Series, mtgo: Series, models=None,
+def backtest(paper: Series, mtgo, models=None,
              min_lists: int = MIN_PAPER_LISTS) -> Backtest:
     models = models or candidates()
     weeks = sorted(paper)
@@ -241,12 +294,16 @@ def next_target_week(today: date) -> date:
     return week_of(sat)
 
 
-def field_forecast(paper: Series, mtgo: Series, model, t: date) -> list[dict]:
+def field_forecast(paper: Series, mtgo, model, t: date) -> list[dict]:
     pred = model(paper, mtgo, t)
-    recent_p = _norm(_weighted(paper, t, lambda ago: 1.0 if ago <= 2 else 0.0))
-    recent_m = _norm(_weighted(mtgo, t, lambda ago: 1.0 if ago <= 2 else 0.0))
+    def two(ago: int) -> float:
+        return 1.0 if ago <= 2 else 0.0
+    recent_p = _norm(_weighted(paper, t, two))
+    recent_m = _norm(_weighted(_lists(mtgo), t, two))
+    recent_r = _norm(_weighted(_results(mtgo), t, two))
     return sorted([{"archetype": a, "share": pred[a], "paper_recent": recent_p.get(a, 0.0),
-                    "mtgo_recent": recent_m.get(a, 0.0), "model": model.__name__,
+                    "mtgo_recent": recent_m.get(a, 0.0),
+                    "mtgo_results_recent": recent_r.get(a, 0.0), "model": model.__name__,
                     "target_week": t.isoformat()} for a in pred],
                   key=lambda r: -r["share"])
 
@@ -316,15 +373,24 @@ def report(bt: Backtest, field: list[dict], pos: list[dict], top: int = 15) -> s
         for m, v in sorted(bt.means.items(), key=lambda kv: kv[1]["log_loss"])[:10]:
             mark = "  <- chosen" if m == bt.best else ""
             lines.append(f"  {m:<22}{v['log_loss']:>10.4f}{v['tvd']:>8.3f}{mark}")
+        lines.append("  best of each family (is the blend really beating its parts?):")
+        fams: dict[str, tuple[str, dict]] = {}
+        for m, v in bt.means.items():
+            fam = m.split("(")[0]
+            if fam not in fams or v["log_loss"] < fams[fam][1]["log_loss"]:
+                fams[fam] = (m, v)
+        for _, (m, v) in sorted(fams.items(), key=lambda kv: kv[1][1]["log_loss"]):
+            lines.append(f"  {m:<22}{v['log_loss']:>10.4f}{v['tvd']:>8.3f}")
     else:
         lines.append("  not enough history to backtest; using paper_ewma(2)")
     if field:
         lines.append(f"\n  forecast field for week of {field[0]['target_week']} "
                      f"({field[0]['model']}):")
-        lines.append(f"  {'archetype':<24}{'share':>7}{'paper 2w':>10}{'mtgo 2w':>9}")
+        lines.append(f"  {'archetype':<24}{'share':>7}{'paper 2w':>10}{'mtgo 2w':>9}"
+                     f"{'results 2w':>12}")
         for f in field[:top]:
             lines.append(f"  {f['archetype']:<24}{f['share']:>7.1%}{f['paper_recent']:>10.1%}"
-                         f"{f['mtgo_recent']:>9.1%}")
+                         f"{f['mtgo_recent']:>9.1%}{f.get('mtgo_results_recent', 0.0):>12.1%}")
     if pos:
         lines.append("\n  position against that field (expected match win rate, shrunk matrix):")
         lines.append(f"  {'archetype':<24}{'exp WR':>7}{'cover':>7}{'fcst sh':>8}{'matches':>8}")

@@ -113,13 +113,25 @@ new decks first), which is what the forecast uses.
 
 ## Forecast
 
-`gold/forecast.py` turns the two weekly share series (paper = Melee lists,
-mtgo = MTGO lists) into next weekend's expected paper field. Candidate models
-— last paper week, exponentially weighted paper, recent MTGO, paper/MTGO
-blends, and paper nudged by MTGO momentum — are backtested on every past
+`gold/forecast.py` turns the weekly share series (paper = Melee lists; mtgo =
+MTGO lists, counted plainly and weighted by finish) into next weekend's
+expected paper field. Candidate models — last paper week, exponentially
+weighted paper, recent MTGO (by lists or by results), paper/MTGO blends of
+both kinds, and paper nudged by MTGO momentum — are backtested on every past
 paper week with at least 150 lists (multinomial log-loss per list, plus total
 variation distance), and the best one is used. The backtest table is in the
 run summary and `reports/forecast.txt`, so the choice is visible.
+
+Two beliefs about how paper players behave are encoded as candidates rather
+than assumed, so the backtest can confirm or reject them:
+
+* paper memory is long — people testing for a big event anchor on the last
+  RC's top tables, not last week's lists: paper half-lives of 1, 2 and 4 weeks;
+* MTGO signal is results-weighted, not volume-weighted — a random league 5-0
+  is one data point, but a list that top-8s a Showcase and two more challenges
+  in a fortnight is what people copy: the `results` series counts a challenge
+  top 8 as 3, 9–16 as 2, other challenge lists 1, a league 5-0 as 0.5
+  (`RESULT_WEIGHTS`), and `blend_r` models blend paper with it.
 
 `position_forecast` weights the current period's shrunk matchup matrix by the
 forecast field: each archetype's expected match win rate against the field it

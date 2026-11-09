@@ -97,3 +97,30 @@ def test_mcp_tables_point_at_written_forecast_files(tmp_path):
     for table, key in (("forecast_backtest", "backtest"), ("field_forecast", "field_forecast"),
                        ("position_forecast", "position_forecast")):
         assert Path(written[key]) == tmp_path / TABLES[table]
+
+
+def test_result_weights_and_results_models():
+    assert fc.result_weight("TOURNAMENT", 1) == 3.0 and fc.result_weight("TOURNAMENT", 8) == 3.0
+    assert fc.result_weight("TOURNAMENT", 12) == 2.0 and fc.result_weight("TOURNAMENT", 30) == 1.0
+    assert fc.result_weight("LEAGUE", None) == 0.5
+    # Online: many C lists 5-0 leagues (volume), but B keeps top-8ing challenges (results).
+    lists = {W[1]: Counter(A=10, B=4, C=20)}
+    results = {W[1]: Counter(A=10.0, B=12.0, C=10.0)}
+    m = fc.MtgoSeries(lists, results)
+    assert fc.mtgo_recent(1)({}, m, W[2])["C"] > fc.mtgo_recent(1)({}, m, W[2])["B"]
+    assert fc.mtgo_results(1)({}, m, W[2])["B"] > fc.mtgo_results(1)({}, m, W[2])["C"]
+    # plain dicts still work as the mtgo input (both flavours read the same series)
+    assert fc.mtgo_results(1)({}, lists, W[2]) == fc.mtgo_recent(1)({}, lists, W[2])
+    # paper copies the results, so the results-weighted blend scores better
+    paper = {w: Counter(A=100, B=100, C=100) for w in W[:4]}
+    paper[W[4]] = Counter(A=90, B=130, C=80)
+    paper[W[5]] = Counter(A=90, B=140, C=70)
+    lists = {w: Counter(A=10, B=4, C=20) for w in W}
+    results = {w: Counter(A=10.0, B=16.0, C=8.0) for w in W}
+    bt = fc.backtest(paper, fc.MtgoSeries(lists, results), min_lists=100)
+    assert bt.best.startswith("blend_r")
+    field = fc.field_forecast(paper, fc.MtgoSeries(lists, results), fc.blend_r(0.5, 1, 1),
+                              date(2026, 10, 19))
+    assert field[0]["archetype"] == "B" and field[0]["mtgo_results_recent"] > \
+        field[0]["mtgo_recent"]
+    assert "best of each family" in fc.report(bt, field, [])

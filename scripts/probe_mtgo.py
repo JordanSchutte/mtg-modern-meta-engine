@@ -51,6 +51,42 @@ def main() -> int:
                 for key in ("decklists", "standings", "brackets", "player", "loginid", "wins",
                             "losses", "final_rank", "placement", "card_attributes"):
                     notes.append(f"  '{key}' occurs {r.text.count(key)}x")
+        # Round 2: the page is a shell; data comes from census.daybreakgames.com via the
+        # decklist-item bundle. Pull the bundle, list the census calls, try them.
+        page = (args.out / "event_challenge.html").read_text(encoding="utf-8") \
+            if (args.out / "event_challenge.html").exists() else ""
+        census = re.search(r'censusUrl\s*=\s*"([^"]+)"', page)
+        notes.append(f"censusUrl: {census.group(1) if census else None}")
+        bundles = re.findall(r'src="(https://www\.mtgo\.com/minify-js[^"]+)"', page)
+        bundle_url = next((u for u in bundles if "decklist-item" in u), None)
+        notes.append(f"bundle: {bundle_url}")
+        event_id = re.search(r'"event_id"\s*:\s*"?(\d+)', page)
+        if bundle_url:
+            js = client.get(bundle_url.replace("&amp;", "&")).text
+            (args.out / "decklist-item.js").write_text(js, encoding="utf-8")
+            pat = r"""["'`]([^"'`]*(?:mtgo:v1|/get/|census)[^"'`]*)["'`]"""
+            calls = sorted(set(re.findall(pat, js)))
+            notes.append(f"census-looking strings in bundle: {len(calls)}")
+            notes += [f"  {c}" for c in calls]
+            for i, line in enumerate(js.splitlines()):
+                if "census" in line.lower() or "mtgo:v1" in line:
+                    notes.append(f"  js:{i}: {line.strip()[:300]}")
+            if census and event_id:
+                for c in calls:
+                    url = c if c.startswith("http") else census.group(1) + c
+                    url = re.sub(r"\$\{[^}]*\}|'\s*\+\s*[\w.]+\s*\+\s*'", event_id.group(1), url)
+                    if "mtgo:v1" not in url:
+                        continue
+                    r = client.get(url)
+                    name = re.sub(r"\W+", "_", url.split("mtgo:v1")[-1])[:60]
+                    (args.out / f"census{name}.json").write_text(r.text, encoding="utf-8")
+                    notes.append(f"GET {url} -> {r.status_code}, {len(r.text)} bytes")
+        for kind in ("challenge", "league"):
+            f = args.out / f"event_{kind}.html"
+            if f.exists():
+                t = f.read_text(encoding="utf-8")
+                m = re.search(r"<title>(.*?)</title>", t, re.S)
+                notes.append(f"{kind} page title: {m.group(1).strip() if m else None}")
     (args.out / "NOTES.txt").write_text("\n".join(notes) + "\n", encoding="utf-8")
     print("\n".join(notes))
     return 0

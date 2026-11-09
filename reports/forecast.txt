@@ -32,20 +32,20 @@ Field forecast
 
   position against that field (expected match win rate, shrunk matrix):
   archetype                exp WR  cover fcst sh matches
-  Phoenix                   53.2%   100%    7.6%     757
-  Broodscale Combo          53.1%   100%   13.6%    9101
-  Creativity                52.6%    89%    0.4%     150
-  Azorius Control           51.8%   100%    6.9%    3534
-  Tameshi Belcher           51.7%   100%    1.2%     725
-  Devoted Druid             51.1%   100%    2.7%    2471
-  Affinity                  50.9%   100%    5.8%    4104
-  Grinding Station          50.6%    99%    0.9%     876
-  Energy                    50.2%   100%    7.4%    4593
-  Living End                49.8%   100%    2.7%    1386
-  Fight Rigging             49.8%   100%    0.6%    1597
-  Ponza                     49.7%    99%    1.1%    1455
-  Izzet Murktide            49.7%    96%    0.6%     248
-  Domain Zoo                49.6%   100%    3.7%    2384
-  Amulet Titan              49.5%   100%    5.7%    2037
+  Phoenix                   53.2%   100%    7.6%     876
+  Broodscale Combo          53.0%   100%   13.6%    9560
+  Creativity                52.8%    95%    0.4%     156
+  Azorius Control           52.1%   100%    6.9%    3758
+  Tameshi Belcher           51.4%   100%    1.2%     802
+  Affinity                  51.0%   100%    5.8%    4336
+  Grinding Station          50.4%    99%    0.9%     908
+  Devoted Druid             50.3%   100%    2.7%    2592
+  Energy                    50.1%   100%    7.4%    5007
+  Nantuko Combo             50.1%    92%    0.0%      89
+  Domain Zoo                49.9%   100%    3.7%    2512
+  Amulet Titan              49.8%   100%    5.7%    2178
+  Fight Rigging             49.6%   100%    0.6%    1670
+  Ponza                     49.6%   100%    1.1%    1564
+  Living End                49.4%   100%    2.7%    1517
 
 wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet

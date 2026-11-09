@@ -51,4 +51,4 @@ MTGO events in bronze
   showcase-challenge          4    128
   showcase-qualifier          1     32
   2026-05-18 .. 2026-11-08
-wrote 3 tables to data/silver/mtgo: events=437, decklists=17064, decklist_cards=542920
+wrote 4 tables to data/silver/mtgo: events=437, decklists=17064, decklist_cards=542920, matches=1999

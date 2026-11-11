@@ -31,7 +31,9 @@ rules:
   - Monastery Swiftspear
   - Mutagenic Growth
   - Expressive Iteration
+  - Slickshot Show-Off
   min_signature: 3
+  note: 'proposed 2026-11-11: added Slickshot Show-Off.'
 - archetype: Reanimator
   variant: Esper Goryo's
   signature:

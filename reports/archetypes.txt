@@ -150,3 +150,5 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17435 lists
      8%  Sink into Stupor
 
 wrote data/silver/mtgo/decklist_archetypes.parquet
+
+Open archetype proposals awaiting review: #3 open since 2026-11-11

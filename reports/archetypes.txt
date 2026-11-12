@@ -75,75 +75,75 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
 
 wrote data/silver/melee/decklist_archetypes.parquet
 === mtgo
-rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17435 lists
-17435 lists classified; 282 unclassified (1.6%)
-   1690   9.7%  Energy  [Boros Energy 1429, Azorius Energy 261]
-   1578   9.1%  Broodscale Combo
-   1441   8.3%  Reanimator  [Esper Goryo's 903, Grixis Reanimator 418, Esper Reanimator 67, Mono-Black Reanimator 53]
-   1320   7.6%  Izzet Prowess
-   1061   6.1%  Affinity  [Affinity 1040, Classic Affinity 21]
-    948   5.4%  Eldrazi Tron  [Eldrazi Tron 878, Emrakul Tron 52, Breach Tron 18]
-    750   4.3%  Azorius Control  [Scepter Control 493, Teferi Control 142, Snapcaster Control 89, Miracles 26]
-    749   4.3%  Blink  [Esper Blink 652, Jeskai Blink 97]
-    601   3.4%  Ruby Storm
-    532   3.1%  Devoted Druid
-    520   3.0%  Domain Zoo
-    519   3.0%  Dimir Midrange
-    514   2.9%  Phoenix  [Rakdos Phoenix 414, Darklight Phoenix 100]
-    493   2.8%  Ponza
-    486   2.8%  Amulet Titan
-    466   2.7%  Living End
-    345   2.0%  Fight Rigging
-    324   1.9%  Hollow One
-    262   1.5%  Neobrand
-    253   1.5%  Grinding Station  [Grinding Station (Emry) 249, Grinding Station (Loki/Oswald) 4]
-    248   1.4%  Necro  [Necro 225, Necro (Rite of Consumption) 23]
+rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17643 lists
+17643 lists classified; 289 unclassified (1.6%)
+   1702   9.6%  Energy  [Boros Energy 1438, Azorius Energy 264]
+   1603   9.1%  Broodscale Combo
+   1449   8.2%  Reanimator  [Esper Goryo's 904, Grixis Reanimator 421, Esper Reanimator 71, Mono-Black Reanimator 53]
+   1335   7.6%  Izzet Prowess
+   1071   6.1%  Affinity  [Affinity 1050, Classic Affinity 21]
+    958   5.4%  Eldrazi Tron  [Eldrazi Tron 888, Emrakul Tron 52, Breach Tron 18]
+    769   4.4%  Azorius Control  [Scepter Control 511, Teferi Control 143, Snapcaster Control 89, Miracles 26]
+    752   4.3%  Blink  [Esper Blink 655, Jeskai Blink 97]
+    611   3.5%  Ruby Storm
+    535   3.0%  Devoted Druid
+    534   3.0%  Phoenix  [Rakdos Phoenix 432, Darklight Phoenix 102]
+    527   3.0%  Domain Zoo
+    521   3.0%  Dimir Midrange
+    499   2.8%  Amulet Titan
+    494   2.8%  Ponza
+    477   2.7%  Living End
+    346   2.0%  Fight Rigging
+    325   1.8%  Hollow One
+    271   1.5%  Neobrand
+    256   1.5%  Grinding Station  [Grinding Station (Emry) 252, Grinding Station (Loki/Oswald) 4]
+    249   1.4%  Necro  [Necro 226, Necro (Rite of Consumption) 23]
     247   1.4%  Green Tron
-    206   1.2%  Tameshi Belcher
-    164   0.9%  Samwise Combo
-    159   0.9%  Esper Midrange
-    151   0.9%  Burn
+    208   1.2%  Tameshi Belcher
+    168   1.0%  Samwise Combo
+    160   0.9%  Esper Midrange
+    153   0.9%  Burn
     151   0.9%  Yawgmoth
-    126   0.7%  Ritual Oculus
+    127   0.7%  Ritual Oculus
     110   0.6%  Goyf Fling
-     98   0.6%  Wizards
-     74   0.4%  Izzet Murktide
-     67   0.4%  Hammer
-     65   0.4%  Creativity
+    100   0.6%  Wizards
+     75   0.4%  Izzet Murktide
+     68   0.4%  Hammer
+     67   0.4%  Creativity
      62   0.4%  Ritual Omnath
      58   0.3%  Eldrazi Aggro
      57   0.3%  Mill
      53   0.3%  Death's Shadow
      42   0.2%  Rhinos
-     38   0.2%  Song of Creation
+     39   0.2%  Song of Creation
      36   0.2%  Dredge
      36   0.2%  Merfolk
      32   0.2%  Mono-Red Belcher
      19   0.1%  Nantuko Combo
       2   0.0%  Infect
 
-282 unclassified lists; most common non-land cards among them:
-    59%  Thoughtseize
-    50%  Fatal Push
-    41%  Orcish Bowmasters
+289 unclassified lists; most common non-land cards among them:
+    58%  Thoughtseize
+    49%  Fatal Push
+    42%  Orcish Bowmasters
     39%  Inquisition of Kozilek
     33%  Pithing Needle
     33%  Nihil Spellbomb
     31%  Nethergoyf
     30%  Kozilek's Command
-    29%  Shadowspear
-    29%  Mishra's Bauble
+    30%  Shadowspear
+    30%  Mishra's Bauble
     29%  Emperor of Bones
     26%  Thought-Knot Seer
-    18%  Lightning Bolt
+    19%  Lightning Bolt
     16%  Malevolent Rumble
     12%  Wrenn and Six
-    11%  Ragavan, Nimble Pilferer
     11%  Force of Negation
     11%  Solitude
     11%  Green Sun's Zenith
+    10%  Ragavan, Nimble Pilferer
      9%  Teferi, Time Raveler
-     9%  The Underworld Cookbook
+     8%  The Underworld Cookbook
      8%  Chthonian Nightmare
      8%  Psychic Frog
      8%  Gravecrawler

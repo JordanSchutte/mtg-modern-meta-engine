@@ -40,10 +40,10 @@ Field forecast
 
   position against that field (expected match win rate, shrunk matrix):
   archetype                exp WR  cover fcst sh matches
-  Phoenix                   53.2%   100%    7.4%     900
-  Broodscale Combo          52.9%   100%   13.7%    9582
+  Phoenix                   53.3%   100%    7.4%     904
+  Broodscale Combo          52.9%   100%   13.7%    9584
   Creativity                52.9%    96%    0.5%     158
-  Azorius Control           52.3%   100%    7.4%    3779
+  Azorius Control           52.2%   100%    7.4%    3780
   Tameshi Belcher           51.4%   100%    1.1%     804
   Affinity                  51.1%   100%    5.6%    4360
   Grinding Station          50.5%    99%    0.9%     908

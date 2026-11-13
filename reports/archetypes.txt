@@ -75,50 +75,50 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
 
 wrote data/silver/melee/decklist_archetypes.parquet
 === mtgo
-rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17643 lists
-17643 lists classified; 289 unclassified (1.6%)
-   1702   9.6%  Energy  [Boros Energy 1438, Azorius Energy 264]
-   1603   9.1%  Broodscale Combo
-   1449   8.2%  Reanimator  [Esper Goryo's 904, Grixis Reanimator 421, Esper Reanimator 71, Mono-Black Reanimator 53]
-   1335   7.6%  Izzet Prowess
-   1071   6.1%  Affinity  [Affinity 1050, Classic Affinity 21]
-    958   5.4%  Eldrazi Tron  [Eldrazi Tron 888, Emrakul Tron 52, Breach Tron 18]
-    769   4.4%  Azorius Control  [Scepter Control 511, Teferi Control 143, Snapcaster Control 89, Miracles 26]
-    752   4.3%  Blink  [Esper Blink 655, Jeskai Blink 97]
-    611   3.5%  Ruby Storm
+rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17704 lists
+17704 lists classified; 289 unclassified (1.6%)
+   1707   9.6%  Energy  [Boros Energy 1443, Azorius Energy 264]
+   1608   9.1%  Broodscale Combo
+   1454   8.2%  Reanimator  [Esper Goryo's 908, Grixis Reanimator 421, Esper Reanimator 72, Mono-Black Reanimator 53]
+   1338   7.6%  Izzet Prowess
+   1077   6.1%  Affinity  [Affinity 1055, Classic Affinity 22]
+    962   5.4%  Eldrazi Tron  [Eldrazi Tron 892, Emrakul Tron 52, Breach Tron 18]
+    774   4.4%  Azorius Control  [Scepter Control 516, Teferi Control 143, Snapcaster Control 89, Miracles 26]
+    752   4.2%  Blink  [Esper Blink 655, Jeskai Blink 97]
+    612   3.5%  Ruby Storm
+    540   3.1%  Phoenix  [Rakdos Phoenix 438, Darklight Phoenix 102]
     535   3.0%  Devoted Druid
-    534   3.0%  Phoenix  [Rakdos Phoenix 432, Darklight Phoenix 102]
-    527   3.0%  Domain Zoo
-    521   3.0%  Dimir Midrange
-    499   2.8%  Amulet Titan
-    494   2.8%  Ponza
-    477   2.7%  Living End
+    529   3.0%  Domain Zoo
+    521   2.9%  Dimir Midrange
+    504   2.8%  Amulet Titan
+    497   2.8%  Ponza
+    480   2.7%  Living End
     346   2.0%  Fight Rigging
     325   1.8%  Hollow One
-    271   1.5%  Neobrand
-    256   1.5%  Grinding Station  [Grinding Station (Emry) 252, Grinding Station (Loki/Oswald) 4]
+    274   1.5%  Neobrand
+    256   1.4%  Grinding Station  [Grinding Station (Emry) 252, Grinding Station (Loki/Oswald) 4]
     249   1.4%  Necro  [Necro 226, Necro (Rite of Consumption) 23]
     247   1.4%  Green Tron
     208   1.2%  Tameshi Belcher
-    168   1.0%  Samwise Combo
+    169   1.0%  Samwise Combo
     160   0.9%  Esper Midrange
     153   0.9%  Burn
     151   0.9%  Yawgmoth
     127   0.7%  Ritual Oculus
     110   0.6%  Goyf Fling
     100   0.6%  Wizards
-     75   0.4%  Izzet Murktide
+     76   0.4%  Izzet Murktide
      68   0.4%  Hammer
      67   0.4%  Creativity
      62   0.4%  Ritual Omnath
+     58   0.3%  Mill
      58   0.3%  Eldrazi Aggro
-     57   0.3%  Mill
-     53   0.3%  Death's Shadow
+     54   0.3%  Death's Shadow
      42   0.2%  Rhinos
      39   0.2%  Song of Creation
      36   0.2%  Dredge
      36   0.2%  Merfolk
-     32   0.2%  Mono-Red Belcher
+     33   0.2%  Mono-Red Belcher
      19   0.1%  Nantuko Combo
       2   0.0%  Infect
 

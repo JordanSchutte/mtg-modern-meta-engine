@@ -75,43 +75,43 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
 
 wrote data/silver/melee/decklist_archetypes.parquet
 === mtgo
-rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17763 lists
-17763 lists classified; 289 unclassified (1.6%)
-   1712   9.6%  Energy  [Boros Energy 1447, Azorius Energy 265]
-   1613   9.1%  Broodscale Combo
-   1456   8.2%  Reanimator  [Esper Goryo's 910, Grixis Reanimator 421, Esper Reanimator 72, Mono-Black Reanimator 53]
-   1345   7.6%  Izzet Prowess
-   1082   6.1%  Affinity  [Affinity 1060, Classic Affinity 22]
-    968   5.4%  Eldrazi Tron  [Eldrazi Tron 897, Emrakul Tron 52, Breach Tron 19]
-    777   4.4%  Azorius Control  [Scepter Control 519, Teferi Control 143, Snapcaster Control 89, Miracles 26]
-    754   4.2%  Blink  [Esper Blink 656, Jeskai Blink 98]
-    613   3.5%  Ruby Storm
-    544   3.1%  Phoenix  [Rakdos Phoenix 442, Darklight Phoenix 102]
-    535   3.0%  Devoted Druid
-    532   3.0%  Domain Zoo
-    521   2.9%  Dimir Midrange
-    510   2.9%  Amulet Titan
+rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17876 lists
+17876 lists classified; 297 unclassified (1.7%)
+   1729   9.7%  Energy  [Boros Energy 1459, Azorius Energy 270]
+   1621   9.1%  Broodscale Combo
+   1465   8.2%  Reanimator  [Esper Goryo's 912, Grixis Reanimator 425, Esper Reanimator 75, Mono-Black Reanimator 53]
+   1348   7.5%  Izzet Prowess
+   1090   6.1%  Affinity  [Affinity 1068, Classic Affinity 22]
+    973   5.4%  Eldrazi Tron  [Eldrazi Tron 902, Emrakul Tron 52, Breach Tron 19]
+    783   4.4%  Azorius Control  [Scepter Control 524, Teferi Control 143, Snapcaster Control 89, Miracles 27]
+    756   4.2%  Blink  [Esper Blink 657, Jeskai Blink 99]
+    615   3.4%  Ruby Storm
+    561   3.1%  Phoenix  [Rakdos Phoenix 455, Darklight Phoenix 106]
+    536   3.0%  Devoted Druid
+    534   3.0%  Domain Zoo
+    522   2.9%  Dimir Midrange
+    519   2.9%  Amulet Titan
     497   2.8%  Ponza
-    484   2.7%  Living End
+    489   2.7%  Living End
     346   1.9%  Fight Rigging
     326   1.8%  Hollow One
-    275   1.5%  Neobrand
-    257   1.4%  Grinding Station  [Grinding Station (Emry) 253, Grinding Station (Loki/Oswald) 4]
-    250   1.4%  Necro  [Necro 227, Necro (Rite of Consumption) 23]
+    276   1.5%  Neobrand
+    258   1.4%  Grinding Station  [Grinding Station (Emry) 254, Grinding Station (Loki/Oswald) 4]
+    252   1.4%  Necro  [Necro 229, Necro (Rite of Consumption) 23]
     247   1.4%  Green Tron
-    209   1.2%  Tameshi Belcher
-    169   1.0%  Samwise Combo
+    211   1.2%  Tameshi Belcher
+    170   1.0%  Samwise Combo
     160   0.9%  Esper Midrange
     153   0.9%  Burn
-    151   0.9%  Yawgmoth
+    151   0.8%  Yawgmoth
     127   0.7%  Ritual Oculus
     110   0.6%  Goyf Fling
     101   0.6%  Wizards
      76   0.4%  Izzet Murktide
      68   0.4%  Hammer
      67   0.4%  Creativity
-     62   0.3%  Ritual Omnath
-     58   0.3%  Mill
+     63   0.4%  Ritual Omnath
+     59   0.3%  Mill
      58   0.3%  Eldrazi Aggro
      54   0.3%  Death's Shadow
      42   0.2%  Rhinos
@@ -119,35 +119,35 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17763 lists
      36   0.2%  Dredge
      36   0.2%  Merfolk
      33   0.2%  Mono-Red Belcher
-     19   0.1%  Nantuko Combo
+     20   0.1%  Nantuko Combo
       2   0.0%  Infect
 
-289 unclassified lists; most common non-land cards among them:
+297 unclassified lists; most common non-land cards among them:
     58%  Thoughtseize
     49%  Fatal Push
-    42%  Orcish Bowmasters
+    41%  Orcish Bowmasters
     39%  Inquisition of Kozilek
     33%  Pithing Needle
     33%  Nihil Spellbomb
     31%  Nethergoyf
     30%  Kozilek's Command
-    30%  Shadowspear
     30%  Mishra's Bauble
+    30%  Shadowspear
     29%  Emperor of Bones
     26%  Thought-Knot Seer
     19%  Lightning Bolt
     16%  Malevolent Rumble
-    12%  Wrenn and Six
+    13%  Wrenn and Six
     11%  Force of Negation
     11%  Solitude
-    11%  Green Sun's Zenith
     10%  Ragavan, Nimble Pilferer
+    10%  Green Sun's Zenith
      9%  Teferi, Time Raveler
      8%  The Underworld Cookbook
      8%  Chthonian Nightmare
+     8%  Fable of the Mirror-Breaker
      8%  Psychic Frog
-     8%  Gravecrawler
-     8%  Sink into Stupor
+     7%  Gravecrawler
 
 wrote data/silver/mtgo/decklist_archetypes.parquet
 

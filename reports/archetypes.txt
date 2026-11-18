@@ -150,5 +150,3 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 17876 lists
      7%  Gravecrawler
 
 wrote data/silver/mtgo/decklist_archetypes.parquet
-
-Open archetype proposals awaiting review: #3 open since 2026-11-11

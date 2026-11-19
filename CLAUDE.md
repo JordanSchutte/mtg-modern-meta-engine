@@ -67,7 +67,8 @@ usually have no data; tests use fixtures and never need it.
 ## Working from the backlog (scheduled sessions)
 
 Work items are GitHub Issues. Only take an issue labeled **`ready`**; take the
-oldest one that is not already assigned to an open PR. Then:
+oldest one that is not already referenced by an open PR — unless the run's
+own instructions name a specific issue, in which case take that one. Then:
 
 1. Comment on the issue: "Starting — plan: …" (two or three lines).
 2. Branch from `main`, implement, add or update tests, update
@@ -83,7 +84,15 @@ issue, **do not guess**: write the question as a comment on the issue, add
 the label **`needs-jordan`**, remove `ready`, and stop. Do the preparatory
 work first so the question is concrete.
 
-Scope per session: one issue. Do not refactor beyond what the issue needs.
+**One issue per session, then stop.** Once the PR is open and the issue has
+its comment, the session is finished — do not start a second issue even if
+time remains. Do not refactor beyond what the issue needs.
+
+When an issue leaves a design choice open and you can make a reasonable call,
+make it, state it in the PR description and in `docs/architecture.md`, and
+say in the issue comment that it is a choice Jordan may want to reverse. Ask
+first (label `needs-jordan`) only when the choice is hard to undo or changes
+what other issues assume.
 
 ## Health check (scheduled sessions)
 

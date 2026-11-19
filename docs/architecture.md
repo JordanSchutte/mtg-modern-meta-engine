@@ -137,3 +137,33 @@ than assumed, so the backtest can confirm or reject them:
 forecast field: each archetype's expected match win rate against the field it
 will actually meet, with `matchup_coverage` saying how much of that field has
 a known matchup. The MCP tools `forecast()` and `recommend()` read these.
+
+## Weekly brief
+
+`gold/brief.py` (`scripts/build_brief.py`, last step of the watcher's gold
+build) writes a short markdown report for people rather than tables for
+queries: the forecast field and the model in words with its backtest score
+against the paper-only baseline; movers against last week's brief; the
+best-positioned decks (coverage ≥ 90%) and underplayed ones (forecast share
+< 3%, expected win rate > 52%); new MTGO bracket matches and matchup swings
+(pairs with ≥ 30 matches whose shrunk win rate moved ≥ 3 points); and data
+notes (paper lists this week vs last, MTGO events fetched, coverage flags).
+Every statistical term is explained where it first appears.
+
+Output is `gold/melee/brief/brief-<target_week>.md`, one per forecast target
+week and overwritten within it (so a Monday brief and a Thursday refresh are
+the same file), plus `brief.md` = latest. The watcher copies both to the
+`reports` branch and the MCP tool `brief()` returns the latest. Two design
+choices keep it self-contained:
+
+* **Movers read the previous brief, not a history table.** Each brief ends
+  with an HTML comment (`<!-- mtgmeta-brief {...} -->`) carrying its target
+  week and forecast field as JSON; the next week's brief finds the newest
+  dated brief before its own target week and diffs against that. The watcher
+  rebuilds gold from scratch, so it pulls `gold/melee/brief/` back down from
+  R2 first. When a dated forecast history exists (#9) movers can read that
+  instead; the marker costs nothing to keep.
+* **Matchup swings are recomputed, not stored.** The matrix is rebuilt from the
+  same silver inputs without this week's matches (by event date) and compared
+  to the full one. That is what last week's matrix was, up to any rules or
+  imputation change since, and it needs no snapshot of gold.

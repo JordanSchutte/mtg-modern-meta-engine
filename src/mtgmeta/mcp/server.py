@@ -128,6 +128,14 @@ def recommend(min_coverage: float = 0.6, min_matches: int = 100, top: int = 5) -
 
 @server.tool()
 @safe
+def brief() -> dict:
+    """The latest weekly meta brief as markdown: forecast field and model, movers vs last
+    week, best-positioned and underplayed decks, matchup swings, data notes."""
+    return q.brief(_root)
+
+
+@server.tool()
+@safe
 def run_sql(sql: str, limit: int = 200) -> dict:
     """Read-only SQL over Melee tables (events, matches, decklists, decklist_cards, players,
     decklist_archetypes, imputations), MTGO tables (mtgo_events, mtgo_decklists,

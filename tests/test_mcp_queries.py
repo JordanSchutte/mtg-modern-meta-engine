@@ -87,4 +87,5 @@ def test_server_exposes_the_tools(monkeypatch, dataset):
     tools = asyncio.run(srv.server.list_tools())
     names = {t.name for t in tools}
     assert {"coverage", "matchup", "matrix", "archetype_cards", "run_sql", "meta_share",
-            "failed_events", "card_usage", "archetypes"} <= names
+            "failed_events", "card_usage", "archetypes", "forecast", "recommend",
+            "brief"} <= names

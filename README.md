@@ -1,138 +1,143 @@
 # MTG Modern Meta Engine
 
-Predicts the Modern field for an upcoming tournament and recommends the best-positioned deck and flex slots for it, built as an event-driven data platform.
+A small data platform that forecasts the Magic: The Gathering **Modern** metagame and says which deck is best positioned against it. Two polite scrapers feed an append-only bronze layer in Cloudflare R2; DuckDB builds silver Parquet tables; gold holds a matchup matrix, archetype shares and a backtested field forecast; an MCP server exposes all of it to Claude Desktop so a matchup or coverage question is a sentence. GitHub Actions on a cron schedule is the whole orchestrator.
 
-> **Status:** Phase 0 — ingestion foundations. Melee discovery, fetching and the unattended watcher run end to end into an R2 bronze layer, and silver tables are rebuilt from it on every run; everything downstream is planned (see [Roadmap](#roadmap)).
+> **Status:** running unattended. 32 large paper events (36k Swiss matches, 89% with both decks known) and 470 MTGO events (18k lists) since the May 2026 format period, refreshed twice a day; the forecast is published every run. See [docs/architecture.md](docs/architecture.md) for the design record.
 
-## What it does
+## What it answers
 
-1. **Matchup history.** Pairings from completed large paper events (100+ players) build an archetype-vs-archetype matchup matrix, pooled within a *format period* (the time between bans, unbans or format-warping set releases).
-2. **Meta prediction.** Recent MTGO Challenge top 32s and 5-0 league dumps, corrected for survivorship, forecast each archetype's share of the upcoming field.
-3. **Deck selection.** Each archetype's expected win rate against the forecast field is `E[WR_d] = Σ_a share_a · WR(d vs a)`. A metagame-equilibrium solve flags underplayed decks.
-4. **Flex tuning.** Each archetype is split into a fixed core and flex slots; flex slots are scored against the forecast field.
+| Question | Where the answer comes from |
+| --- | --- |
+| **What will the field look like next weekend?** | `field_forecast`: each archetype's expected share of the next paper field, from the model that won the backtest (below). |
+| **How does deck A do against deck B?** | The matchup matrix: shrunk match win rate with a 90% interval and sample size, one row per ordered pair per format period. |
+| **What should I play?** | `position_forecast`: each archetype's expected win rate against the forecast field, i.e. the matrix weighted by the forecast, plus underplayed decks that are well positioned. |
+| **How much data is behind that?** | Coverage per event, imputation evidence and failed fetches are all tables, not log lines. |
+
+The MCP server (`mtgmeta-mcp`) exposes these as tools: `forecast`, `recommend`, `meta_share`, `matchup`, `matrix`, `archetype_cards` (core / package / flex-slot breakdown of a deck), `card_usage`, `archetypes`, `coverage`, `failed_events` and a read-only `run_sql` over every silver and gold table.
 
 ## Architecture
 
 ```
- Melee watcher ─┐
- MTGO watcher  ─┼─► Kafka: tournament.published ─► ingestion consumer ─► Bronze (Iceberg on MinIO)
- TopDeck hook  ─┘                                   └─► dead-letter topic         │
-                                                                                   ▼
-                                           Airflow (asset-triggered, debounced rebuild)
-                                                   │
-                                     Spark: bronze → silver ─► dbt: silver → gold
-                                                                    │
-                                         matchup matrix · meta forecast · deck ranking + flex
+ Melee.gg  ──PoliteClient──►  bronze/melee  ┐
+ (paper: every list and every Swiss pairing) │   Cloudflare R2, append-only:
+                                              ├─  raw pages + JSON, versioned,
+ mtgo.com  ──PoliteClient──►  bronze/mtgo   ┘   never rewritten or deleted
+ (online: Challenge / League lists, top-8 brackets)
+                     │
+                     ▼  DuckDB (scripts/build_silver.py, classify_decklists.py, build_imputations.py)
+              silver/  Parquet: events, matches, decklists, decklist_cards, players,
+                       decklist_archetypes (rules-based), imputations, cards (Scryfall)
+                     │
+                     ▼  DuckDB (scripts/build_gold.py, build_forecast.py)
+              gold/    matchups + archetype_summary (one matrix, `source` = paper | mtgo)
+                       field_forecast, position_forecast, forecast_backtest
+                     │
+                     ▼
+              mtgmeta-mcp  ──stdio──►  Claude Desktop / Claude Code
 ```
 
-More detail in [docs/architecture.md](docs/architecture.md).
+Orchestration is four GitHub Actions workflows on cron: `mtgo-watcher.yml` (daily, bronze only), `melee-watcher.yml` (twice a day: discover, fetch, then rebuild silver and gold for both sources and publish the text reports to the `reports` branch), `propose-rules.yml` (Wednesdays: re-mines the last 30 days and opens one pull request of mechanical archetype-rule proposals for a person to name and merge) and `ci.yml` (lint + contract tests on fixtures, offline). The pipeline runs only there; dev sessions never write to R2.
 
-## Data sources
+Design choices worth knowing, all recorded in [docs/architecture.md](docs/architecture.md):
 
-| Source | Used for | Access |
+- **Each source does the job it is reliable at.** Paper events publish the whole field and every pairing, so they build the matchup matrix and define meta share. MTGO publishes only the top 32 lists and the top-8 bracket, so it drives the forecast (online players adopt decks a week or two before paper does) and adds bracket matches to the matrix at `source = 'mtgo'`; MTGO lists never count toward meta share.
+- **Archetypes are rules, not clusters.** A human-editable YAML file per format period names each deck's signature cards; the classifier picks the file by event date, so history never silently reclassifies. Clustering is only used to *draft* proposals.
+- **Nothing is deleted.** Bronze is append-only with retry history; silver and gold are rebuilt from it on every run. Missing paper decklists are filled from the same player's list at a nearby event (`imputations`), kept as a separate table with measured evidence (79% same archetype, 41% identical 75 on same-weekend pairs), and every matchup row says how many of its matches used one.
+- **Fail loudly.** Every parser sits behind contract tests on fixtures trimmed from real pages; a page-shape change stops the run instead of writing bad rows.
+
+## How the forecast is chosen
+
+Each run backtests a set of candidate models on every past paper week with at least 150 lists, using only data from before that week, and uses whichever scored best. Nothing is hand-picked. Two metrics, both lower-is-better:
+
+- **log-loss** — how surprised the model was by the lists that actually showed up (per list; it punishes giving a deck a tiny share and then seeing a lot of it).
+- **TVD** (total variation distance) — the share of the field the model put in the wrong archetypes (0.147 means about 15% of the forecast mass was misplaced).
+
+Latest backtest (`reports/forecast.txt` on the `reports` branch, 2026-11-18, 6 paper weeks), best of each model family:
+
+| model | what it is | log-loss | TVD |
+| --- | --- | ---: | ---: |
+| `blend(0.5,1,1)` ← chosen | half paper (1-week half-life), half recent MTGO lists | 3.1490 | 0.147 |
+| `blend_r(0.5,1,1)` | same, but MTGO lists weighted by finish (top 8 = 3, 9–16 = 2, other = 1, league 5-0 = 0.5) | 3.1493 | 0.150 |
+| `mtgo_recent(2)` | MTGO lists from the last 2 weeks | 3.1675 | 0.164 |
+| `mtgo_results(2)` | the same, results-weighted | 3.1756 | 0.177 |
+| `paper_last` | last paper week (the naive baseline) | 3.1863 | 0.179 |
+| `momentum(1,0.5)` | paper nudged by MTGO's recent trend | 3.1913 | 0.179 |
+| `paper_ewma(1)` | exponentially weighted paper | 3.1924 | 0.184 |
+
+Beliefs about how players behave ("paper memory is long", "people copy results, not volume") are encoded as candidate models so the backtest can confirm or reject them rather than being assumed. The forecast field is then run through the current period's matchup matrix to get each archetype's expected win rate against the field it will actually meet.
+
+## Data sources and politeness
+
+| Source | Used for | How |
 | --- | --- | --- |
-| Melee.gg | Matchup matrix (full-field decklists and every Swiss pairing) | Public tournament pages, fetched politely (below) |
-| mtgo.com decklists | Meta forecast (Challenge top 32, 5-0 leagues); top 8 brackets at low weight | Public pages |
-| Scryfall bulk data | Card dimension, role tagging | Official bulk files |
-| TopDeck.gg | Optional second source; demonstrates webhook ingestion | Official API (key in `.env`) |
+| [Melee.gg](https://melee.gg) | Matchup matrix and meta share: completed Modern events with 100+ players, every decklist and every Swiss pairing | Public tournament pages and the JSON a browser loads for them; event discovery through the public *Find Events* search (Playwright) plus a watchlist for events created months ahead |
+| [mtgo.com/decklists](https://www.mtgo.com/decklists) | Forecast input and top-8 bracket matches: Challenges, Preliminaries, Showcases, League 5-0s | Monthly index pages; each event page embeds the whole event as JSON |
+| Scryfall bulk data | Card dimension (colors, types, lands) | Official bulk files, refreshed weekly |
 
-### How Melee data is obtained
+Both sources go through one `PoliteClient`: one request at a time, a fixed interval of 2.5 s (2 s floor enforced in code), exponential backoff on HTTP 429 and a hard stop after repeated 429s. Each event is fetched once; late decklist uploads are picked up by a light daily re-check for 14 days that re-fetches only what changed. A contact address travels in a `From` header on every request. There is no parallel fetching and no dependency on third-party decklist caches: discovery is the project's own.
 
-Melee doesn't offer API credentials to individuals, so this project reads the same public pages and JSON a browser loads when viewing a finished tournament. It is deliberately conservative:
+## Run it locally
 
-- Only **completed** Modern events with **100+ players** are fetched, each **once**. Raw responses are cached in bronze and never re-requested.
-- One request at a time, **2.5 s apart**, exponential backoff on HTTP 429, and the run **stops** after repeated 429s.
-- Requests present a browser User-Agent, because Melee's firewall returns 403 to anything else; the contact address is carried in a `From` header on every request.
-- Event discovery uses Melee's public *Find Events* search: the page is opened once in Playwright and its search hub is queried page by page (about 45 requests for six months of Modern events).
-- Every parser sits behind **contract tests** on fixtures captured from live pages. If Melee changes its page or JSON shape, the run fails loudly instead of writing bad rows.
-
-## Quick start
+The MCP server reads local Parquet only, so a laptop needs the tables, not the pipeline.
 
 ```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
-playwright install chromium
-cp .env.example .env                                 # set MELEE_CONTACT_EMAIL
+pip install -e ".[dev,mcp]"
 
-# Find completed Modern events with 100+ players since a date
-python scripts/discover_melee.py --since 2026-04-20 --min-players 100
+# Pull the current silver and gold tables (read access to the bucket needed)
+rclone copy r2:mtgmeta-bronze/silver data/silver
+rclone copy r2:mtgmeta-bronze/gold data/gold
 
-# Fetch one event into data/bronze/melee/
-python scripts/fetch_melee_event.py 453138
-
-# Parse bronze into silver Parquet tables and print per-event coverage
-python scripts/build_silver.py
-
-# Same-75 imputation (needs classify first), then gold: matchup matrix + archetype summary
-python scripts/build_imputations.py
-python scripts/build_gold.py            # --no-impute for published lists only
-
-# Archetypes: card table, mined draft rules, then classify with the rules you keep
-python scripts/update_cards.py
-python scripts/mine_archetypes.py --period-start 2026-05-18     # -> config/archetypes/*.draft.yml
-python scripts/classify_decklists.py                            # rules file chosen per event date
-python scripts/propose_rules.py                                 # what the weekly PR would propose
-python scripts/new_period.py --start 2026-12-15 --ban "Card"    # B&R day: new period file
-
-pytest
+mtgmeta-mcp          # stdio MCP server; DATA_ROOT defaults to ./data
 ```
 
-## Ask the data a question (MCP server)
+For Claude Desktop, add it to `claude_desktop_config.json`:
 
-The tables are exposed as tools for Claude Code or Claude Desktop, so a coverage or matchup question is a sentence:
+```json
+{ "mcpServers": { "mtg-modern-meta": { "command": "mtgmeta-mcp", "env": { "DATA_ROOT": "/path/to/repo/data" } } } }
+```
+
+(Claude Desktop does not inherit your shell's `PATH`, so use the full path to `mtgmeta-mcp` from `which mtgmeta-mcp` if the server does not start.) For Claude Code, `.mcp.json` in the repo registers the same server; open the repo and the `mtg-modern-meta` tools appear.
+
+To rebuild tables yourself from a bronze copy under `data/bronze`:
 
 ```bash
-pip install -e ".[mcp]"
-rclone copy r2:mtgmeta-bronze/silver data/silver && rclone copy r2:mtgmeta-bronze/gold data/gold
+python scripts/build_silver.py             # bronze -> silver Parquet, prints per-event coverage
+python scripts/classify_decklists.py       # rules file chosen per event date -> decklist_archetypes
+python scripts/build_imputations.py        # same-75 imputation with evidence
+python scripts/build_gold.py               # matchup matrix + archetype summary
+python scripts/build_forecast.py --no-write  # backtest table + forecast, printed
+ruff check . && python -m pytest -q        # offline; tests run on fixtures
 ```
-
-`.mcp.json` in the repo registers it for Claude Code (open the repo and the `mtg-modern-meta` tools appear). For Claude Desktop, add the same command (`python -m mtgmeta.mcp.server`, cwd = this repo) to its MCP config. Tools: `coverage`, `failed_events`, `meta_share`, `matchup`, `matrix`, `archetype_cards` (core / package / slot breakdown with the flex budget), `card_usage`, `archetypes`, and read-only `run_sql`. It reads local Parquet only; refresh with rclone when you want current numbers.
-
-## Unattended runs
-
-`.github/workflows/melee-watcher.yml` is the Melee watcher from the architecture doc as a scheduled GitHub Actions job: it pulls bronze down from a Cloudflare R2 bucket, discovers Modern events created in the last 14 days (headless), adds upcoming Modern events to a watchlist, fetches events that are at least two days old (so late decklist uploads and corrections have landed), and copies bronze back. The watchlist exists because Melee's search is ordered by creation date and large events are created months ahead; see [docs/architecture.md](docs/architecture.md#melee-discovery). It runs twice a day, around noon and midnight US Eastern. The upload is a copy, never a sync, so nothing in R2 is ever deleted by a run.
-
-Secrets it needs: `MELEE_CONTACT_EMAIL`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`. Run it by hand with a `since` date to backfill.
 
 ## Repository layout
 
 ```
 src/mtgmeta/
-  contracts.py              ContractError: raised when a source's shape changes
-  sources/melee/
-    query.py                builds Find Events search URLs
-    discovery.py            Find Events search via the page's SignalR hub (Playwright)
-    watchlist.py            upcoming events, settled (fetched or marked too small) once over
-    http.py                 throttled, backoff-aware HTTP client
-    parse.py                tournament page, round matches, decklist parsers
-    fetch.py                fetches one event into bronze (idempotent)
-  silver/melee.py           bronze -> Parquet tables (events, matches, decklists, cards, players)
-  silver/impute.py          same-75 imputation from a player's nearby published list, with evidence
-  gold/matrix.py            matchup matrix + archetype summary (shrunk win rates, intervals, position)
-  mcp/queries.py            questions over the tables as plain functions
-  mcp/server.py             those functions as MCP tools (stdio) for Claude Code / Desktop
-  cards/scryfall.py         Scryfall bulk data -> silver/cards.parquet (colors, types, lands)
-  archetypes/rules.py       rules file format and the signature-based classifier
-  archetypes/mine.py        drafts rules by clustering the period's decklists
-config/archetypes/          archetype rules per format period (yours to edit; drafts are mined)
-scripts/                    CLI entry points
-tests/fixtures/melee/       responses captured from live Melee pages
-docs/                       architecture and design notes
+  sources/melee/        discovery (Find Events via Playwright), watchlist, PoliteClient, parsers, fetch
+  sources/mtgo/         monthly index discovery, embedded-JSON parser, fetch
+  silver/               bronze -> Parquet for each source; same-75 imputation
+  archetypes/           rules file format, signature classifier, mining and weekly proposals
+  gold/                 matchup matrix + archetype summary; forecast models, backtest, position
+  cards/                Scryfall bulk data -> cards.parquet
+  mcp/                  questions as plain functions (queries.py) and as MCP tools (server.py)
+config/archetypes/      one YAML rules file per format period, edited by hand
+scripts/                CLI entry points, one per pipeline step
+tests/                  contract and unit tests; fixtures are trimmed real pages
+.github/workflows/      the orchestrator
+docs/architecture.md    design record, kept current with the code
 ```
 
 ## Roadmap
 
-| Phase | Builds | Done when |
-| --- | --- | --- |
-| 0 Foundations | Melee discovery + fetch, contract tests, CI, unattended watcher with R2 bronze, silver tables (DuckDB/Parquet), Scryfall cards | One command loads cards and an event to silver; CI green |
-| 1 Batch MVP | MTGO scraper, archetype rules, naive matrix and meta share, first ranking (dbt on DuckDB) | Produces a ranking for a real upcoming Modern event |
-| 2 Orchestration, Spark, quality | Airflow DAGs, Spark bronze→silver, history backfill, data contracts | Full history rebuilds from bronze in one run |
-| 3 Event-driven ingestion | Watchers, Kafka topic, dead-letter topic, debounced asset triggers | A new event rebuilds only the affected marts |
-| 4 Statistics | Shrinkage, skill-adjusted model, field-share calibration, equilibrium LP, core/flex | Backtest on past events written up |
-| 5 Cloud + BI | Terraform (AWS, Snowflake), dashboards | apply → run → destroy at ≈ $0 |
+The backlog is the open issues labeled [`ready`](https://github.com/JordanSchutte/mtg-modern-meta-engine/issues?q=is%3Aissue+is%3Aopen+label%3Aready); at the time of writing:
+
+- [#6](https://github.com/JordanSchutte/mtg-modern-meta-engine/issues/6) Weekly meta brief generated from gold
+- [#7](https://github.com/JordanSchutte/mtg-modern-meta-engine/issues/7) Coverage report: flag events whose lists never published
+- [#8](https://github.com/JordanSchutte/mtg-modern-meta-engine/issues/8) One-command local data refresh for the MCP server
+- [#9](https://github.com/JordanSchutte/mtg-modern-meta-engine/issues/9) Keep a dated history of field forecasts
 
 ## Acknowledgements
 
-The Melee endpoint layout was first documented by [zachyattack23/mtg-modern-meta](https://github.com/zachyattack23/mtg-modern-meta). Historical tournament JSON from [Badaro/MTGODecklistCache](https://github.com/Badaro/MTGODecklistCache).
+The Melee endpoint layout was first documented by [zachyattack23/mtg-modern-meta](https://github.com/zachyattack23/mtg-modern-meta).
 
 This project is not affiliated with or endorsed by Wizards of the Coast, Melee.gg or Daybreak Games. Magic: The Gathering is a trademark of Wizards of the Coast LLC.

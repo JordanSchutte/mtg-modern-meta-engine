@@ -358,3 +358,16 @@ def recommend(data_root: Path, min_coverage: float = 0.6, min_matches: int = 100
             "filters": {"min_coverage": min_coverage, "min_matches": min_matches},
             "note": "expected_wr is against the forecast field; a 53% deck in a 55% field "
                     "is still a coin flip per match. Check matchup sample sizes with matchup()."}
+
+
+def brief(data_root: Path) -> dict:
+    """The latest weekly meta brief (markdown) written by scripts/build_brief.py."""
+    from mtgmeta.gold import brief as b
+    text = b.latest(data_root)
+    if text is None:
+        return {"error": f"no brief yet ({b.brief_root(Path('.')).as_posix()}/brief.md missing "
+                         "under DATA_ROOT); refresh gold with rclone or run "
+                         "scripts/build_brief.py"}
+    meta = b.read_marker(text)
+    return {"target_week": meta.get("target_week"), "generated": meta.get("generated"),
+            "model": meta.get("model"), "markdown": text}

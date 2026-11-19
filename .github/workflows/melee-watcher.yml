@@ -86,6 +86,14 @@ jobs:
           rclone sync "r2:$BUCKET/bronze" data/bronze --fast-list
           echo "events in bronze: $(ls data/bronze/melee/events 2>/dev/null | wc -l)"
 
+      - name: Pull earlier briefs from R2
+        # Silver and gold are rebuilt from scratch, but the weekly brief compares
+        # against the previous week's brief, so those few files come back down.
+        run: |
+          mkdir -p data/gold/melee/brief
+          rclone copy "r2:$BUCKET/gold/melee/brief" data/gold/melee/brief --fast-list 2>/dev/null \
+            || echo "no earlier briefs in R2"
+
       - name: Check R2 is writable
         # Fail here, in the first minute, rather than after hours of fetching.
         run: |
@@ -158,13 +166,15 @@ jobs:
         if: always()
         run: rclone copy data/silver "r2:$BUCKET/silver" --fast-list --stats-one-line -v
 
-      - name: Build gold (matchup matrix, forecast) and push
+      - name: Build gold (matchup matrix, forecast, weekly brief) and push
         if: always()
         run: |
           python scripts/build_gold.py | tee gold-report.txt
           { echo '## Matchups'; echo '```'; cat gold-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           python scripts/build_forecast.py | tee forecast-report.txt
           { echo '## Forecast'; echo '```'; cat forecast-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          python scripts/build_brief.py > /dev/null || echo "::warning::weekly brief failed"
+          { echo '## Brief'; cat data/gold/melee/brief/brief.md 2>/dev/null; } >> "$GITHUB_STEP_SUMMARY"
           rclone copy data/gold "r2:$BUCKET/gold" --fast-list --stats-one-line -v
 
       - name: Publish reports to the reports branch
@@ -178,6 +188,7 @@ jobs:
           cp gold-report.txt /tmp/reports/matchups.txt 2>/dev/null || true
           cp impute-report.txt /tmp/reports/imputation.txt 2>/dev/null || true
           cp forecast-report.txt /tmp/reports/forecast.txt 2>/dev/null || true
+          cp data/gold/melee/brief/brief*.md /tmp/reports/ 2>/dev/null || true
           git config user.name "melee-watcher[bot]"
           git config user.email "noreply@github.com"
           git fetch -q origin reports || true

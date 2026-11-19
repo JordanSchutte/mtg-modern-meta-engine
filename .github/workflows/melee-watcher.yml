@@ -156,6 +156,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
 
+      - name: Coverage flags (events whose lists never published, paper dark)
+        # Needs classified counts, so it runs after classification and is
+        # appended to the coverage report rather than printed by build_silver.
+        if: always()
+        run: |
+          { echo; python scripts/coverage_flags.py; } | tee flags-report.txt >> silver-report.txt
+          { echo '## Coverage flags'; echo '```'; cat flags-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Impute missing decklists (same player, nearby event)
         if: always()
         run: |

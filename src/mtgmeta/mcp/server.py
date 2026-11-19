@@ -50,7 +50,10 @@ _root = Settings.from_env().data_root
 @safe
 def coverage(days: int = 30) -> dict:
     """Events ingested in the last N days: Modern Swiss matches, how many have both
-    decklists known, empty lists, refresh checks. Use for 'how much data do we have'."""
+    decklists known, empty lists, refresh checks; plus the flags — events whose lists
+    never published (Melee: no usable lists or < 10% of players after 3 days; MTGO:
+    fetched empty) and the last paper event with >= 150 classified lists and how many
+    days ago ('paper went dark'). Use for 'how much data do we have / what's missing'."""
     return q.coverage(_root, days)
 
 

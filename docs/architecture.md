@@ -138,6 +138,36 @@ forecast field: each archetype's expected match win rate against the field it
 will actually meet, with `matchup_coverage` saying how much of that field has
 a known matchup. The MCP tools `forecast()` and `recommend()` read these.
 
+## Coverage flags
+
+Events that were discovered but whose lists never published used to vanish
+from every report: a zero-list event is just a short row in the per-event
+coverage table. `silver/coverage.py` (`scripts/coverage_flags.py`) names them
+and appends a section to `reports/coverage.txt`; the MCP `coverage()` tool
+returns the same data. Three facts, each over silver only:
+
+* **Unpublished Melee events** — start at least 3 days in the past and either
+  no usable decklist or fewer usable lists than 10% of the players. Silver has
+  no end date, so the grace window counts from the start; a two-day RC is
+  therefore flagged a day or so earlier than "end + 3" would (the issue's
+  wording), which only matters for events that do eventually publish. A list
+  belongs to an event when one of that event's matches references it (not
+  `first_tournament_id`), so a 75 reused from an earlier event still counts as
+  published here.
+* **Empty MTGO events** — manifest status `empty`: the page was fetched but
+  never carried lists.
+* **Paper dark** — the most recent Melee event with ≥ 150 classified lists
+  (`MIN_CLASSIFIED`, pinned by a test to the forecast's `MIN_PAPER_LISTS`) and
+  how many days ago it was. When this passes a couple of weeks the forecast is
+  running on MTGO alone.
+
+Classified counts exist only after `classify_decklists.py`, so the section
+cannot come from `build_silver.py`; the watcher runs the script after
+classification and appends its output to the coverage report. The flag list
+is not windowed: an event that never published stays listed, which is the
+point (the total is the number to watch). The thresholds are module constants,
+not configuration.
+
 ## Weekly brief
 
 `gold/brief.py` (`scripts/build_brief.py`, last step of the watcher's gold

@@ -40,15 +40,16 @@ wrote 5 tables to data/silver/melee: events=32, matches=37864, decklists=10388, 
 
 MTGO events in bronze
   kind                   events  lists
-  challenge-16               27    792
-  challenge-32              112   3584
+  challenge-16               28    816
+  challenge-32              121   3872
   challenge-64              128   4096
   challenge-96               28    896
   last-chance                 4    128
-  league                    161   8251
+  league                    162   8276
   rc-qualifier                1     32
   rc-super-qualifier          4    128
   showcase-challenge          4    128
   showcase-qualifier          1     32
-  2026-05-18 .. 2026-11-14
-wrote 4 tables to data/silver/mtgo: events=470, decklists=18067, decklist_cards=574676, matches=2125
+  2 events recorded without lists
+  2026-05-18 .. 2026-11-17
+wrote 4 tables to data/silver/mtgo: events=483, decklists=18404, decklist_cards=585416, matches=2195

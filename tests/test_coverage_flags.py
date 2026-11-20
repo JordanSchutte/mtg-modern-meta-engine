@@ -147,7 +147,7 @@ def test_without_classification_or_mtgo(tmp_path, dataset):
 
 
 def test_mcp_coverage_carries_the_flags(dataset):
-    cov = q.coverage(dataset, days=36500)
+    cov = q.coverage(dataset, days=36500, today=TODAY)   # the fixture's dates are relative to TODAY
     assert cov["unpublished_total"] == 3
     assert {r["tournament_id"] for r in cov["unpublished_melee"]} == {900001, 900002}
     assert cov["last_big_paper_event"]["tournament_id"] == 900004

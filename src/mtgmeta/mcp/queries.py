@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter, defaultdict
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import duckdb
@@ -61,13 +61,15 @@ def _latest_period(con) -> str | None:
 
 # --------------------------------------------------------------------------
 
-def coverage(data_root: Path, days: int = 30) -> dict:
+def coverage(data_root: Path, days: int = 30, today: date | None = None) -> dict:
     """Events in bronze over the last N days with how much of each the matrix can use,
     plus the coverage flags: events whose lists never published (all of them, not
-    just the window) and the last paper event with enough classified lists."""
+    just the window) and the last paper event with enough classified lists.
+    ``today`` pins the clock (tests); the server leaves it as the real date."""
     from mtgmeta.silver import coverage as flags
     con = connect(data_root)
-    since = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
+    now = datetime.combine(today, datetime.min.time()) if today else datetime.now(UTC)
+    since = (now - timedelta(days=days)).strftime("%Y-%m-%d")
     events = _rows(con, """
         select substr(start, 1, 10) as start, tournament_id, name, players_estimate as players,
                modern_swiss_matches as modern_swiss, modern_swiss_known as both_known,
@@ -79,7 +81,7 @@ def coverage(data_root: Path, days: int = 30) -> dict:
     tot = sum(e["modern_swiss"] or 0 for e in events)
     known = sum(e["both_known"] or 0 for e in events)
     con.close()
-    f = flags.flags(data_root)
+    f = flags.flags(data_root, today)
     return {"since": since, "events": len(events), "modern_swiss_matches": tot,
             "both_decks_known": known,
             "known_share": round(known / tot, 3) if tot else None, "rows": events,

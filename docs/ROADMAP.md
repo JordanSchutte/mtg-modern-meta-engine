@@ -6,15 +6,12 @@ direction. Work items themselves live in GitHub Issues (see CLAUDE.md).
 
 ## Who it is for
 
-A small private group (Jordan, and eventually a team he plays with). The
-output is for them, not the public. The code is public as a portfolio; the
-*outputs* (forecasts, briefs, matrix) are not meant to be. The "everyone
-bandwagons the recommended deck" problem is therefore out of scope for now,
-but see "After 1.0".
+A small testing team. The code is public as a portfolio; the
+*outputs* (forecasts, briefs, matrix) are not meant to be.
 
 ## 1.0 definition
 
-Someone on the team who isn't Jordan can, on a Thursday, see what next
+Someone on the team, on a Thursday, see what next
 weekend's paper field is forecast to be, which decks are best positioned
 against it and why, and how well past forecasts did — and the platform keeps
 itself running and reporting without anyone touching it.

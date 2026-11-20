@@ -83,12 +83,19 @@ The MCP server reads local Parquet only, so a laptop needs the tables, not the p
 ```bash
 pip install -e ".[dev,mcp]"
 
-# Pull the current silver and gold tables (read access to the bucket needed)
-rclone copy r2:mtgmeta-bronze/silver data/silver
-rclone copy r2:mtgmeta-bronze/gold data/gold
+# Pull the current silver and gold tables (rclone + read access to the bucket needed)
+python scripts/sync_local.py            # rclone copy r2:mtgmeta-bronze/{silver,gold} -> data/
+python scripts/sync_local.py --dry-run  # show the commands and the local state, copy nothing
 
 mtgmeta-mcp          # stdio MCP server; DATA_ROOT defaults to ./data
 ```
+
+`sync_local.py` is the two `rclone copy` commands with a check in front and a
+summary after: it stops with a one-line hint if `rclone` is missing or no `r2`
+remote is configured (either `rclone config`, or `RCLONE_CONFIG_R2_*` variables
+in `.env` — see `.env.example`), then prints per-layer file counts, which files
+were added or updated, and the forecast's target week. It only ever copies
+*from* R2; nothing local is deleted and nothing is written to the bucket.
 
 For Claude Desktop, add it to `claude_desktop_config.json`:
 

@@ -62,7 +62,10 @@ def _latest_period(con) -> str | None:
 # --------------------------------------------------------------------------
 
 def coverage(data_root: Path, days: int = 30) -> dict:
-    """Events in bronze over the last N days with how much of each the matrix can use."""
+    """Events in bronze over the last N days with how much of each the matrix can use,
+    plus the coverage flags: events whose lists never published (all of them, not
+    just the window) and the last paper event with enough classified lists."""
+    from mtgmeta.silver import coverage as flags
     con = connect(data_root)
     since = (datetime.now(UTC) - timedelta(days=days)).strftime("%Y-%m-%d")
     events = _rows(con, """
@@ -76,9 +79,14 @@ def coverage(data_root: Path, days: int = 30) -> dict:
     tot = sum(e["modern_swiss"] or 0 for e in events)
     known = sum(e["both_known"] or 0 for e in events)
     con.close()
+    f = flags.flags(data_root)
     return {"since": since, "events": len(events), "modern_swiss_matches": tot,
             "both_decks_known": known,
-            "known_share": round(known / tot, 3) if tot else None, "rows": events}
+            "known_share": round(known / tot, 3) if tot else None, "rows": events,
+            "unpublished_melee": f["unpublished_melee"], "empty_mtgo": f["empty_mtgo"],
+            "unpublished_total": f["unpublished_total"],
+            "last_big_paper_event": f["last_big_paper_event"],
+            "flag_rules": f["rules"]}
 
 
 def failed_events(data_root: Path) -> dict:

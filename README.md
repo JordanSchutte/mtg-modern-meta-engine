@@ -103,6 +103,7 @@ To rebuild tables yourself from a bronze copy under `data/bronze`:
 ```bash
 python scripts/build_silver.py             # bronze -> silver Parquet, prints per-event coverage
 python scripts/classify_decklists.py       # rules file chosen per event date -> decklist_archetypes
+python scripts/coverage_flags.py           # events whose lists never published; days since last big paper event
 python scripts/build_imputations.py        # same-75 imputation with evidence
 python scripts/build_gold.py               # matchup matrix + archetype summary
 python scripts/build_forecast.py --no-write  # backtest table + forecast, printed

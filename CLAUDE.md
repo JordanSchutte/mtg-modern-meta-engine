@@ -94,6 +94,27 @@ say in the issue comment that it is a choice Jordan may want to reverse. Ask
 first (label `needs-jordan`) only when the choice is hard to undo or changes
 what other issues assume.
 
+## Planning (scheduled sessions)
+
+When asked to plan: read `docs/ROADMAP.md` (the 1.0 definition and what is
+after it), the open issues, the latest Status comment and the latest brief
+on the `reports` branch. Then:
+
+- For each roadmap gap with no open issue, and for each issue labeled
+  **`idea`**, write one or more issues labeled **`proposed`**, each sized for
+  one nightly session and shaped like the existing ones: what, where in the
+  code, how to verify, what it must not touch. Link them to the roadmap item
+  or the `idea` issue; on the `idea` issue, comment the breakdown and remove
+  the `idea` label.
+- Mark a proposed issue **`ready`** yourself only when it is small by the
+  roadmap's definition (one PR; no new workflow; no change to table schemas
+  the MCP tools read; no new external surface; no change to R2 layout).
+  Everything else stays `proposed` for Jordan.
+- Do not duplicate: search open and recently closed issues first. Do not
+  reopen decisions recorded in `docs/architecture.md` or the roadmap.
+- Finish with one comment on the Status issue: what you proposed, what you
+  marked ready, what needs Jordan's call.
+
 ## Health check (scheduled sessions)
 
 When asked to check on the platform:

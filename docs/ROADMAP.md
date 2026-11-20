@@ -55,8 +55,8 @@ itself running and reporting without anyone touching it.
    Write the runbook in docs/ before it happens; do it when it happens.
 7. **Docs current.** Remove the stale "Event-driven ingestion" (Kafka/Airflow)
    section from `docs/architecture.md`; every section describes what runs.
-8. Ops: rotate the burned `mtgmeta-local` R2 token (Jordan); gzip bronze
-   pages when the bucket passes ~5 GB.
+8. Ops: gzip bronze pages when the bucket passes ~5 GB. (The `mtgmeta-local`
+   R2 token has been rotated — done.)
 
 ## After 1.0
 

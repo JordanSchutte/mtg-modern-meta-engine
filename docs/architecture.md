@@ -167,3 +167,26 @@ choices keep it self-contained:
   same silver inputs without this week's matches (by event date) and compared
   to the full one. That is what last week's matrix was, up to any rules or
   imputation change since, and it needs no snapshot of gold.
+
+## Local refresh for the MCP server
+
+The MCP server reads Parquet under `DATA_ROOT`; a laptop gets those tables by
+copying the published `silver/` and `gold/` prefixes down from R2, never by
+running the pipeline. `scripts/sync_local.py` (`mtgmeta/local_sync.py`) is
+that copy as one command: a preflight (rclone on `PATH`, a remote named by
+`Settings.rclone_remote` known to rclone through `rclone.conf` or
+`RCLONE_CONFIG_<REMOTE>_*` variables — `.env` works, since `Settings` loads it
+before the subprocess starts), then `rclone copy <remote>:<bucket>/<layer>
+DATA_ROOT/<layer>` per layer, then a diff of local file snapshots (path, size,
+mtime) taken before and after, printed with the newest `target_week` in
+`field_forecast.parquet`.
+
+Choices: it is `copy`, not `sync`, so a table that disappears from R2 lingers
+locally rather than being deleted on a laptop (consistent with "nothing is
+deleted"; `rm -r data/silver data/gold` and re-run is the reset). The remote
+name and bucket became `Settings` fields (`RCLONE_REMOTE`, `R2_BUCKET`,
+defaults `r2` / `mtgmeta-bronze`) so the script and the workflows agree on one
+place for them; the workflows still set `BUCKET` in their own `env:` block.
+`--dry-run` prints the commands and the local state without calling rclone,
+which is also how the tests exercise the script; the copy path is tested
+against a stand-in `rclone` on `PATH`.

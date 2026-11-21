@@ -22,38 +22,38 @@ Field forecast
 
   forecast field for week of 2026-11-16 (blend(0.5,1,1)):
   archetype                 share  paper 2w  mtgo 2w  results 2w
-  Broodscale Combo          13.3%      0.0%    11.0%       13.5%
+  Broodscale Combo          13.5%      0.0%    11.2%       13.6%
+  Izzet Prowess              8.6%      0.0%     5.9%        4.8%
   Energy                     8.5%      0.0%     9.0%        8.3%
-  Izzet Prowess              8.5%      0.0%     5.8%        4.7%
-  Azorius Control            7.9%      0.0%     7.7%        8.7%
-  Phoenix                    6.9%      0.0%    11.8%       12.4%
+  Azorius Control            7.9%      0.0%     7.8%        8.7%
+  Phoenix                    6.9%      0.0%    11.8%       12.7%
   Affinity                   5.8%      0.0%     6.2%        6.8%
-  Reanimator                 5.3%      0.0%     4.7%        5.2%
-  Amulet Titan               5.0%      0.0%     7.1%        7.2%
+  Reanimator                 5.2%      0.0%     4.7%        5.1%
   Eldrazi Tron               4.9%      0.0%     7.0%        5.8%
-  Blink                      4.6%      0.0%     1.9%        1.6%
-  Domain Zoo                 4.2%      0.0%     2.5%        2.3%
-  Living End                 3.2%      0.0%     4.7%        4.7%
-  Ruby Storm                 3.0%      0.0%     3.5%        4.0%
-  Neobrand                   2.3%      0.0%     2.7%        2.7%
-  Devoted Druid              2.2%      0.0%     1.1%        0.8%
+  Amulet Titan               4.8%      0.0%     6.9%        7.0%
+  Blink                      4.5%      0.0%     1.8%        1.6%
+  Domain Zoo                 4.2%      0.0%     2.4%        2.2%
+  Living End                 3.1%      0.0%     4.6%        4.6%
+  Ruby Storm                 3.0%      0.0%     3.5%        3.9%
+  Neobrand                   2.3%      0.0%     2.7%        2.6%
+  Devoted Druid              2.2%      0.0%     1.0%        0.8%
 
   position against that field (expected match win rate, shrunk matrix):
   archetype                exp WR  cover fcst sh matches
-  Phoenix                   53.0%   100%    6.9%     921
   Creativity                53.0%    96%    0.4%     158
-  Broodscale Combo          52.7%   100%   13.3%    9626
-  Azorius Control           52.3%   100%    7.9%    3801
-  Tameshi Belcher           51.4%   100%    1.1%     809
-  Affinity                  51.2%   100%    5.8%    4382
+  Phoenix                   52.8%   100%    6.9%     931
+  Broodscale Combo          52.6%   100%   13.5%    9636
+  Azorius Control           52.3%   100%    7.9%    3807
+  Tameshi Belcher           51.3%   100%    1.1%     809
+  Affinity                  51.1%   100%    5.8%    4388
   Grinding Station          50.3%    99%    1.1%     908
-  Devoted Druid             50.1%   100%    2.2%    2598
-  Energy                    50.1%   100%    8.5%    5025
+  Energy                    50.2%   100%    8.5%    5044
+  Devoted Druid             50.0%   100%    2.2%    2599
   Domain Zoo                49.9%   100%    4.2%    2518
-  Living End                49.8%   100%    3.2%    1530
-  Fight Rigging             49.5%   100%    0.6%    1670
+  Living End                49.8%   100%    3.1%    1531
+  Goyf Fling                49.6%    96%    0.4%     295
+  Fight Rigging             49.6%   100%    0.6%    1670
+  Amulet Titan              49.6%   100%    4.8%    2204
   Nantuko Combo             49.5%    92%    0.1%      89
-  Ponza                     49.5%   100%    1.2%    1564
-  Amulet Titan              49.5%   100%    5.0%    2197
 
 wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet

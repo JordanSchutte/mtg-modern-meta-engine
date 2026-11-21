@@ -1,7 +1,7 @@
 """Field forecast: models, backtest selection, positioning."""
 
 from collections import Counter
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pyarrow as pa
@@ -84,6 +84,7 @@ def test_position_weights_matrix_by_forecast(tmp_path):
     assert pos[0]["archetype"] == "B" and by["A"]["matchup_coverage"] == 1.0
     assert by["A"]["current_share"] == 1 / 3
     written = fc.write(fc.Backtest([], {}, None), field, pos, tmp_path)
+    # no target_week on these rows, so there is nothing to date the history copy by
     assert set(written) == {"field_forecast", "position_forecast"}
     assert Path(written["position_forecast"]).exists()
 
@@ -93,10 +94,40 @@ def test_mcp_tables_point_at_written_forecast_files(tmp_path):
     fc.gold_root(tmp_path).mkdir(parents=True)
     written = fc.write(fc.Backtest([{"model": "m", "week": "w", "log_loss": 1.0, "tvd": 0.1,
                                      "lists": 1}], {}, None),
-                       [{"archetype": "A", "share": 1.0}], [{"archetype": "A"}], tmp_path)
+                       [{"archetype": "A", "share": 1.0, "target_week": "2026-11-23"}],
+                       [{"archetype": "A"}], tmp_path)
     for table, key in (("forecast_backtest", "backtest"), ("field_forecast", "field_forecast"),
                        ("position_forecast", "position_forecast")):
         assert Path(written[key]) == tmp_path / TABLES[table]
+    assert Path(written["forecast_history"]).match(TABLES["forecast_history"])
+
+
+def test_write_keeps_a_dated_copy_per_target_week(tmp_path):
+    fc.gold_root(tmp_path).mkdir(parents=True)
+    bt = fc.Backtest([], {}, None)
+    t0 = datetime(2026, 11, 16, 9, 0, tzinfo=UTC)
+    week1 = [{"archetype": "A", "share": 0.6, "model": "m", "target_week": "2026-11-16"},
+             {"archetype": "B", "share": 0.4, "model": "m", "target_week": "2026-11-16"}]
+    w = fc.write(bt, week1, [], tmp_path, generated_at=t0)
+    assert w["forecast_history"] == fc.history_path(tmp_path, "2026-11-16")
+    assert w["forecast_history"].parent == fc.forecast_root(tmp_path) / "field_forecast"
+    # a refresh within the same target week replaces that week's file ...
+    week1b = [{"archetype": "A", "share": 0.7, "model": "m", "target_week": "2026-11-16"},
+              {"archetype": "B", "share": 0.3, "model": "m", "target_week": "2026-11-16"}]
+    fc.write(bt, week1b, [], tmp_path, generated_at=t0 + timedelta(days=3))
+    # ... and the next week adds a new one; field_forecast.parquet is only ever the latest
+    week2 = [{"archetype": "A", "share": 0.5, "model": "m", "target_week": "2026-11-23"},
+             {"archetype": "C", "share": 0.5, "model": "m", "target_week": "2026-11-23"}]
+    fc.write(bt, week2, [], tmp_path, generated_at=t0 + timedelta(days=7))
+    files = sorted(p.name for p in fc.history_root(tmp_path).glob("*.parquet"))
+    assert files == ["2026-11-16.parquet", "2026-11-23.parquet"]
+    assert not list(fc.history_root(tmp_path).glob("*.tmp"))
+    old = pq.read_table(fc.history_path(tmp_path, "2026-11-16")).to_pylist()
+    assert {r["archetype"]: r["share"] for r in old} == {"A": 0.7, "B": 0.3}
+    assert {r["generated_at"] for r in old} == {"2026-11-19T09:00:00Z"}
+    latest = pq.read_table(fc.forecast_root(tmp_path) / "field_forecast.parquet").to_pylist()
+    assert {r["target_week"] for r in latest} == {"2026-11-23"}
+    assert "generated_at" not in latest[0]
 
 
 def test_result_weights_and_results_models():

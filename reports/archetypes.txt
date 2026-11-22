@@ -75,44 +75,44 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
 
 wrote data/silver/melee/decklist_archetypes.parquet
 === mtgo
-rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 18404 lists
-18404 lists classified; 308 unclassified (1.7%)
-   1787   9.7%  Energy  [Boros Energy 1513, Azorius Energy 274]
-   1694   9.2%  Broodscale Combo
-   1484   8.1%  Reanimator  [Esper Goryo's 923, Grixis Reanimator 429, Esper Reanimator 79, Mono-Black Reanimator 53]
-   1378   7.5%  Izzet Prowess
-   1135   6.2%  Affinity  [Affinity 1111, Classic Affinity 24]
-    996   5.4%  Eldrazi Tron  [Eldrazi Tron 924, Emrakul Tron 52, Breach Tron 20]
-    816   4.4%  Azorius Control  [Scepter Control 555, Teferi Control 144, Snapcaster Control 90, Miracles 27]
-    767   4.2%  Blink  [Esper Blink 666, Jeskai Blink 101]
-    630   3.4%  Ruby Storm
-    627   3.4%  Phoenix  [Rakdos Phoenix 514, Darklight Phoenix 113]
-    548   3.0%  Domain Zoo
-    548   3.0%  Amulet Titan
+rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 18544 lists
+18544 lists classified; 312 unclassified (1.7%)
+   1802   9.7%  Energy  [Boros Energy 1524, Azorius Energy 278]
+   1702   9.2%  Broodscale Combo
+   1492   8.0%  Reanimator  [Esper Goryo's 928, Grixis Reanimator 430, Esper Reanimator 81, Mono-Black Reanimator 53]
+   1388   7.5%  Izzet Prowess
+   1145   6.2%  Affinity  [Affinity 1119, Classic Affinity 26]
+   1008   5.4%  Eldrazi Tron  [Eldrazi Tron 936, Emrakul Tron 52, Breach Tron 20]
+    820   4.4%  Azorius Control  [Scepter Control 558, Teferi Control 144, Snapcaster Control 90, Miracles 28]
+    776   4.2%  Blink  [Esper Blink 675, Jeskai Blink 101]
+    641   3.5%  Phoenix  [Rakdos Phoenix 524, Darklight Phoenix 117]
+    634   3.4%  Ruby Storm
+    559   3.0%  Amulet Titan
+    553   3.0%  Domain Zoo
     542   2.9%  Devoted Druid
-    532   2.9%  Dimir Midrange
-    505   2.7%  Living End
-    500   2.7%  Ponza
+    534   2.9%  Dimir Midrange
+    509   2.7%  Living End
+    501   2.7%  Ponza
     347   1.9%  Fight Rigging
-    327   1.8%  Hollow One
-    286   1.6%  Neobrand
-    270   1.5%  Grinding Station  [Grinding Station (Emry) 266, Grinding Station (Loki/Oswald) 4]
-    253   1.4%  Necro  [Necro 230, Necro (Rite of Consumption) 23]
-    250   1.4%  Green Tron
+    328   1.8%  Hollow One
+    286   1.5%  Neobrand
+    276   1.5%  Grinding Station  [Grinding Station (Emry) 272, Grinding Station (Loki/Oswald) 4]
+    255   1.4%  Necro  [Necro 232, Necro (Rite of Consumption) 23]
+    250   1.3%  Green Tron
     218   1.2%  Tameshi Belcher
-    178   1.0%  Samwise Combo
-    162   0.9%  Esper Midrange
+    180   1.0%  Samwise Combo
+    164   0.9%  Esper Midrange
     156   0.8%  Burn
-    152   0.8%  Yawgmoth
+    153   0.8%  Yawgmoth
     128   0.7%  Ritual Oculus
-    113   0.6%  Goyf Fling
-    105   0.6%  Wizards
+    114   0.6%  Goyf Fling
+    106   0.6%  Wizards
      79   0.4%  Izzet Murktide
      70   0.4%  Hammer
-     67   0.4%  Creativity
+     69   0.4%  Creativity
      63   0.3%  Ritual Omnath
      59   0.3%  Mill
-     58   0.3%  Eldrazi Aggro
+     59   0.3%  Eldrazi Aggro
      56   0.3%  Death's Shadow
      42   0.2%  Rhinos
      39   0.2%  Song of Creation
@@ -122,8 +122,8 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 18404 lists
      20   0.1%  Nantuko Combo
       2   0.0%  Infect
 
-308 unclassified lists; most common non-land cards among them:
-    59%  Thoughtseize
+312 unclassified lists; most common non-land cards among them:
+    60%  Thoughtseize
     50%  Fatal Push
     43%  Orcish Bowmasters
     41%  Inquisition of Kozilek
@@ -138,11 +138,11 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 18404 lists
     18%  Lightning Bolt
     16%  Malevolent Rumble
     13%  Wrenn and Six
+    11%  Ragavan, Nimble Pilferer
     11%  Force of Negation
-    10%  Ragavan, Nimble Pilferer
-    10%  Solitude
+    11%  Solitude
     10%  Green Sun's Zenith
-     8%  The Underworld Cookbook
+     9%  The Underworld Cookbook
      8%  Teferi, Time Raveler
      8%  Chthonian Nightmare
      8%  Psychic Frog

@@ -40,19 +40,19 @@ wrote 5 tables to data/silver/melee: events=32, matches=37864, decklists=10388, 
 
 MTGO events in bronze
   kind                   events  lists
-  challenge-16               30    880
-  challenge-32              125   4000
+  challenge-16               31    905
+  challenge-32              126   4032
   challenge-64              128   4096
   challenge-96               28    896
   last-chance                 4    128
-  league                    162   8276
+  league                    165   8362
   rc-qualifier                1     32
   rc-super-qualifier          4    128
   showcase-challenge          4    128
   showcase-qualifier          1     32
   2 events recorded without lists
-  2026-05-18 .. 2026-11-20
-wrote 4 tables to data/silver/mtgo: events=489, decklists=18596, decklist_cards=591539, matches=2237
+  2026-05-18 .. 2026-11-21
+wrote 4 tables to data/silver/mtgo: events=494, decklists=18739, decklist_cards=596037, matches=2251
 
 Events whose lists never published (as of 2026-11-22; Melee events 3+ days old with no usable lists or under 10% of players; MTGO events fetched empty)
   start           id players lists  name

@@ -20,40 +20,40 @@ Field forecast
   momentum(1,0.5)           3.1913   0.179
   paper_ewma(1)             3.1924   0.184
 
-  forecast field for week of 2026-11-16 (blend(0.5,1,1)):
+  forecast field for week of 2026-11-23 (blend(0.5,1,1)):
   archetype                 share  paper 2w  mtgo 2w  results 2w
-  Broodscale Combo          13.5%      0.0%    11.2%       13.6%
-  Izzet Prowess              8.6%      0.0%     5.9%        4.8%
-  Energy                     8.5%      0.0%     9.0%        8.3%
-  Azorius Control            7.9%      0.0%     7.8%        8.7%
-  Phoenix                    6.9%      0.0%    11.8%       12.7%
-  Affinity                   5.8%      0.0%     6.2%        6.8%
-  Reanimator                 5.2%      0.0%     4.7%        5.1%
-  Eldrazi Tron               4.9%      0.0%     7.0%        5.8%
-  Amulet Titan               4.8%      0.0%     6.9%        7.0%
-  Blink                      4.5%      0.0%     1.8%        1.6%
-  Domain Zoo                 4.2%      0.0%     2.4%        2.2%
-  Living End                 3.1%      0.0%     4.6%        4.6%
-  Ruby Storm                 3.0%      0.0%     3.5%        3.9%
-  Neobrand                   2.3%      0.0%     2.7%        2.6%
-  Devoted Druid              2.2%      0.0%     1.0%        0.8%
+  Broodscale Combo          13.1%      0.0%    10.7%       12.3%
+  Energy                    11.2%      0.0%    11.7%       11.7%
+  Izzet Prowess              8.8%      0.0%     6.9%        6.0%
+  Phoenix                    7.4%      0.0%    11.6%       12.5%
+  Affinity                   6.8%      0.0%     7.1%        7.6%
+  Azorius Control            6.6%      0.0%     7.6%        9.2%
+  Blink                      5.6%      0.0%     2.2%        2.2%
+  Reanimator                 5.2%      0.0%     5.4%        6.0%
+  Amulet Titan               5.1%      0.0%     6.5%        6.1%
+  Domain Zoo                 3.7%      0.0%     2.7%        2.0%
+  Eldrazi Tron               3.3%      0.0%     4.8%        3.8%
+  Ruby Storm                 2.6%      0.0%     3.0%        3.2%
+  Grinding Station           2.6%      0.0%     2.1%        1.4%
+  Devoted Druid              2.4%      0.0%     1.0%        0.8%
+  Living End                 2.1%      0.0%     3.9%        3.3%
 
   position against that field (expected match win rate, shrunk matrix):
   archetype                exp WR  cover fcst sh matches
-  Creativity                53.0%    96%    0.4%     158
-  Phoenix                   52.8%   100%    6.9%     931
-  Broodscale Combo          52.6%   100%   13.5%    9636
-  Azorius Control           52.3%   100%    7.9%    3807
-  Tameshi Belcher           51.3%   100%    1.1%     809
-  Affinity                  51.1%   100%    5.8%    4388
-  Grinding Station          50.3%    99%    1.1%     908
-  Energy                    50.2%   100%    8.5%    5044
-  Devoted Druid             50.0%   100%    2.2%    2599
-  Domain Zoo                49.9%   100%    4.2%    2518
-  Living End                49.8%   100%    3.1%    1531
-  Goyf Fling                49.6%    96%    0.4%     295
-  Fight Rigging             49.6%   100%    0.6%    1670
-  Amulet Titan              49.6%   100%    4.8%    2204
-  Nantuko Combo             49.5%    92%    0.1%      89
+  Creativity                53.0%    97%    0.2%     158
+  Phoenix                   52.8%   100%    7.4%     931
+  Broodscale Combo          52.4%   100%   13.1%    9636
+  Azorius Control           52.0%   100%    6.6%    3807
+  Affinity                  51.3%   100%    6.8%    4388
+  Tameshi Belcher           51.2%   100%    1.1%     809
+  Energy                    50.1%   100%   11.2%    5044
+  Grinding Station          49.9%    99%    2.6%     908
+  Goyf Fling                49.8%    97%    0.5%     295
+  Living End                49.8%   100%    2.1%    1531
+  Ponza                     49.8%   100%    1.1%    1564
+  Fight Rigging             49.7%   100%    0.5%    1670
+  Domain Zoo                49.6%   100%    3.7%    2518
+  Amulet Titan              49.6%   100%    5.1%    2204
+  Nantuko Combo             49.4%    93%    0.0%      89
 
 wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet

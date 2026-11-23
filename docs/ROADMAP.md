@@ -27,6 +27,8 @@ itself running and reporting without anyone touching it.
   candidates), position against the forecast field
 - MCP server for Claude Desktop; weekly written brief
 - CI, branch protection, nightly backlog worker, morning health check
+- Coverage flags (#7): events whose lists never published, and the
+  "most recent paper week with ≥150 lists" indicator
 
 ### Remaining for 1.0
 
@@ -47,8 +49,6 @@ itself running and reporting without anyone touching it.
    which its expected win rate falls to 50% with everything else
    proportional. Reported next to expected WR in `position_forecast`, the
    `recommend()` tool and the brief: "favored up to ~14% of the field."
-5. **Coverage flags** (#7): events whose lists never published, and the
-   "most recent paper week with ≥150 lists" indicator.
 6. **Format-period rollover, exercised.** The next ban announcement:
    `scripts/new_period.py` creates the new rules file, the matrix and
    forecast pool by period correctly, the brief says which period it is on.

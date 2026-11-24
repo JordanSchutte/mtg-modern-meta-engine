@@ -131,6 +131,9 @@ def test_brief_end_to_end(tmp_path):
     text, inp = b.run(tmp_path, today=TODAY)
     assert inp.target_week == date(2026, 11, 16)
     assert text.startswith("# Modern meta brief — week of 2026-11-16")
+    assert inp.period == "2026-05-18"
+    assert ("_Rules period: **2026-05-18** (`config/archetypes/modern-2026-05-18.yml`)"
+            in text.split("## 1.")[0])                  # in the header, before section 1
     for heading in ("## 1. Forecast field", "## 2. Movers", "## 3. Best-positioned decks",
                     "## 4. Matrix changes", "## 5. Data notes"):
         assert heading in text
@@ -155,6 +158,7 @@ def test_brief_end_to_end(tmp_path):
     # the marker carries the forecast field for next week's movers
     marker = b.read_marker(text)
     assert marker["target_week"] == "2026-11-16" and marker["field"] == {"A": 0.6, "B": 0.4}
+    assert marker["period"] == "2026-05-18"
 
     written = b.write(text, inp.target_week, tmp_path)
     assert written["dated"].name == "brief-2026-11-16.md" and written["latest"].name == "brief.md"
@@ -183,4 +187,13 @@ def test_brief_without_any_tables_still_renders(tmp_path):
     text, inp = b.run(tmp_path, today=TODAY)
     assert "No forecast has been built yet" in text
     assert "No matchup matrix available" in text
-    assert b.read_marker(text)["field"] == {}
+    assert "_Rules period: none yet" in text and inp.period is None
+    assert b.read_marker(text)["field"] == {} and b.read_marker(text)["period"] is None
+
+
+def test_rules_period_comes_from_classified_lists_when_the_matrix_cannot_build(tmp_path):
+    _synthetic(tmp_path, TODAY, a_share=0.6)
+    (melee_root(tmp_path) / "matches.parquet").unlink()      # no matrix, but lists classified
+    text, inp = b.run(tmp_path, today=TODAY)
+    assert inp.period == "2026-05-18" and inp.matchups_now == []
+    assert "_Rules period: **2026-05-18**" in text

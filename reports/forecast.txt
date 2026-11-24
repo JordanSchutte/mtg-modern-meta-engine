@@ -22,38 +22,38 @@ Field forecast
 
   forecast field for week of 2026-11-23 (blend(0.5,1,1)):
   archetype                 share  paper 2w  mtgo 2w  results 2w
-  Broodscale Combo          12.7%      0.0%    10.1%       12.2%
-  Energy                    10.7%      0.0%    11.6%       11.8%
-  Izzet Prowess              8.9%      0.0%     7.0%        6.2%
-  Phoenix                    7.0%      0.0%    11.5%       12.1%
-  Affinity                   6.7%      0.0%     7.2%        7.6%
-  Azorius Control            6.3%      0.0%     6.9%        8.5%
-  Blink                      6.3%      0.0%     2.8%        2.5%
-  Reanimator                 5.2%      0.0%     5.4%        5.8%
-  Amulet Titan               5.2%      0.0%     6.7%        6.6%
-  Eldrazi Tron               3.9%      0.0%     5.3%        4.2%
-  Domain Zoo                 3.8%      0.0%     2.8%        2.1%
-  Ruby Storm                 2.6%      0.0%     3.0%        3.4%
-  Grinding Station           2.3%      0.0%     2.4%        1.5%
-  Living End                 2.3%      0.0%     3.8%        3.1%
-  Devoted Druid              2.2%      0.0%     0.8%        0.7%
+  Broodscale Combo          12.5%      0.0%     9.7%       11.7%
+  Energy                    10.5%      0.0%    11.8%       11.9%
+  Izzet Prowess              8.6%      0.0%     6.7%        6.1%
+  Azorius Control            6.9%      0.0%     7.2%        9.0%
+  Phoenix                    6.6%      0.0%    11.1%       11.5%
+  Affinity                   5.9%      0.0%     6.6%        7.3%
+  Blink                      5.8%      0.0%     2.7%        2.4%
+  Reanimator                 5.2%      0.0%     5.4%        6.0%
+  Amulet Titan               5.0%      0.0%     6.6%        6.5%
+  Eldrazi Tron               4.1%      0.0%     5.2%        4.1%
+  Domain Zoo                 3.5%      0.0%     2.5%        1.8%
+  Ruby Storm                 2.9%      0.0%     3.2%        3.6%
+  Grinding Station           2.6%      0.0%     2.8%        2.0%
+  Devoted Druid              2.2%      0.0%     0.9%        0.7%
+  Living End                 2.2%      0.0%     3.5%        3.1%
 
   position against that field (expected match win rate, shrunk matrix):
   archetype                exp WR  cover fcst sh matches
-  Creativity                53.1%    97%    0.4%     161
-  Phoenix                   52.9%   100%    7.0%     933
-  Broodscale Combo          52.6%   100%   12.7%    9644
-  Azorius Control           52.0%   100%    6.3%    3807
-  Affinity                  51.4%   100%    6.7%    4388
-  Tameshi Belcher           51.2%   100%    0.9%     809
-  Energy                    50.1%   100%   10.7%    5045
-  Ponza                     50.0%   100%    1.1%    1564
-  Grinding Station          49.9%    99%    2.3%     908
-  Amulet Titan              49.8%   100%    5.2%    2209
-  Fight Rigging             49.8%   100%    0.5%    1670
-  Goyf Fling                49.8%    97%    0.6%     295
-  Living End                49.7%   100%    2.3%    1531
-  Domain Zoo                49.5%   100%    3.8%    2518
-  Nantuko Combo             49.5%    93%    0.0%      89
+  Creativity                53.0%    96%    0.5%     161
+  Phoenix                   52.9%   100%    6.6%     935
+  Broodscale Combo          52.6%   100%   12.5%    9656
+  Azorius Control           51.9%   100%    6.9%    3818
+  Tameshi Belcher           51.6%   100%    1.0%     812
+  Affinity                  51.4%   100%    5.9%    4390
+  Energy                    50.3%   100%   10.5%    5056
+  Grinding Station          50.1%    99%    2.6%     909
+  Fight Rigging             49.9%   100%    0.5%    1670
+  Domain Zoo                49.7%   100%    3.5%    2518
+  Living End                49.6%   100%    2.2%    1533
+  Amulet Titan              49.6%   100%    5.0%    2213
+  Ponza                     49.6%   100%    1.2%    1564
+  Nantuko Combo             49.5%    92%    0.0%      89
+  Goyf Fling                49.5%    96%    0.7%     295
 
 wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet

@@ -144,7 +144,7 @@ Events that were discovered but whose lists never published used to vanish
 from every report: a zero-list event is just a short row in the per-event
 coverage table. `silver/coverage.py` (`scripts/coverage_flags.py`) names them
 and appends a section to `reports/coverage.txt`; the MCP `coverage()` tool
-returns the same data. Three facts, each over silver only:
+returns the same data. Four facts, each over silver only:
 
 * **Unpublished Melee events** — start at least 3 days in the past and either
   no usable decklist or fewer usable lists than 10% of the players. Silver has
@@ -156,6 +156,16 @@ returns the same data. Three facts, each over silver only:
   published here.
 * **Empty MTGO events** — manifest status `empty`: the page was fetched but
   never carried lists.
+* **Unusable MTGO lists** — lists that did reach `silver/mtgo/decklists` but
+  with a main deck under 60 cards (`usable = false`; the classifier's loader
+  skips them, so they are the standing gap between silver's list count and
+  `classify_decklists.py`'s). The `coverage()` tool returns the stock as
+  `mtgo_unusable_lists` / `mtgo_unusable_events`; the per-event detail (day,
+  kind, lists, unusable, the most common `main_count` — 0 means no cards
+  parsed, 59 one card short) is in the `MTGO events in bronze` block of the
+  silver report, newest first, capped at 20 rows, because that is where the
+  build has the rows in hand. Diagnosis, not a fix: the 60-card rule and the
+  parser are untouched by the report.
 * **Paper dark** — the most recent Melee event with ≥ 150 classified lists
   (`MIN_CLASSIFIED`, pinned by a test to the forecast's `MIN_PAPER_LISTS`) and
   how many days ago it was. When this passes a couple of weeks the forecast is

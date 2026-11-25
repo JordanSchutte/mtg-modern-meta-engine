@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -121,7 +122,30 @@ def write_parquet(build_: MtgoSilver, out_dir: Path) -> dict[str, Path]:
     return written
 
 
-def report(build_: MtgoSilver) -> str:
+def unusable_events(build_: MtgoSilver) -> list[dict]:
+    """Events with lists the classifier cannot use (``usable = false``, i.e. a main
+    deck under 60 cards), newest first. Each row: day, kind, site_name, lists (all
+    published for the event), unusable, and ``main_count`` = the most common main
+    deck size among the unusable lists — 0 says no cards parsed at all, 59 says
+    one card short."""
+    by_event: dict[str, list[int]] = {}
+    totals: dict[str, int] = {}
+    for d in build_.decklists:
+        totals[d["site_name"]] = totals.get(d["site_name"], 0) + 1
+        if not d["usable"]:
+            by_event.setdefault(d["site_name"], []).append(d["main_count"])
+    kinds = {e["site_name"]: e for e in build_.events}
+    rows = []
+    for site, counts in by_event.items():
+        ev = kinds.get(site, {})
+        rows.append({"day": ev.get("day"), "kind": ev.get("kind"), "site_name": site,
+                     "lists": totals[site], "unusable": len(counts),
+                     "main_count": Counter(counts).most_common(1)[0][0]})
+    rows.sort(key=lambda r: (r["day"] or "", r["site_name"]), reverse=True)
+    return rows
+
+
+def report(build_: MtgoSilver, max_unusable_rows: int = 20) -> str:
     by_kind: dict[str, list[int]] = {}
     for e in build_.events:
         if e["status"] == "complete":
@@ -133,6 +157,18 @@ def report(build_: MtgoSilver) -> str:
     empty = [e for e in build_.events if e["status"] != "complete"]
     if empty:
         lines.append(f"  {len(empty)} events recorded without lists")
+    bad = unusable_events(build_)
+    n_lists = sum(r["unusable"] for r in bad)
+    lines.append(f"  {n_lists} lists in {len(bad)} events are not usable "
+                 "(main deck under 60 cards)")
+    if bad:
+        lines.append(f"  {'day':<11}{'kind':<22}{'lists':>6}{'unusable':>9}{'main':>5}"
+                     "  mtgo event")
+        for r in bad[:max_unusable_rows]:
+            lines.append(f"  {r['day'] or '':<11}{r['kind'] or '':<22}{r['lists']:>6}"
+                         f"{r['unusable']:>9}{r['main_count']:>5}  {r['site_name']}")
+        if len(bad) > max_unusable_rows:
+            lines.append(f"  ... and {len(bad) - max_unusable_rows} more events")
     days = sorted(e["day"] for e in build_.events if e.get("day"))
     if days:
         lines.append(f"  {days[0]} .. {days[-1]}")

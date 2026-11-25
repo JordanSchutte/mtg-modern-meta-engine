@@ -136,3 +136,47 @@ def test_fetch_new_then_silver(tmp_path, monkeypatch):
     dates = load_deck_dates(tmp_path, source="mtgo")
     assert set(dates.values()) == {"2026-11-03", "2026-11-01"}
     assert "challenge-16" in silver.report(b) and "league" in silver.report(b)
+
+
+def test_report_names_events_with_unusable_lists(mtgo_bronze):
+    MTGO_SHORT_EVENT = "modern-challenge-32-2026-11-0812857700"   # conftest's synthetic event
+    b = silver.build(mtgo_bronze)
+    assert b.counts()["decklists"] == 9
+    by_site = {}
+    for d in b.decklists:
+        by_site.setdefault(d["site_name"], []).append(d)
+    assert all(d["usable"] for s, ds in by_site.items() if s != MTGO_SHORT_EVENT for d in ds)
+    assert sorted(d["main_count"] for d in by_site[MTGO_SHORT_EVENT]) == [0, 0, 59, 60]
+
+    rows = silver.unusable_events(b)
+    assert rows == [{"day": "2026-11-08", "kind": "challenge-32", "site_name": MTGO_SHORT_EVENT,
+                     "lists": 4, "unusable": 3, "main_count": 0}]
+    text = silver.report(b)
+    assert "  3 lists in 1 events are not usable (main deck under 60 cards)" in text
+    row = next(ln for ln in text.splitlines() if ln.endswith(MTGO_SHORT_EVENT))
+    assert row.split() == ["2026-11-08", "challenge-32", "4", "3", "0", MTGO_SHORT_EVENT]
+    # the unusable lists still reach silver; only the classifier's loader skips them
+    silver.write_parquet(b, silver.silver_root(mtgo_bronze))
+    assert len(load_main_decks(mtgo_bronze, source="mtgo")) == 6
+
+
+def test_report_counts_zero_unusable_and_caps_rows(tmp_path):
+    import copy
+
+    b = silver.MtgoSilver(events=[], decklists=[], decklist_cards=[], matches=[])
+    assert "  0 lists in 0 events are not usable (main deck under 60 cards)" in silver.report(b)
+    assert "mtgo event" not in silver.report(b)   # no table header when there is nothing
+    # newest first, capped, with the overflow counted
+    for i in range(25):
+        site = f"modern-league-2026-10-{i + 1:02d}1"
+        b.events.append({"site_name": site, "kind": "league", "day": f"2026-10-{i + 1:02d}",
+                         "status": "complete", "decklists": 2})
+        for j, n in enumerate((59, 60)):
+            b.decklists.append({"decklist_id": f"mtgo:{site}:{j}", "site_name": site,
+                                "usable": n >= 60, "main_count": n})
+    rows = silver.unusable_events(copy.deepcopy(b))
+    assert [r["day"] for r in rows][:3] == ["2026-10-25", "2026-10-24", "2026-10-23"]
+    text = silver.report(b)
+    assert "  25 lists in 25 events are not usable" in text
+    assert sum(ln.endswith("1") and "league" in ln for ln in text.splitlines()) == 20
+    assert "... and 5 more events" in text

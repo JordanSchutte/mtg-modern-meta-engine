@@ -64,7 +64,9 @@ def _latest_period(con) -> str | None:
 def coverage(data_root: Path, days: int = 30, today: date | None = None) -> dict:
     """Events in bronze over the last N days with how much of each the matrix can use,
     plus the coverage flags: events whose lists never published (all of them, not
-    just the window) and the last paper event with enough classified lists.
+    just the window), the MTGO lists in silver that are not usable (main deck under
+    60 cards, as a count of lists and of events) and the last paper event with
+    enough classified lists.
     ``today`` pins the clock (tests); the server leaves it as the real date."""
     from mtgmeta.silver import coverage as flags
     con = connect(data_root)
@@ -82,11 +84,14 @@ def coverage(data_root: Path, days: int = 30, today: date | None = None) -> dict
     known = sum(e["both_known"] or 0 for e in events)
     con.close()
     f = flags.flags(data_root, today)
+    unusable = flags.unusable_mtgo(data_root)
     return {"since": since, "events": len(events), "modern_swiss_matches": tot,
             "both_decks_known": known,
             "known_share": round(known / tot, 3) if tot else None, "rows": events,
             "unpublished_melee": f["unpublished_melee"], "empty_mtgo": f["empty_mtgo"],
             "unpublished_total": f["unpublished_total"],
+            "mtgo_unusable_lists": unusable["lists"],
+            "mtgo_unusable_events": unusable["events"],
             "last_big_paper_event": f["last_big_paper_event"],
             "flag_rules": f["rules"]}
 

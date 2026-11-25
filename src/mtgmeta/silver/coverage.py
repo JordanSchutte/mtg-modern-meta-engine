@@ -121,6 +121,22 @@ def empty_mtgo(data_root: Path) -> list[dict]:
     return rows
 
 
+def unusable_mtgo(data_root: Path) -> dict:
+    """How many MTGO lists reached silver but are not usable (main deck under 60
+    cards; ``silver/mtgo.py`` sets ``usable``) and how many events they sit in.
+    The per-event detail is in the ``MTGO events in bronze`` block of the silver
+    report; this is the stock the MCP ``coverage`` tool shows."""
+    path = mtgo_root(data_root) / "decklists.parquet"
+    if not path.exists():
+        return {"lists": 0, "events": 0}
+    con = duckdb.connect()
+    n, events = con.execute(f"""
+        select count(*), count(distinct site_name) from {_q(path)} where not usable
+    """).fetchone()
+    con.close()
+    return {"lists": int(n), "events": int(events)}
+
+
 def last_big_paper_event(data_root: Path, today: date,
                          min_classified: int = MIN_CLASSIFIED) -> dict | None:
     """The most recent Melee event with ``min_classified`` classified lists, with

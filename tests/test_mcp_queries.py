@@ -91,6 +91,18 @@ def test_server_exposes_the_tools(monkeypatch, dataset):
             "brief"} <= names
 
 
+def test_coverage_counts_unusable_mtgo_lists(dataset, mtgo_bronze):
+    from mtgmeta.silver import mtgo as silver_mtgo
+    assert dataset == mtgo_bronze            # same tmp_path: melee silver + mtgo bronze
+    cov = q.coverage(dataset, days=36500)
+    assert (cov["mtgo_unusable_lists"], cov["mtgo_unusable_events"]) == (0, 0)  # no mtgo silver
+    b = silver_mtgo.build(mtgo_bronze)
+    silver_mtgo.write_parquet(b, silver_mtgo.silver_root(mtgo_bronze))
+    cov = q.coverage(dataset, days=36500)
+    assert (cov["mtgo_unusable_lists"], cov["mtgo_unusable_events"]) == (3, 1)
+    assert cov["empty_mtgo"] == []           # a short list is not an empty event
+
+
 def test_forecast_history_is_one_view_over_the_dated_files(tmp_path):
     from datetime import UTC, datetime
 

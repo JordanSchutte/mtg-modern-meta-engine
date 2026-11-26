@@ -89,3 +89,30 @@ def test_server_exposes_the_tools(monkeypatch, dataset):
     assert {"coverage", "matchup", "matrix", "archetype_cards", "run_sql", "meta_share",
             "failed_events", "card_usage", "archetypes", "forecast", "recommend",
             "brief"} <= names
+
+
+def test_forecast_history_is_one_view_over_the_dated_files(tmp_path):
+    from datetime import UTC, datetime
+
+    from mtgmeta.gold import forecast as fc
+    # nothing on record yet: the view is simply absent, not an error
+    assert "error" in q.run_sql(tmp_path, "select * from forecast_history")
+    fc.history_root(tmp_path).mkdir(parents=True)
+    bt = fc.Backtest([], {}, None)
+    # an older file written before generated_at existed still reads (union by name)
+    pq.write_table(pa.Table.from_pylist([
+        {"archetype": "A", "share": 1.0, "model": "m", "target_week": "2026-11-09"}]),
+        fc.history_path(tmp_path, "2026-11-09"))
+    fc.write(bt, [{"archetype": "A", "share": 0.6, "model": "m", "target_week": "2026-11-16"},
+                  {"archetype": "B", "share": 0.4, "model": "m", "target_week": "2026-11-16"}],
+             [{"archetype": "A", "expected_wr": 0.5}], tmp_path,
+             generated_at=datetime(2026, 11, 16, tzinfo=UTC))
+    rows = q.run_sql(tmp_path, """
+        select target_week, count(*) as archetypes, max(generated_at) as generated_at
+        from forecast_history group by target_week order by target_week
+    """)["rows"]
+    assert [(r["target_week"], r["archetypes"]) for r in rows] == [("2026-11-09", 1),
+                                                                   ("2026-11-16", 2)]
+    assert rows[0]["generated_at"] is None and rows[1]["generated_at"] == "2026-11-16T00:00:00Z"
+    # the current forecast is unchanged by the history
+    assert q.forecast(tmp_path)["target_week"] == "2026-11-16"

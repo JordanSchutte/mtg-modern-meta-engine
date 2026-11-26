@@ -137,6 +137,28 @@ forecast field: each archetype's expected match win rate against the field it
 will actually meet, with `matchup_coverage` saying how much of that field has
 a known matchup. The MCP tools `forecast()` and `recommend()` read these.
 
+### Forecast history
+
+`field_forecast.parquet` is only ever the latest forecast, so `forecast.write`
+also keeps a dated copy, `gold/melee/forecast/field_forecast/<target_week>.parquet`:
+the same rows plus `generated_at` (UTC), one file per target week and
+overwritten within it (a Monday run and a Thursday refresh of the same weekend
+leave one file — the last forecast made before that weekend, which is the one
+to score). That record is what out-of-sample scoring will compare against the
+paper lists that actually land, and what the brief's movers can read instead
+of the previous brief's marker.
+
+Choices: the copies live under the gold prefix, so the watcher's existing
+`rclone copy data/gold` pushes them and, because `copy` never deletes, they
+accumulate in R2 even though every run rebuilds local gold from scratch; the
+local sync script brings the whole directory down the same way. Nothing pulls
+the history back into an Actions run yet — the step that scores or shows
+movers from it will need a `rclone copy` of that prefix first, as the brief
+step does for earlier briefs. The MCP table `forecast_history` is one DuckDB
+view over the directory's files (`read_parquet(..., union_by_name=true)`, so a
+file written before a column existed still reads), mounted only when at least
+one file is present; it is for `run_sql`, there is no dedicated tool yet.
+
 ## Coverage flags
 
 Events that were discovered but whose lists never published used to vanish
@@ -190,8 +212,8 @@ choices keep it self-contained:
   week and forecast field as JSON; the next week's brief finds the newest
   dated brief before its own target week and diffs against that. The watcher
   rebuilds gold from scratch, so it pulls `gold/melee/brief/` back down from
-  R2 first. When a dated forecast history exists (#9) movers can read that
-  instead; the marker costs nothing to keep.
+  R2 first. The dated forecast history (#9, above) is the better source for
+  movers once a run pulls it back down; the marker costs nothing to keep.
 * **Matchup swings are recomputed, not stored.** The matrix is rebuilt from the
   same silver inputs without this week's matches (by event date) and compared
   to the full one. That is what last week's matrix was, up to any rules or

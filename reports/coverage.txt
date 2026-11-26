@@ -54,11 +54,11 @@ MTGO events in bronze
   2026-05-18 .. 2026-11-23
 wrote 4 tables to data/silver/mtgo: events=503, decklists=19010, decklist_cards=604595, matches=2286
 
-Events whose lists never published (as of 2026-11-25; Melee events 3+ days old with no usable lists or under 10% of players; MTGO events fetched empty)
+Events whose lists never published (as of 2026-11-26; Melee events 3+ days old with no usable lists or under 10% of players; MTGO events fetched empty)
   start           id players lists  name
   2026-11-01  469603     162     0  马年单淘赛2 / Year of the Horse Single-Elimination Ev
   day        kind                    mtgo event
   2026-11-12 challenge-32            modern-challenge-32-2026-11-1212857015
   2026-11-03 challenge-64            modern-challenge-64-2026-11-0312857053
   1 Melee + 2 MTGO = 3 events without published lists
-Last paper event with >= 150 classified lists: 2026-10-17 MTG SEA Championship Final 2026-27 Round 1 (180 lists), 39 days ago
+Last paper event with >= 150 classified lists: 2026-10-17 MTG SEA Championship Final 2026-27 Round 1 (180 lists), 40 days ago

@@ -34,17 +34,30 @@ TABLES = {
     "field_forecast": "gold/melee/forecast/field_forecast.parquet",
     "position_forecast": "gold/melee/forecast/position_forecast.parquet",
     "forecast_backtest": "gold/melee/forecast/backtest.parquet",
+    # every field forecast on record, one file per target week (see gold/forecast.py)
+    "forecast_history": "gold/melee/forecast/field_forecast/*.parquet",
     "archetype_summary": "gold/melee/archetype_summary.parquet",
 }
 
 
 def connect(data_root: Path) -> duckdb.DuckDBPyConnection:
-    """A connection with one read-only view per table that exists on disk."""
+    """A connection with one read-only view per table that exists on disk.
+
+    A table whose path is a glob (``forecast_history``) is one view over every
+    matching file, by column name, so files written before a column was added
+    still read; it is mounted only when at least one file matches."""
     con = duckdb.connect()
     for name, rel in TABLES.items():
         path = data_root / rel
-        if path.exists():
-            con.execute(f"create view {name} as select * from '{path.as_posix()}'").fetchall()
+        if "*" in rel:
+            if not any(path.parent.glob(path.name)):
+                continue
+            src = f"read_parquet('{path.as_posix()}', union_by_name=true)"
+        elif path.exists():
+            src = f"'{path.as_posix()}'"
+        else:
+            continue
+        con.execute(f"create view {name} as select * from {src}").fetchall()
     return con
 
 
@@ -244,7 +257,8 @@ def archetype_cards(data_root: Path, archetype: str, period: str | None = None,
 
 def run_sql(data_root: Path, sql: str, limit: int = 200) -> dict:
     """Read-only SQL over the tables (events, matches, decklists, decklist_cards,
-    players, decklist_archetypes, imputations, cards, matchups, archetype_summary)."""
+    players, decklist_archetypes, imputations, cards, matchups, archetype_summary,
+    field_forecast, position_forecast, forecast_backtest, forecast_history)."""
     if re.search(r"\b(insert|update|delete|drop|create|alter|copy|attach|pragma|install|load)\b",
                  sql, re.I):
         return {"error": "read-only: select statements only"}

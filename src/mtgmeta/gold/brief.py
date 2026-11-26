@@ -60,6 +60,7 @@ class BriefInputs:
     target_week: date
     since: date                                   # start of "this week" (today - 7 days)
     model: str | None = None
+    period: str | None = None                     # rules period the matrix/forecast are on
     backtest: dict[str, dict] = dc_field(default_factory=dict)   # model -> {weeks, log_loss, tvd}
     field: list[dict] = dc_field(default_factory=list)           # field_forecast rows, by share
     position: list[dict] = dc_field(default_factory=list)       # position_forecast rows
@@ -128,11 +129,23 @@ def load_matrix_change(data_root: Path, inputs: BriefInputs) -> None:
     now_rows, _ = matrix.build(rows, archetypes)
     before_rows, _ = matrix.build(before, archetypes)
     period = max((r["period"] for r in now_rows), default=None)
+    inputs.period = period
     inputs.matchups_now = [r for r in now_rows if r["period"] == period]
     inputs.matchups_before = [r for r in before_rows if r["period"] == period]
     inputs.new_mtgo_matches = sum(
         1 for m in rows if m["source"] == "mtgo" and (day.get(m["tournament_id"]) or "") >= since
         and all(archetypes.get(m[k]) for k in ("decklist_a", "decklist_b")))
+
+
+def latest_rules_period(data_root: Path) -> str | None:
+    """Newest rules period any usable paper list was classified under (``"2026-05-18"``)."""
+    path = melee_root(data_root) / "decklist_archetypes.parquet"
+    if not path.exists():
+        return None
+    con = duckdb.connect()
+    (newest,) = con.execute(f"select max(rules_file) from '{path.as_posix()}'").fetchone()
+    con.close()
+    return matrix._period(newest) if newest else None
 
 
 def load_data_notes(data_root: Path, inputs: BriefInputs) -> None:
@@ -201,6 +214,8 @@ def load_inputs(data_root: Path, today: date | None = None) -> BriefInputs:
     if prev:
         inputs.previous_date, inputs.previous_field = prev
     load_matrix_change(data_root, inputs)
+    if inputs.period is None:
+        inputs.period = latest_rules_period(data_root)   # classified lists but no matrix yet
     load_data_notes(data_root, inputs)
     return inputs
 
@@ -300,7 +315,8 @@ def render(inp: BriefInputs, top: int = 12) -> str:
     saturday = inp.target_week + timedelta(days=5)
     lines = [f"# Modern meta brief — week of {inp.target_week.isoformat()}", "",
              f"_Generated {inp.today.isoformat()} from the gold tables. \"This week\" below is "
-             f"{inp.since.isoformat()} to {inp.today.isoformat()}._", ""]
+             f"{inp.since.isoformat()} to {inp.today.isoformat()}._", "",
+             _period_line(inp.period), ""]
 
     # 1. Forecast field
     lines += [f"## 1. Forecast field for the weekend of {saturday.isoformat()}", ""]
@@ -420,10 +436,19 @@ def render(inp: BriefInputs, top: int = 12) -> str:
         lines.append("")
 
     payload = {"target_week": inp.target_week.isoformat(), "generated": inp.today.isoformat(),
-               "model": inp.model,
+               "model": inp.model, "period": inp.period,
                "field": {f["archetype"]: round(f["share"], 6) for f in inp.field}}
     lines.append(f"<!-- {MARKER} {json.dumps(payload, sort_keys=True)} -->")
     return "\n".join(lines) + "\n"
+
+
+def _period_line(period: str | None) -> str:
+    """Which rules file the matrix and the forecast's positioning are pooled under."""
+    if not period:
+        return ("_Rules period: none yet (no classified paper lists; the matrix and forecast "
+                "have nothing to pool)._")
+    return (f"_Rules period: **{period}** (`config/archetypes/modern-{period}.yml`) — the "
+            f"matchups and positioning below count only matches from this period._")
 
 
 def _backtest_sentence(inp: BriefInputs) -> str:

@@ -2,20 +2,24 @@
 
 ## Principles
 
-- **Each source does only the job it's reliable at.** Full-field paper events (every decklist and every Swiss pairing published) build the matchup matrix. MTGO only shows the top 32 lists and the top 8 bracket, so it drives the meta forecast and contributes top 8 matchups at low weight.
+- **Each source does only the job it's reliable at.** Full-field paper events (every decklist and every Swiss pairing published) build the matchup matrix. MTGO only shows the top 32 lists and the top 8 bracket, so it drives the meta forecast and contributes its top-8 bracket matches to the matrix (tagged `source = 'mtgo'`, never counted toward meta share).
 - **Nothing is deleted.** Bronze is append-only and versioned. Rows that can't be used for the matrix (an unknown opponent deck, a bye) stay in silver with flags.
-- **Fail loudly.** Every source parser is covered by contract tests on fixtures captured from the live site. A shape change stops the run and goes to a dead-letter topic; bad rows never reach bronze.
-- **Near-zero cost.** Everything runs locally in Docker Compose; cloud targets (AWS, Snowflake) are Terraform-managed profiles that are created, run and destroyed.
+- **Fail loudly.** Every source parser is covered by contract tests on fixtures trimmed from real pages; a page-shape change fails CI (and the watcher's build step) instead of writing bad rows. The one expected failure is handled as data, not as an error: an MTGO event page served before its lists land is logged in `attempts.json` and retried on later runs, and recorded as `empty` after six tries or once the event is a week old — reversibly, since bronze keeps every attempt.
+- **Near-zero cost.** GitHub Actions free minutes are the compute, one Cloudflare R2 bucket is the storage, and there are no servers: silver and gold are rebuilt from bronze on the runner every run and pushed back as Parquet.
 
-## Event-driven ingestion
+## How it runs
 
-Sources publish irregularly: some weekends have six large events, some none, and MTGO posts dozens of times a week. Instead of a fixed schedule:
+Everything is scheduled GitHub Actions; there is no orchestrator, queue or server, and dev sessions never write to R2. The workflow files under `.github/workflows/` are the authoritative description of each run, including the step order and the cron times; this section only says how they fit together.
 
-1. **Watchers** turn publications into events. Melee and MTGO only publish pages, so small pollers detect new completed events and emit `tournament.published` (keyed by source + event ID). TopDeck's webhook posts into the same topic.
-2. An **ingestion consumer** fetches the full event and lands raw responses in bronze. Parse failures go to a dead-letter topic.
-3. Landing in bronze updates an **Airflow asset**, which triggers a debounced rebuild of only the affected marts. A paper event updates the matrix and the forecast; a 5-0 dump only updates the forecast.
+- **`melee-watcher.yml`** — twice a day (around midnight and noon US Eastern). Pulls `bronze/` from R2 to the runner (`rclone sync`; the runner is disposable), discovers recently created Modern events, scans upcoming events onto the watchlist, fetches new and settled events plus a cheap 14-day refresh of recent ones, and pushes bronze back (`rclone copy`, never deleting in R2). It then rebuilds **silver and gold from scratch** for both sources — build silver, refresh the Scryfall card table, classify, coverage flags, imputations, matrix, forecast, brief — and pushes `silver/` and `gold/` to R2. The earlier briefs are pulled from R2 first because movers in the brief diff against the previous one.
+- **`mtgo-watcher.yml`** — daily, US morning, bronze only: reads the month index pages, fetches every Modern event not yet in `bronze/mtgo`, pushes it back. The Melee watcher's noon run builds silver and gold over it.
+- **`propose-rules.yml`** — weekly, Wednesday morning US Eastern: pulls silver from R2, re-mines the last 30 days and opens or refreshes one pull request of mechanical archetype-rule proposals on `archetype-proposals` (see Archetypes). Nothing changes until a person merges.
+- **`ci.yml`** — lint and the offline contract/unit tests on every push to `main` and every pull request. `main` is protected by it.
+- `melee-probe.yml`, `mtgo-probe.yml` and `mine-archetypes.yml` are manual (`workflow_dispatch`): the probes fetch one event or one month to prove a path before scheduling it, and the mining job writes a draft rules file to the `archetype-draft` branch for bootstrapping a new period.
 
-Kafka is used for decoupling and replay, not throughput: changing archetype rules means replaying every event from the start of the topic to reclassify history.
+**Reports.** Each pipeline step prints a plain-text report (`tee`), which the Melee watcher appends to the Actions step summary and commits to the `reports` branch as `reports/{coverage,archetypes,matchups,imputation,forecast}.txt` plus the markdown briefs — readable with `git show origin/reports:reports/forecast.txt`, no Actions UI needed. A health-check session reads the same files.
+
+**Replay.** Because silver and gold are rebuilt from bronze every run, a changed archetype rule, imputation window or model candidate reclassifies and re-scores all of history on the next run; nothing has to be replayed or migrated.
 
 ## Melee discovery
 
@@ -50,22 +54,17 @@ An event is fetched once its start is two days past, but decklists can be publis
 
 ## Imputation
 
-`silver/impute.py` fills a player's missing list from their own nearest usable published Modern list at another event within 7 days (earlier event wins ties), as its own table `imputations.parquet`; nothing in silver is overwritten and the matrix can be built without it (`--no-impute`). A list that exists but is empty counts as missing. The assumption is measured, not assumed: for players with published lists at two nearby events, the report gives the share with the same archetype and the identical 75 per day-gap bucket — that evidence sets the window. Matchup rows carry `imputed_matches` so a cell's dependence on imputation is always visible. Measured on ~3,600 same-weekend pairs: 79% same archetype, 41% identical 75 — so imputed lists feed the archetype-level matrix only; card-level views (`archetype_cards`, packages) use published lists, which card tables already do because imputations are a separate table.
+Melee lets players reuse an exact 75 they've already submitted, so an unpublished list at a side event is most likely the same player's list from the neighbouring event. `silver/impute.py` (`scripts/build_imputations.py`) fills a player's missing list from their own nearest usable published Modern list at another event within 7 days (`DEFAULT_WINDOW_DAYS`; the earlier event wins ties), as its own table `silver/melee/imputations.parquet` — one row per filled match side with the list used, its source event and the day gap. Nothing in silver is overwritten; a list that exists but is empty counts as missing. `gold/matrix.py` joins the table in when loading matches (each match row gets `imputed_a` / `imputed_b`) and can be built without it (`build_gold.py --no-impute`). Matchup and summary rows carry `imputed_matches` so a cell's dependence on imputation is always visible; there is no per-row weight or down-weighting, a match is in or out.
+
+The assumption is measured, not assumed: for players with published lists at two events inside the window, `validate` reports the share with the same archetype and the identical 75 per day-gap bucket, and that evidence sets the window. Measured in Nov 2026 on ~3,600 same-weekend pairs: 79% same archetype and 41% identical 75 within a day, 78% / 6% at 4–7 days, 56% same archetype at 8–14 days (on 9 pairs). So imputed lists feed the archetype-level matrix only; card-level views (`archetype_cards`, packages, flex slots) use published lists, which card tables already do because imputations are a separate table.
 
 ## Matchup matrix
 
-Built in `gold/matrix.py` from silver on every run: one row per ordered archetype pair per period (Modern, Swiss, no byes, both decks known and classified; draws count half; mirrors kept as share but fixed at 50%). Win rates are shrunk toward 50% by 10 pseudo-matches with a 90% Wilson interval on the raw rate, and game-level rates sit beside match-level. The archetype summary adds share of match slots, record vs the field, and **position**: the share-weighted shrunk win rate against every other archetype, i.e. how well a deck is placed against the field as it currently is. The forecast later swaps the current field for an expected one in that same formula.
+Built in `gold/matrix.py` (`scripts/build_gold.py`) from silver on every run: one row per ordered archetype pair per format period, from paper matches that are Modern, Swiss, not a bye, with both decks known and classified, plus the MTGO top-8 bracket matches (below). Draws count half a win. `Unclassified` is left out of pairs but counts toward meta share. Each match keeps its round number in silver so late-round effects can be checked; within a period every match counts equally, because a matchup is mostly a property of the two decks — a decay for list drift would be added only if a backtest showed it helps.
 
-## Matchup matrix — design notes
+**Mirrors** are kept as a row (they are real meta share), flagged `is_mirror`, with `win_rate_shrunk` fixed at 50% by definition. The current-field `position` in the archetype summary is computed over the *other* archetypes only (the mirror row is skipped); the forecast's `position_forecast` counts the forecast mirror share at 50% in the same weighted average (`gold/forecast.position`). Both read the same way: a mirror is a coin flip, and the difference is only whether the deck's own share is in the denominator.
 
-- Mirrors are excluded.
-- Within a format period every match counts equally; a matchup is mostly a property of the two decks. A light decay for list drift is added only if a backtest shows it helps.
-- Each match keeps its round number so late-round effects can be checked.
-- Win rates are shrunk toward 50% (beta-binomial) and reported with intervals.
-
-## Imputation
-
-Melee lets players reuse an exact 75 they've already submitted, so an unpublished list at a side event is most likely the player's most recent Modern submission. Imputed rows use the same player's latest list before the event (ideally within two weeks) and carry an `imputed_same_75` flag so the matrix can down-weight them.
+Win rates are shrunk toward 50% by 10 pseudo-matches (`prior_n`; 3–1 reads as about 57%, not 75%, and the pull fades as matches accumulate) with a 90% Wilson interval on the raw rate, and game-level rates sit beside match-level. The archetype summary adds share of match slots, record vs the field, and **position**: the share-weighted shrunk win rate against every other archetype, i.e. how well a deck is placed against the field as it currently is. The forecast later swaps the current field for an expected one in that same formula.
 
 ## Archetypes
 
@@ -75,7 +74,7 @@ Rules live in `config/archetypes/<format>-<period-start>.yml` and name only a de
 
 **Bootstrapping and drift.** The first file was mined (`scripts/mine_archetypes.py`): IDF-weighted clustering of the period's lists, each cluster's high-presence/high-lift cards as a draft signature, then named by hand. Every Wednesday `propose-rules.yml` re-mines the last 30 days and opens one pull request with mechanical proposals only — `NEW:` rules for unclassified clusters, trims of signature cards that fell out of their own deck, additions of cards that became ubiquitous in it — plus variant candidates in the PR text. It never renames, merges or deletes. A person names and merges; nothing changes until then. The job replaces only its own commits (a branch with a human commit is left alone), closes its PR when a later week finds nothing, and the twice-daily report names any proposal PR still open.
 
-**Failure modes.** No rules file for a list's date fails the classify step loudly instead of writing an empty table; the file is in git, so an accidental delete is a checkout. Leftover lists (staples only, no shared engine) are `Unclassified` and are reported with their most common cards.
+**Failure modes.** If no rules file applies to any list, the classify step exits non-zero instead of writing an empty table (lists that predate every rules file are skipped with a warning); the files are in git, so an accidental delete is a checkout. Leftover lists (staples only, no shared engine) are `Unclassified` and are reported with their most common cards.
 
 ## MTGO (the forecast input)
 
@@ -105,8 +104,8 @@ each link (`modern-challenge-32-2026-11-07<id>`) gives kind, date and id.
   8 is not the field — only toward win rates. One matrix, not two: there is not
   enough data to keep them apart, and the MTGO grinders are largely the same
   people doing well at the large paper events.
-* `.github/workflows/mtgo-watcher.yml` — daily, ~09:40 ET, bronze only; the
-  Melee watcher builds silver for both sources at noon
+* `.github/workflows/mtgo-watcher.yml` — daily in the US morning, bronze only;
+  the Melee watcher's noon run builds silver and gold for both sources
 
 The MTGO field leads the paper field by a week or two (online players adopt
 new decks first), which is what the forecast uses.
@@ -137,6 +136,28 @@ than assumed, so the backtest can confirm or reject them:
 forecast field: each archetype's expected match win rate against the field it
 will actually meet, with `matchup_coverage` saying how much of that field has
 a known matchup. The MCP tools `forecast()` and `recommend()` read these.
+
+### Forecast history
+
+`field_forecast.parquet` is only ever the latest forecast, so `forecast.write`
+also keeps a dated copy, `gold/melee/forecast/field_forecast/<target_week>.parquet`:
+the same rows plus `generated_at` (UTC), one file per target week and
+overwritten within it (a Monday run and a Thursday refresh of the same weekend
+leave one file — the last forecast made before that weekend, which is the one
+to score). That record is what out-of-sample scoring will compare against the
+paper lists that actually land, and what the brief's movers can read instead
+of the previous brief's marker.
+
+Choices: the copies live under the gold prefix, so the watcher's existing
+`rclone copy data/gold` pushes them and, because `copy` never deletes, they
+accumulate in R2 even though every run rebuilds local gold from scratch; the
+local sync script brings the whole directory down the same way. Nothing pulls
+the history back into an Actions run yet — the step that scores or shows
+movers from it will need a `rclone copy` of that prefix first, as the brief
+step does for earlier briefs. The MCP table `forecast_history` is one DuckDB
+view over the directory's files (`read_parquet(..., union_by_name=true)`, so a
+file written before a column existed still reads), mounted only when at least
+one file is present; it is for `run_sql`, there is no dedicated tool yet.
 
 ## Coverage flags
 
@@ -191,8 +212,8 @@ choices keep it self-contained:
   week and forecast field as JSON; the next week's brief finds the newest
   dated brief before its own target week and diffs against that. The watcher
   rebuilds gold from scratch, so it pulls `gold/melee/brief/` back down from
-  R2 first. When a dated forecast history exists (#9) movers can read that
-  instead; the marker costs nothing to keep.
+  R2 first. The dated forecast history (#9, above) is the better source for
+  movers once a run pulls it back down; the marker costs nothing to keep.
 * **Matchup swings are recomputed, not stored.** The matrix is rebuilt from the
   same silver inputs without this week's matches (by event date) and compared
   to the full one. That is what last week's matrix was, up to any rules or

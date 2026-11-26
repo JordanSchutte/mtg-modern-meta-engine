@@ -34,6 +34,9 @@ Tables (``gold/melee/forecast/``)
 backtest           one row per (model, week): lists, log_loss, tvd
 field_forecast     archetype, share (chosen model), paper_recent, mtgo_recent
 position_forecast  archetype, expected_wr, matchup_coverage, current share/position
+field_forecast/<target_week>.parquet
+                   dated copy of field_forecast (+ generated_at), one per target
+                   week, overwritten within it — the forecast record
 """
 
 from __future__ import annotations
@@ -41,7 +44,7 @@ from __future__ import annotations
 import math
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import duckdb
@@ -56,6 +59,7 @@ from mtgmeta.silver.mtgo import silver_root as mtgo_root
 MIN_PAPER_LISTS = 150   # a week needs this many paper lists to score a forecast
 MIN_HISTORY_WEEKS = 3
 EPS = 0.002             # smoothing so an unseen archetype is not an infinite loss
+HISTORY_DIR = "field_forecast"   # gold/melee/forecast/field_forecast/<target_week>.parquet
 
 Series = dict[date, Counter]   # week Monday -> archetype -> lists (or weight)
 RESULT_WEIGHTS = {"top8": 3.0, "top16": 2.0, "tournament": 1.0, "league": 0.5}
@@ -349,7 +353,33 @@ def position(data_root: Path, field: list[dict], period: str | None) -> list[dic
     return sorted(out, key=lambda r: -r["expected_wr"])
 
 
-def write(bt: Backtest, field: list[dict], pos: list[dict], data_root: Path) -> dict[str, Path]:
+def history_root(data_root: Path) -> Path:
+    """Dated copies of the field forecast, one file per target week."""
+    return forecast_root(data_root) / HISTORY_DIR
+
+
+def history_path(data_root: Path, target_week: str) -> Path:
+    return history_root(data_root) / f"{target_week}.parquet"
+
+
+def _write_parquet(rows: list[dict], path: Path) -> Path:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    pq.write_table(pa.Table.from_pylist(rows), tmp)
+    tmp.replace(path)
+    return path
+
+
+def write(bt: Backtest, field: list[dict], pos: list[dict], data_root: Path,
+          generated_at: datetime | None = None) -> dict[str, Path]:
+    """Write the three forecast tables, plus a dated copy of the field forecast.
+
+    ``field_forecast.parquet`` is overwritten on every run, so the dated copy
+    ``field_forecast/<target_week>.parquet`` (the same rows plus ``generated_at``,
+    overwritten within one target week) is the only record of what was forecast
+    for a week once it has passed. Gold is pushed to R2 with ``rclone copy``,
+    which never deletes, so the copies accumulate there even though each
+    watcher run rebuilds gold from scratch.
+    """
     out_dir = forecast_root(data_root)
     out_dir.mkdir(parents=True, exist_ok=True)
     written = {}
@@ -357,10 +387,14 @@ def write(bt: Backtest, field: list[dict], pos: list[dict], data_root: Path) -> 
                        ("position_forecast", pos)):
         if not rows:
             continue
-        tmp = out_dir / f"{name}.parquet.tmp"
-        pq.write_table(pa.Table.from_pylist(rows), tmp)
-        tmp.replace(out_dir / f"{name}.parquet")
-        written[name] = out_dir / f"{name}.parquet"
+        written[name] = _write_parquet(rows, out_dir / f"{name}.parquet")
+    target_week = field[0].get("target_week") if field else None
+    if target_week:
+        stamp = (generated_at or datetime.now(UTC)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        history_root(data_root).mkdir(parents=True, exist_ok=True)
+        written["forecast_history"] = _write_parquet(
+            [{**f, "generated_at": stamp} for f in field],
+            history_path(data_root, target_week))
     return written
 
 

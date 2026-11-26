@@ -6,8 +6,12 @@ direction. Work items themselves live in GitHub Issues (see CLAUDE.md).
 
 ## Who it is for
 
-A small testing team. The code is public as a portfolio; the
-*outputs* (forecasts, briefs, matrix) are not meant to be.
+First, a public demonstration of the stack, built for a problem Jordan
+cares about; second, a tool for a small testing team (and possibly a
+Riftbound equivalent later). Code and outputs are both public: the
+forecasts, briefs and matrix on the `reports` branch and in run summaries
+are fine where they are. If a team ever needs exclusivity, that is a
+post-1.0 change, not a 1.0 requirement.
 
 ## 1.0 definition
 
@@ -37,18 +41,18 @@ itself running and reporting without anyone touching it.
    (log-loss and TVD, same as the backtest) and show the running record in
    the brief. Until one real weekend has been forecast and scored, the
    headline claim is untested.
-2. **Private outputs.** Stop committing reports and briefs to the public
-   `reports` branch and stop printing forecast tables in Actions summaries;
-   write them to R2 only, and have the local sync script (#8) fetch them.
-   Keep code and tests public.
+2. ~~Private outputs~~ — decided against (Nov 26): outputs stay public.
 3. **A page to look at.** An HTML report built each run from gold (brief,
-   forecast field, position table, matrix heatmap), written to R2 next to the
-   markdown brief. Viewing it is via the sync script locally for now; a
-   team-facing hosted page behind access control is after 1.0.
+   forecast field, position table, matrix heatmap), committed to the
+   `reports` branch beside the markdown brief. Hosting it (GitHub Pages) is
+   after 1.0.
 4. **Saturation share.** For each positioned deck, the share of the field at
-   which its expected win rate falls to 50% with everything else
-   proportional. Reported next to expected WR in `position_forecast`, the
-   `recommend()` tool and the brief: "favored up to ~14% of the field."
+   which it stops being favored, assuming the field adapts: hold the deck at
+   share *s*, tilt the other archetypes toward the ones that beat it (each
+   share × its win rate vs the deck, renormalised to 1 − s), and report the
+   smallest *s* where expected WR ≤ 50% ("> 100%" if never). Reported next
+   to expected WR in `position_forecast`, `recommend()` and the brief:
+   "favored up to ~14% of the field." (Decided Nov 26, issue #31.)
 6. **Format-period rollover, exercised.** The next ban announcement:
    `scripts/new_period.py` creates the new rules file, the matrix and
    forecast pool by period correctly, the brief says which period it is on.
@@ -62,8 +66,9 @@ itself running and reporting without anyone touching it.
 
 - Flex-slot tuning: split each archetype into core and flex slots and score
   flex choices against the forecast field (personal to the deck you play).
-- Team page: hosted HTML behind access control (e.g. Cloudflare Access),
-  built from the R2 outputs.
+- Hosted page: the HTML report on GitHub Pages from the `reports` branch.
+- Exclusive outputs for a team, if it ever matters: reports to R2 only plus
+  a page behind access control.
 - MTGO result-weight tuning by backtest once ≥10 paper weeks are scored (#10).
 - Metagame-equilibrium solve (the field where no deck has an edge) if the
   tool ever gets a public audience.

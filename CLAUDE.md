@@ -73,7 +73,9 @@ own instructions name a specific issue, in which case take that one. Then:
 1. Comment on the issue: "Starting — plan: …" (two or three lines).
 2. Branch from `main`, implement, add or update tests, update
    `docs/architecture.md` if the design changed.
-3. Run the lint+test gate. Push. Open a PR that references the issue
+3. Before pushing, `git fetch origin && git merge origin/main` (never
+   rebase or force-push): if that conflicts, resolve it yourself, re-run the
+   gate, and say so in the PR. Then run the lint+test gate. Push. Open a PR that references the issue
    (`Closes #N`), with a short description of what changed and how it was
    verified. Draft PR if anything is unfinished.
 4. Comment on the issue with the PR link and any open questions.

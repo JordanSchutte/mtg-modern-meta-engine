@@ -28,9 +28,10 @@ The MCP server (`mtgmeta-mcp`) exposes these as tools: `forecast`, `recommend`, 
               silver/  Parquet: events, matches, decklists, decklist_cards, players,
                        decklist_archetypes (rules-based), imputations, cards (Scryfall)
                      │
-                     ▼  DuckDB (scripts/build_gold.py, build_forecast.py)
+                     ▼  DuckDB (scripts/build_gold.py, build_forecast.py, score_forecasts.py)
               gold/    matchups + archetype_summary (one matrix, `source` = paper | mtgo)
-                       field_forecast, position_forecast, forecast_backtest
+                       field_forecast, position_forecast, forecast_backtest,
+                       forecast_scores (each recorded forecast vs the week it was made for)
                      │
                      ▼
               mtgmeta-mcp  ──stdio──►  Claude Desktop / Claude Code
@@ -51,6 +52,8 @@ Each run backtests a set of candidate models on every past paper week with at le
 
 - **log-loss** — how surprised the model was by the lists that actually showed up (per list; it punishes giving a deck a tiny share and then seeing a lot of it).
 - **TVD** (total variation distance) — the share of the field the model put in the wrong archetypes (0.147 means about 15% of the forecast mass was misplaced).
+
+The backtest is in-sample (the candidates were chosen on those same weeks), so every forecast is also kept on record and, once its weekend's lists land, scored out of sample against them — beside what "same as last paper week" would have got (`forecast_scores`, at the end of `reports/forecast.txt`). A forecast rewritten on or after its weekend's first event day is not scored.
 
 Latest backtest (`reports/forecast.txt` on the `reports` branch, 2026-11-18, 6 paper weeks), best of each model family:
 

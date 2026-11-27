@@ -11,7 +11,7 @@
 
 Everything is scheduled GitHub Actions; there is no orchestrator, queue or server, and dev sessions never write to R2. The workflow files under `.github/workflows/` are the authoritative description of each run, including the step order and the cron times; this section only says how they fit together.
 
-- **`melee-watcher.yml`** — twice a day (around midnight and noon US Eastern). Pulls `bronze/` from R2 to the runner (`rclone sync`; the runner is disposable), discovers recently created Modern events, scans upcoming events onto the watchlist, fetches new and settled events plus a cheap 14-day refresh of recent ones, and pushes bronze back (`rclone copy`, never deleting in R2). It then rebuilds **silver and gold from scratch** for both sources — build silver, refresh the Scryfall card table, classify, coverage flags, imputations, matrix, forecast, brief — and pushes `silver/` and `gold/` to R2. The earlier briefs are pulled from R2 first because movers in the brief diff against the previous one.
+- **`melee-watcher.yml`** — twice a day (around midnight and noon US Eastern). Pulls `bronze/` from R2 to the runner (`rclone sync`; the runner is disposable), discovers recently created Modern events, scans upcoming events onto the watchlist, fetches new and settled events plus a cheap 14-day refresh of recent ones, and pushes bronze back (`rclone copy`, never deleting in R2). It then rebuilds **silver and gold from scratch** for both sources — build silver, refresh the Scryfall card table, classify, coverage flags, imputations, matrix, forecast, forecast scoring, brief — and pushes `silver/` and `gold/` to R2. The earlier briefs and the dated forecast history are pulled from R2 first: movers in the brief diff against the previous brief, and scoring reads the forecasts made before each weekend.
 - **`mtgo-watcher.yml`** — daily, US morning, bronze only: reads the month index pages, fetches every Modern event not yet in `bronze/mtgo`, pushes it back. The Melee watcher's noon run builds silver and gold over it.
 - **`propose-rules.yml`** — weekly, Wednesday morning US Eastern: pulls silver from R2, re-mines the last 30 days and opens or refreshes one pull request of mechanical archetype-rule proposals on `archetype-proposals` (see Archetypes). Nothing changes until a person merges.
 - **`ci.yml`** — lint and the offline contract/unit tests on every push to `main` and every pull request. `main` is protected by it.
@@ -144,20 +144,60 @@ also keeps a dated copy, `gold/melee/forecast/field_forecast/<target_week>.parqu
 the same rows plus `generated_at` (UTC), one file per target week and
 overwritten within it (a Monday run and a Thursday refresh of the same weekend
 leave one file — the last forecast made before that weekend, which is the one
-to score). That record is what out-of-sample scoring will compare against the
-paper lists that actually land, and what the brief's movers can read instead
-of the previous brief's marker.
+to score). That record is what out-of-sample scoring (below) compares against
+the paper lists that actually land, and what the brief's movers can read
+instead of the previous brief's marker.
 
 Choices: the copies live under the gold prefix, so the watcher's existing
 `rclone copy data/gold` pushes them and, because `copy` never deletes, they
 accumulate in R2 even though every run rebuilds local gold from scratch; the
-local sync script brings the whole directory down the same way. Nothing pulls
-the history back into an Actions run yet — the step that scores or shows
-movers from it will need a `rclone copy` of that prefix first, as the brief
-step does for earlier briefs. The MCP table `forecast_history` is one DuckDB
+local sync script brings the whole directory down the same way. The watcher
+pulls the prefix back down before the gold step ("Pull forecast history from
+R2", the same pattern as the earlier briefs) so scoring can read it; the
+brief's movers still use the previous brief. The MCP table `forecast_history` is one DuckDB
 view over the directory's files (`read_parquet(..., union_by_name=true)`, so a
 file written before a column existed still reads), mounted only when at least
 one file is present; it is for `run_sql`, there is no dedicated tool yet.
+
+### Forecast scoring
+
+The backtest is *in-sample*: pretend-forecasts for past weeks made today, and
+the candidate list itself was tuned on those weeks, so it can flatter the
+model. `gold/scoring.py` (`scripts/score_forecasts.py`, run after
+`build_forecast.py`) keeps the *out-of-sample* record: each dated history
+file was written before its weekend, and once that target week has at least
+`MIN_PAPER_LISTS` (150) classified paper lists in silver it is scored with
+the same `forecast.score` — log-loss per list (how surprised the forecast
+was by the lists that showed up; lower is better) and TVD (the share of the
+field it put in the wrong place). Beside it, the naive baseline: `paper_last`
+("same as the last paper week") *as the forecast's author could have computed
+it*, i.e. the latest paper week whose events had all ended before
+`generated_at`, so a forecast written on a Sunday is not compared against a
+baseline that already knew that Sunday's event. Output is
+`gold/melee/forecast/forecast_scores.parquet` (`target_week, generated_at,
+model, forecast_lists, log_loss, tvd, baseline_log_loss, baseline_tvd,
+events`), rebuilt from the history files + silver every run — nothing
+accumulates that cannot be regenerated — and mounted for `run_sql` as
+`forecast_scores` (no dedicated tool yet). The report is appended to the
+forecast section of the run summary and `reports/forecast.txt`, with a
+"beat the baseline" count and a line per file not scored, and why.
+
+**Leak guard.** The watcher runs twice a day and overwrites the week's file
+within the target week, so a file whose `generated_at` is on or after the
+first event day of its target week was written with knowledge of the
+weekend. Those are skipped (reason `leak`), never scored: the record is only
+honest if every scored row was a real prediction. A file whose week has no
+lists yet (`no_paper`) or too few (`too_few_lists`) simply waits for a later
+run. The guard compares UTC dates: the midnight-Eastern run on a Saturday
+(04:17 UTC) counts as the event day and is skipped, which errs toward
+dropping a genuine Friday-night forecast rather than scoring a tainted one.
+
+Choices here (Jordan may want to reverse): skipped files are reported, not
+written as rows with a reason column, so the table holds only scored
+forecasts and its schema is exactly the one #25 asked for; and when nothing
+is scorable the file is not written at all (the view is absent, like the
+other forecast tables before their first build). Scores are never fed back
+into model choice, which stays with the backtest.
 
 ## Coverage flags
 

@@ -146,7 +146,9 @@ def run_sql(sql: str, limit: int = 200) -> dict:
     decklist_archetypes, imputations), MTGO tables (mtgo_events, mtgo_decklists,
     mtgo_decklist_cards, mtgo_decklist_archetypes, mtgo_matches), cards, matchups,
     archetype_summary, field_forecast, position_forecast, forecast_backtest,
-    forecast_history (every field forecast on record, one target_week per run week).
+    forecast_history (every field forecast on record, one target_week per run week),
+    forecast_scores (each recorded forecast scored out of sample against its paper week:
+    log_loss/tvd beside baseline_log_loss/baseline_tvd of "same as last paper week").
     Rows capped by limit."""
     return q.run_sql(_root, sql, limit)
 

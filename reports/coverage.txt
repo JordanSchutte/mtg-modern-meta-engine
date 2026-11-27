@@ -40,25 +40,26 @@ wrote 5 tables to data/silver/melee: events=32, matches=37864, decklists=10388, 
 
 MTGO events in bronze
   kind                   events  lists
-  challenge-16               31    905
-  challenge-32              131   4192
+  challenge-16               32    936
+  challenge-32              135   4320
   challenge-64              128   4096
   challenge-96               28    896
   last-chance                 4    128
-  league                    169   8473
+  league                    170   8500
   rc-qualifier                1     32
   rc-super-qualifier          4    128
   showcase-challenge          4    128
   showcase-qualifier          1     32
   2 events recorded without lists
-  2026-05-18 .. 2026-11-23
-wrote 4 tables to data/silver/mtgo: events=503, decklists=19010, decklist_cards=604595, matches=2286
+  0 lists in 0 events are not usable (main deck under 60 cards)
+  2026-05-18 .. 2026-11-25
+wrote 4 tables to data/silver/mtgo: events=509, decklists=19196, decklist_cards=610463, matches=2321
 
-Events whose lists never published (as of 2026-11-26; Melee events 3+ days old with no usable lists or under 10% of players; MTGO events fetched empty)
+Events whose lists never published (as of 2026-11-27; Melee events 3+ days old with no usable lists or under 10% of players; MTGO events fetched empty)
   start           id players lists  name
   2026-11-01  469603     162     0  马年单淘赛2 / Year of the Horse Single-Elimination Ev
   day        kind                    mtgo event
   2026-11-12 challenge-32            modern-challenge-32-2026-11-1212857015
   2026-11-03 challenge-64            modern-challenge-64-2026-11-0312857053
   1 Melee + 2 MTGO = 3 events without published lists
-Last paper event with >= 150 classified lists: 2026-10-17 MTG SEA Championship Final 2026-27 Round 1 (180 lists), 40 days ago
+Last paper event with >= 150 classified lists: 2026-10-17 MTG SEA Championship Final 2026-27 Round 1 (180 lists), 41 days ago

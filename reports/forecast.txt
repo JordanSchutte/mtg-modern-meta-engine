@@ -41,19 +41,19 @@ Field forecast
   position against that field (expected match win rate, shrunk matrix):
   archetype                exp WR  cover fcst sh matches
   Creativity                53.0%    96%    0.5%     161
-  Phoenix                   52.9%   100%    6.6%     935
-  Broodscale Combo          52.6%   100%   12.5%    9656
-  Azorius Control           51.9%   100%    6.9%    3818
+  Phoenix                   52.9%   100%    6.6%     939
+  Broodscale Combo          52.6%   100%   12.5%    9663
+  Azorius Control           51.9%   100%    6.9%    3823
   Tameshi Belcher           51.6%   100%    1.0%     812
-  Affinity                  51.4%   100%    5.9%    4390
-  Energy                    50.3%   100%   10.5%    5056
-  Grinding Station          50.1%    99%    2.6%     909
+  Affinity                  51.4%   100%    5.9%    4393
+  Grinding Station          50.3%    99%    2.6%     913
+  Energy                    50.3%   100%   10.5%    5061
   Fight Rigging             49.9%   100%    0.5%    1670
-  Domain Zoo                49.7%   100%    3.5%    2518
-  Living End                49.6%   100%    2.2%    1533
+  Living End                49.7%   100%    2.2%    1541
+  Domain Zoo                49.7%   100%    3.5%    2519
   Amulet Titan              49.6%   100%    5.0%    2213
   Ponza                     49.6%   100%    1.2%    1564
   Nantuko Combo             49.5%    92%    0.0%      89
   Goyf Fling                49.5%    96%    0.7%     295
 
-wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet
+wrote data/gold/melee/forecast/backtest.parquet, data/gold/melee/forecast/field_forecast.parquet, data/gold/melee/forecast/position_forecast.parquet, data/gold/melee/forecast/field_forecast/2026-11-23.parquet

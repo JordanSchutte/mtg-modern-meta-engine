@@ -36,6 +36,8 @@ TABLES = {
     "forecast_backtest": "gold/melee/forecast/backtest.parquet",
     # every field forecast on record, one file per target week (see gold/forecast.py)
     "forecast_history": "gold/melee/forecast/field_forecast/*.parquet",
+    # each recorded forecast scored against its paper week (see gold/scoring.py)
+    "forecast_scores": "gold/melee/forecast/forecast_scores.parquet",
     "archetype_summary": "gold/melee/archetype_summary.parquet",
 }
 
@@ -258,7 +260,8 @@ def archetype_cards(data_root: Path, archetype: str, period: str | None = None,
 def run_sql(data_root: Path, sql: str, limit: int = 200) -> dict:
     """Read-only SQL over the tables (events, matches, decklists, decklist_cards,
     players, decklist_archetypes, imputations, cards, matchups, archetype_summary,
-    field_forecast, position_forecast, forecast_backtest, forecast_history)."""
+    field_forecast, position_forecast, forecast_backtest, forecast_history,
+    forecast_scores)."""
     if re.search(r"\b(insert|update|delete|drop|create|alter|copy|attach|pragma|install|load)\b",
                  sql, re.I):
         return {"error": "read-only: select statements only"}

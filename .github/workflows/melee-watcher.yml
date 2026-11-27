@@ -94,6 +94,17 @@ jobs:
           rclone copy "r2:$BUCKET/gold/melee/brief" data/gold/melee/brief --fast-list 2>/dev/null \
             || echo "no earlier briefs in R2"
 
+      - name: Pull forecast history from R2
+        # Every run's field forecast is kept as gold/melee/forecast/field_forecast/<week>.parquet;
+        # gold is rebuilt from scratch, so the record comes back down to be scored
+        # against the paper weeks that have since landed (score_forecasts.py).
+        run: |
+          mkdir -p data/gold/melee/forecast/field_forecast
+          rclone copy "r2:$BUCKET/gold/melee/forecast/field_forecast" \
+            data/gold/melee/forecast/field_forecast --fast-list 2>/dev/null \
+            || echo "no forecast history in R2"
+          echo "recorded forecasts: $(ls data/gold/melee/forecast/field_forecast 2>/dev/null | wc -l)"
+
       - name: Check R2 is writable
         # Fail here, in the first minute, rather than after hours of fetching.
         run: |
@@ -180,6 +191,8 @@ jobs:
           python scripts/build_gold.py | tee gold-report.txt
           { echo '## Matchups'; echo '```'; cat gold-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           python scripts/build_forecast.py | tee forecast-report.txt
+          { echo; python scripts/score_forecasts.py || echo "::warning::forecast scoring failed"; } \
+            | tee -a forecast-report.txt
           { echo '## Forecast'; echo '```'; cat forecast-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           python scripts/build_brief.py > /dev/null || echo "::warning::weekly brief failed"
           { echo '## Brief'; cat data/gold/melee/brief/brief.md 2>/dev/null; } >> "$GITHUB_STEP_SUMMARY"

@@ -1,18 +1,18 @@
 Archetypes, period 2026-05-18 (share of Swiss match slots; win rate vs the field, shrunk; position = share-weighted matchup win rate)
 archetype                   share  matches   win%        90% CI   pos
-Broodscale Combo            13.5%     8153  54.1%       53%–55% 54.1%
-Izzet Prowess               10.3%     6412  49.4%       48%–50% 49.2%
-Reanimator                   8.0%     5186  47.9%       47%–49% 47.7%
+Broodscale Combo            13.5%     8154  54.1%       53%–55% 54.1%
+Izzet Prowess               10.3%     6413  49.4%       48%–50% 49.2%
+Reanimator                   8.0%     5187  47.9%       47%–49% 47.7%
 Blink                        6.8%     4432  50.6%       49%–52% 50.8%
-Energy                       6.8%     4653  50.3%       49%–52% 50.1%
+Energy                       6.8%     4656  50.3%       49%–52% 50.0%
 Affinity                     6.1%     4069  51.4%       50%–53% 51.1%
 Azorius Control              5.3%     3547  53.2%       52%–55% 52.8%
 Eldrazi Tron                 4.5%     3049  46.4%       45%–48% 47.0%
 Devoted Druid                3.7%     2497  50.2%       49%–52% 49.8%
 Domain Zoo                   3.5%     2415  50.2%       49%–52% 49.6%
-Amulet Titan                 3.0%     2111  49.5%       48%–51% 50.3%
-Dimir Midrange               2.9%     2004  48.1%       46%–50% 48.1%
-Ruby Storm                   2.8%     1993  47.8%       46%–50% 47.7%
+Amulet Titan                 3.0%     2113  49.5%       48%–51% 50.3%
+Dimir Midrange               2.9%     2007  48.2%       46%–50% 48.2%
+Ruby Storm                   2.8%     1996  47.8%       46%–50% 47.7%
 Fight Rigging                2.4%     1614  49.9%       48%–52% 50.1%
 Ponza                        2.2%     1526  49.5%       47%–52% 49.7%
 Living End                   2.1%     1505  49.8%       48%–52% 49.5%
@@ -31,21 +31,21 @@ Ritual Omnath                0.5%      334  50.6%       46%–55% 49.6%
 Burn                         0.4%      315  44.6%       40%–49% 45.7%
 Mill                         0.4%      292  39.2%       34%–44% 43.3%
 
-unclassified share of match slots: 1.2%; matches using an imputed list: 2282 of 63456 (3.6%); from MTGO top-8 brackets: 4129 (6.5%)
+unclassified share of match slots: 1.2%; matches using an imputed list: 2282 of 63470 (3.6%); from MTGO top-8 brackets: 4143 (6.5%)
 
 Matchups, period 2026-05-18: shrunk match win rate of row vs column (blank = under 20 matches); share and position per row
                       Broodscal Izzet Pro Reanimato     Blink    Energy  Affinity Azorius C Eldrazi T Devoted D Domain Zo Amulet Ti Dimir Mid
-Broodscale Combo              —      53%       57%       54%       48%       62%       44%       62%       48%       51%       48%       63%    share 13.5%  pos 54%  n=8153
-Izzet Prowess              47%          —      48%       48%       56%       43%       50%       42%       66%       44%       38%       58%    share 10.3%  pos 49%  n=6412
-Reanimator                 43%       52%          —      39%       54%       41%       48%       40%       48%       54%       52%       43%    share  8.0%  pos 48%  n=5186
+Broodscale Combo              —      53%       57%       54%       48%       62%       44%       62%       48%       51%       48%       63%    share 13.5%  pos 54%  n=8154
+Izzet Prowess              47%          —      48%       48%       56%       43%       50%       42%       66%       44%       38%       58%    share 10.3%  pos 49%  n=6413
+Reanimator                 43%       52%          —      39%       54%       41%       48%       40%       48%       54%       52%       43%    share  8.0%  pos 48%  n=5187
 Blink                      46%       52%       61%          —      49%       43%       43%       46%       68%       57%       54%       61%    share  6.8%  pos 51%  n=4432
-Energy                     52%       44%       46%       51%          —      45%       54%       53%       58%       51%       50%       45%    share  6.8%  pos 50%  n=4653
+Energy                     52%       44%       46%       51%          —      45%       54%       53%       58%       51%       50%       45%    share  6.8%  pos 50%  n=4656
 Affinity                   38%       57%       59%       57%       55%          —      53%       51%       45%       53%       43%       62%    share  6.1%  pos 51%  n=4069
 Azorius Control            56%       50%       52%       57%       46%       47%          —      53%       50%       44%       60%       40%    share  5.3%  pos 53%  n=3547
 Eldrazi Tron               38%       58%       60%       54%       47%       49%       47%          —      32%       43%       30%       55%    share  4.5%  pos 47%  n=3049
 Devoted Druid              52%       34%       52%       32%       42%       55%       50%       68%          —      56%       65%       55%    share  3.7%  pos 50%  n=2497
 Domain Zoo                 49%       56%       46%       43%       49%       47%       56%       57%       44%          —      42%       45%    share  3.5%  pos 50%  n=2415
-Amulet Titan               52%       62%       48%       46%       50%       57%       40%       70%       35%       58%          —      35%    share  3.0%  pos 50%  n=2111
-Dimir Midrange             37%       42%       57%       39%       55%       38%       60%       45%       45%       55%       65%          —   share  2.9%  pos 48%  n=2004
+Amulet Titan               52%       62%       48%       46%       50%       57%       40%       70%       35%       58%          —      34%    share  3.0%  pos 50%  n=2113
+Dimir Midrange             37%       42%       57%       39%       55%       38%       60%       45%       45%       55%       66%          —   share  2.9%  pos 48%  n=2007
 
 wrote data/gold/melee/matchups.parquet, data/gold/melee/archetype_summary.parquet: 1646 pairs, 44 archetypes

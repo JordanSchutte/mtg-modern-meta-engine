@@ -42,16 +42,16 @@ Field forecast
   archetype                exp WR  cover fcst sh matches
   Creativity                53.0%    96%    0.5%     161
   Phoenix                   52.9%   100%    6.6%     939
-  Broodscale Combo          52.6%   100%   12.5%    9663
+  Broodscale Combo          52.6%   100%   12.5%    9664
   Azorius Control           51.9%   100%    6.9%    3823
   Tameshi Belcher           51.6%   100%    1.0%     812
   Affinity                  51.4%   100%    5.9%    4393
   Grinding Station          50.3%    99%    2.6%     913
-  Energy                    50.3%   100%   10.5%    5061
+  Energy                    50.2%   100%   10.5%    5064
   Fight Rigging             49.9%   100%    0.5%    1670
   Living End                49.7%   100%    2.2%    1541
   Domain Zoo                49.7%   100%    3.5%    2519
-  Amulet Titan              49.6%   100%    5.0%    2213
+  Amulet Titan              49.6%   100%    5.0%    2215
   Ponza                     49.6%   100%    1.2%    1564
   Nantuko Combo             49.5%    92%    0.0%      89
   Goyf Fling                49.5%    96%    0.7%     295

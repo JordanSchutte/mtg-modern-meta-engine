@@ -75,31 +75,31 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 10346 lists
 
 wrote data/silver/melee/decklist_archetypes.parquet
 === mtgo
-rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 19001 lists
-19001 lists classified; 336 unclassified (1.8%)
-   1860   9.8%  Energy  [Boros Energy 1576, Azorius Energy 284]
-   1740   9.2%  Broodscale Combo
-   1521   8.0%  Reanimator  [Esper Goryo's 942, Grixis Reanimator 444, Esper Reanimator 81, Mono-Black Reanimator 54]
-   1416   7.5%  Izzet Prowess
-   1159   6.1%  Affinity  [Affinity 1132, Classic Affinity 27]
-   1028   5.4%  Eldrazi Tron  [Eldrazi Tron 956, Emrakul Tron 52, Breach Tron 20]
-    852   4.5%  Azorius Control  [Scepter Control 586, Teferi Control 144, Snapcaster Control 93, Miracles 29]
-    787   4.1%  Blink  [Esper Blink 685, Jeskai Blink 102]
-    688   3.6%  Phoenix  [Rakdos Phoenix 565, Darklight Phoenix 123]
-    651   3.4%  Ruby Storm
-    587   3.1%  Amulet Titan
+rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 19063 lists
+19063 lists classified; 337 unclassified (1.8%)
+   1869   9.8%  Energy  [Boros Energy 1582, Azorius Energy 287]
+   1746   9.2%  Broodscale Combo
+   1525   8.0%  Reanimator  [Esper Goryo's 944, Grixis Reanimator 446, Esper Reanimator 81, Mono-Black Reanimator 54]
+   1419   7.4%  Izzet Prowess
+   1160   6.1%  Affinity  [Affinity 1133, Classic Affinity 27]
+   1037   5.4%  Eldrazi Tron  [Eldrazi Tron 965, Emrakul Tron 52, Breach Tron 20]
+    857   4.5%  Azorius Control  [Scepter Control 591, Teferi Control 144, Snapcaster Control 93, Miracles 29]
+    788   4.1%  Blink  [Esper Blink 686, Jeskai Blink 102]
+    689   3.6%  Phoenix  [Rakdos Phoenix 566, Darklight Phoenix 123]
+    657   3.4%  Ruby Storm
+    590   3.1%  Amulet Titan
     557   2.9%  Domain Zoo
-    546   2.9%  Devoted Druid
-    545   2.9%  Dimir Midrange
-    522   2.7%  Living End
+    547   2.9%  Devoted Druid
+    547   2.9%  Dimir Midrange
+    524   2.7%  Living End
     503   2.6%  Ponza
     347   1.8%  Fight Rigging
     329   1.7%  Hollow One
-    295   1.6%  Grinding Station  [Grinding Station (Emry) 291, Grinding Station (Loki/Oswald) 4]
-    293   1.5%  Neobrand
+    298   1.6%  Grinding Station  [Grinding Station (Emry) 294, Grinding Station (Loki/Oswald) 4]
+    295   1.5%  Neobrand
     264   1.4%  Necro  [Necro 241, Necro (Rite of Consumption) 23]
     251   1.3%  Green Tron
-    221   1.2%  Tameshi Belcher
+    222   1.2%  Tameshi Belcher
     191   1.0%  Samwise Combo
     167   0.9%  Esper Midrange
     160   0.8%  Burn
@@ -107,12 +107,12 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 19001 lists
     130   0.7%  Ritual Oculus
     118   0.6%  Goyf Fling
     106   0.6%  Wizards
-     83   0.4%  Izzet Murktide
+     84   0.4%  Izzet Murktide
      71   0.4%  Creativity
      70   0.4%  Hammer
      64   0.3%  Ritual Omnath
+     60   0.3%  Eldrazi Aggro
      59   0.3%  Mill
-     59   0.3%  Eldrazi Aggro
      57   0.3%  Death's Shadow
      42   0.2%  Rhinos
      39   0.2%  Song of Creation
@@ -122,15 +122,15 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 19001 lists
      22   0.1%  Nantuko Combo
       2   0.0%  Infect
 
-336 unclassified lists; most common non-land cards among them:
+337 unclassified lists; most common non-land cards among them:
     59%  Thoughtseize
     50%  Fatal Push
     42%  Orcish Bowmasters
     42%  Inquisition of Kozilek
     35%  Pithing Needle
-    35%  Nihil Spellbomb
+    34%  Nihil Spellbomb
     33%  Nethergoyf
-    32%  Shadowspear
+    31%  Shadowspear
     31%  Kozilek's Command
     31%  Mishra's Bauble
     30%  Emperor of Bones
@@ -138,15 +138,15 @@ rules: config/archetypes/modern-2026-05-18.yml (58 rules) -> 19001 lists
     18%  Lightning Bolt
     15%  Wrenn and Six
     15%  Malevolent Rumble
-    12%  Solitude
+    13%  Solitude
     10%  Ragavan, Nimble Pilferer
-    10%  Force of Negation
     10%  Teferi, Time Raveler
+    10%  Force of Negation
      9%  Green Sun's Zenith
      9%  The Underworld Cookbook
      8%  Mox Opal
-     7%  Chthonian Nightmare
      7%  Leyline Binding
-     7%  Psychic Frog
+     7%  Quantum Riddler
+     7%  Chthonian Nightmare
 
 wrote data/silver/mtgo/decklist_archetypes.parquet

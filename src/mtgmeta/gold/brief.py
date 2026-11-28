@@ -3,7 +3,9 @@
 Written to ``gold/melee/brief/brief-<target_week>.md`` (one per forecast target
 week, overwritten within that week) and ``brief.md`` (always the latest). The
 Melee watcher copies both to the ``reports`` branch and the MCP ``brief()``
-tool returns the latest one.
+tool returns the latest one. ``report_html.py`` renders the same inputs as a
+self-contained HTML page written beside them (``report-<week>.html``,
+``report.html``).
 
 Sections, in order: the forecast field for the coming weekend and the model
 behind it; movers against the previous week's brief; the best-positioned decks
@@ -46,6 +48,7 @@ LOW_KNOWN_SHARE = 0.5       # an event with fewer known-known matches than this 
 WEEK_DAYS = 7
 BASELINE_MODEL = "paper_last"
 MARKER = "mtgmeta-brief"    # the machine-readable comment that carries the forecast field
+REPORT_HTML = "report.html"  # the latest HTML page, beside brief.md (report_html.py)
 
 
 def brief_root(data_root: Path) -> Path:
@@ -357,12 +360,7 @@ def render(inp: BriefInputs, top: int = 12) -> str:
         lines += ["No position table yet.", ""]
     else:
         best = best_positioned(inp.position)
-        lines.append(
-            "Expected win rate = the deck's matchup win rates weighted by the forecast field "
-            "(a mirror counts 50%). Matchup win rates are *shrunk*: pulled toward 50% by ten "
-            "imaginary even matches, so a 3–0 record doesn't read as 100%. Coverage is how much "
-            f"of the forecast field the deck has a known matchup against; decks below "
-            f"{MIN_COVERAGE:.0%} coverage are left out.")
+        lines.append(position_explainer())
         lines.append("")
         if best:
             lines += _table(["Archetype", "Expected WR", "Forecast share", "Coverage", "Matches"],
@@ -451,6 +449,15 @@ def _period_line(period: str | None) -> str:
             f"matchups and positioning below count only matches from this period._")
 
 
+def position_explainer() -> str:
+    """Expected win rate, shrinkage and coverage in one paragraph (brief and HTML report)."""
+    return ("Expected win rate = the deck's matchup win rates weighted by the forecast field "
+            "(a mirror counts 50%). Matchup win rates are *shrunk*: pulled toward 50% by ten "
+            "imaginary even matches, so a 3–0 record doesn't read as 100%. Coverage is how much "
+            f"of the forecast field the deck has a known matchup against; decks below "
+            f"{MIN_COVERAGE:.0%} coverage are left out.")
+
+
 def _backtest_sentence(inp: BriefInputs) -> str:
     bt = inp.backtest
     if not bt or inp.model not in bt:
@@ -467,21 +474,34 @@ def _backtest_sentence(inp: BriefInputs) -> str:
 
 # -- output ------------------------------------------------------------------
 
-def write(text: str, target_week: date, data_root: Path) -> dict[str, Path]:
+def write(text: str, target_week: date, data_root: Path,
+          html: str | None = None) -> dict[str, Path]:
+    """Write ``brief-<week>.md`` + ``brief.md`` and, when ``html`` is given, the same pair
+    as ``report-<week>.html`` + ``report.html`` (see ``report_html.py``), all atomically."""
     out = brief_root(data_root)
     out.mkdir(parents=True, exist_ok=True)
     dated = out / f"brief-{target_week.isoformat()}.md"
     latest = out / "brief.md"
-    for p in (dated, latest):
-        tmp = p.with_suffix(".md.tmp")
-        tmp.write_text(text, encoding="utf-8")
+    written = {"dated": dated, "latest": latest}
+    if html is not None:
+        written["html_dated"] = out / f"report-{target_week.isoformat()}.html"
+        written["html_latest"] = out / REPORT_HTML
+    for key, p in written.items():
+        tmp = p.with_name(p.name + ".tmp")
+        tmp.write_text(html if key.startswith("html") else text, encoding="utf-8")
         tmp.replace(p)
-    return {"dated": dated, "latest": latest}
+    return written
 
 
 def latest(data_root: Path) -> str | None:
     p = brief_root(data_root) / "brief.md"
     return p.read_text(encoding="utf-8") if p.exists() else None
+
+
+def latest_report_path(data_root: Path) -> Path | None:
+    """The latest HTML report's local path, or None when none has been written or synced."""
+    p = brief_root(data_root) / REPORT_HTML
+    return p if p.exists() else None
 
 
 def run(data_root: Path, today: date | None = None) -> tuple[str, BriefInputs]:

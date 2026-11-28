@@ -21,6 +21,7 @@ import pyarrow.parquet as pq
 
 LAYERS = ("silver", "gold")
 FORECAST_FILE = Path("gold/melee/forecast/field_forecast.parquet")
+REPORT_FILE = Path("gold/melee/brief/report.html")     # the HTML brief, opened from disk
 
 
 # -- preflight ---------------------------------------------------------------
@@ -143,8 +144,10 @@ def _mb(n: int) -> str:
 
 
 def report(before: dict[str, Snapshot], after: dict[str, Snapshot],
-           week_before: str | None, week_after: str | None, show: int = 12) -> str:
-    """Per-layer counts, the files that changed (truncated) and the forecast week."""
+           week_before: str | None, week_after: str | None, show: int = 12,
+           report_path: Path | None = None) -> str:
+    """Per-layer counts, the files that changed (truncated), the forecast week and, when
+    ``report_path`` is given, where the HTML brief landed (so Jordan knows what to open)."""
     lines = []
     for layer in before:
         d = diff(before[layer], after[layer])
@@ -161,4 +164,9 @@ def report(before: dict[str, Snapshot], after: dict[str, Snapshot],
         lines.append(f"forecast: target week {week_after} (was {week_before or 'none'})")
     else:
         lines.append(f"forecast: target week {week_after} (unchanged)")
+    if report_path is not None:
+        if report_path.exists():
+            lines.append(f"report: open {report_path.resolve()} in a browser")
+        else:
+            lines.append(f"report: none locally ({REPORT_FILE.as_posix()} missing)")
     return "\n".join(lines)

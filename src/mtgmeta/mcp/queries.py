@@ -398,5 +398,7 @@ def brief(data_root: Path) -> dict:
                          "under DATA_ROOT); refresh gold with rclone or run "
                          "scripts/build_brief.py"}
     meta = b.read_marker(text)
+    html = b.latest_report_path(data_root)
     return {"target_week": meta.get("target_week"), "generated": meta.get("generated"),
-            "model": meta.get("model"), "markdown": text}
+            "model": meta.get("model"), "markdown": text,
+            "html_path": str(html) if html else None}

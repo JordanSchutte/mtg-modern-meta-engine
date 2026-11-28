@@ -229,6 +229,27 @@ choices keep it self-contained:
   to the full one. That is what last week's matrix was, up to any rules or
   imputation change since, and it needs no snapshot of gold.
 
+**The page (#29).** `gold/report_html.py` renders the same `BriefInputs` as one
+HTML file, `gold/melee/brief/report-<target_week>.html` plus `report.html` =
+latest, written by `brief.write` in the same step and pushed by the same
+`rclone copy data/gold`; nothing in the workflows changed. It is deliberately
+not a markdown-to-HTML conversion: both renderers read the dataclass and share
+the pure pieces (`movers`, `best_positioned`, `underplayed`, `swings`,
+`describe_model`, the backtest and position sentences), so the two outputs
+cannot drift apart. Everything is inline — one `<style>` block, no scripts,
+fonts, images or links out — because the file is opened from disk after
+`sync_local.py` (which prints its path) and will later be served from a
+bucket behind access control; a test asserts there is no `http(s)://` in the
+rendered page. Layout is a single column with horizontally scrolling tables,
+light and dark via `prefers-color-scheme`. Differences from the markdown by
+design: the position table lists every deck, with rows under 90% coverage
+greyed rather than dropped (★ marks the markdown's best-positioned set); the
+forecast-field table draws share bars as plain `<div>` widths on one hue and
+one scale across its three share columns, with the value printed beside each
+bar. The MCP `brief()` tool gained an additive `html_path` key (the local file,
+or `null`). The matchup heatmap is the follow-up (#30). A hosted page is after
+1.0.
+
 ## Local refresh for the MCP server
 
 The MCP server reads Parquet under `DATA_ROOT`; a laptop gets those tables by

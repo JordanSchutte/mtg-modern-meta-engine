@@ -43,7 +43,8 @@ def main() -> int:
         for p in problems:
             print(f"warning: {p}")
         print()
-        print(local_sync.report(before, before, week_before, week_before))
+        print(local_sync.report(before, before, week_before, week_before,
+                                report_path=root / local_sync.REPORT_FILE))
         return 0
 
     problems = local_sync.preflight(remote)
@@ -56,7 +57,8 @@ def main() -> int:
     rc = local_sync.run_commands(cmds)
     after = {layer: local_sync.snapshot(root / layer) for layer in layers}
     print()
-    print(local_sync.report(before, after, week_before, local_sync.forecast_target_week(root)))
+    print(local_sync.report(before, after, week_before, local_sync.forecast_target_week(root),
+                            report_path=root / local_sync.REPORT_FILE))
     if rc != 0:
         print(f"\nerror: rclone exited {rc}; the counts above are what landed before it stopped.",
               file=sys.stderr)

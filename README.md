@@ -94,8 +94,10 @@ mtgmeta-mcp          # stdio MCP server; DATA_ROOT defaults to ./data
 summary after: it stops with a one-line hint if `rclone` is missing or no `r2`
 remote is configured (either `rclone config`, or `RCLONE_CONFIG_R2_*` variables
 in `.env` — see `.env.example`), then prints per-layer file counts, which files
-were added or updated, and the forecast's target week. It only ever copies
-*from* R2; nothing local is deleted and nothing is written to the bucket.
+were added or updated, the forecast's target week, and the local path of
+`report.html` — the weekly brief as a self-contained page; open it in a browser.
+It only ever copies *from* R2; nothing local is deleted and nothing is written
+to the bucket.
 
 For Claude Desktop, add it to `claude_desktop_config.json`:
 

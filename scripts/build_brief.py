@@ -2,6 +2,7 @@
 """Write the weekly meta brief from the gold tables.
 
     python scripts/build_brief.py              # writes gold/melee/brief/{brief-<week>.md,brief.md}
+                                               #   and {report-<week>.html,report.html} beside them
     python scripts/build_brief.py --no-write   # print only
     python scripts/build_brief.py --today 2026-11-16
 
@@ -17,7 +18,7 @@ import logging
 from datetime import date
 
 from mtgmeta.config import Settings
-from mtgmeta.gold import brief
+from mtgmeta.gold import brief, report_html
 
 
 def main() -> int:
@@ -31,7 +32,8 @@ def main() -> int:
     text, inputs = brief.run(root, today=args.today)
     print(text)
     if not args.no_write:
-        written = brief.write(text, inputs.target_week, root)
+        html = report_html.render(inputs, inputs.position, inputs.field)
+        written = brief.write(text, inputs.target_week, root, html=html)
         print(f"wrote {', '.join(str(p) for p in written.values())}")
     return 0
 
